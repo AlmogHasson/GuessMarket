@@ -1,7 +1,7 @@
 package ui;
 import engine.Engine;
 import engine.EngineImpl;
-
+import java.util.List;
 import java.util.Scanner;
 
 public final class UI {
@@ -19,7 +19,6 @@ public final class UI {
             this.value = value;
         }
     }
-
     private final Engine engine = new EngineImpl();
 
     private void displayMenu() {
@@ -30,7 +29,7 @@ public final class UI {
         System.out.println("to exit program press 5");
     }
 
-    boolean isUserInputValid(String input) {
+    private boolean isUserInputValid(String input) {
         int choice;
         try {
             choice = Integer.parseInt(input);
@@ -45,10 +44,25 @@ public final class UI {
         return false;
     }
 
-    void executeOption(MenuOption option) {
+    private String getValidUserPath(String prompt) {
+        Scanner input = new Scanner(System.in);
+        String userInput;
+        boolean isValid = false;
+        do {
+            System.out.println(prompt);
+            userInput = input.nextLine();
+            isValid = isUserInputValid(userInput);
+            if (!isValid) {
+                System.out.println("Invalid Input, please input a valid path");
+            }
+        } while (!isValid);
+        return userInput;
+    }
+
+    private void executeOption(MenuOption option) {
         switch (option){
             case LOAD_FILE -> {
-                engine.loadFile();
+                engine.loadFile(getValidUserPath("Please input a valid file path:"));
             }
             case GET_EVENTS -> {
                 engine.getEvents();
@@ -68,7 +82,7 @@ public final class UI {
         }
     }
 
-    MenuOption intToMenuOption(int num) {
+    private MenuOption intToMenuOption(int num) {
         for (MenuOption option : MenuOption.values()) {
             if (option.value == num) {
                 return option;
@@ -103,5 +117,4 @@ public final class UI {
             }
         }
     }
-
 }

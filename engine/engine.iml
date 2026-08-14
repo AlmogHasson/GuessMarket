@@ -6,6 +6,19 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/src/lib/jaxb" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/src/lib/jaxb" />
+        </SOURCES>
+        <jarDirectory url="file://$MODULE_DIR$/src/lib/jaxb" recursive="false" />
+        <jarDirectory url="file://$MODULE_DIR$/src/lib/jaxb" recursive="false" type="SOURCES" />
+      </library>
+    </orderEntry>
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
