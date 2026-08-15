@@ -2,18 +2,14 @@ package api;
 
 import dto.EventDTO;
 import engine.Engine;
-import engine.Event;
-import generated.GuessMarket;
-import jakarta.xml.bind.JAXBException;
+import engine.EngineImpl;
 
-import java.io.File;
 import java.util.List;
 
 public class GMController {
-    private Engine engine;
+    private Engine engine = new EngineImpl();
 
-
-    public void loadFile(String path) throws JAXBException {
+    public void loadFile(String path) throws Exception {
         engine.loadFile(path);
     }
 

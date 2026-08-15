@@ -9,4 +9,9 @@ public class Method {
     public Method(GMMethod method) {
         this.lmsr = new LMSR(method.getGMLMSR().getB());
     }
+
+    //getters
+    public LMSR getLmsr() {
+        return lmsr;
+    }
 }

@@ -1,6 +1,8 @@
 package ui;
 import api.GMController;
+import dto.EventDTO;
 
+import java.util.List;
 import java.util.Scanner;
 
 public final class UI {
@@ -26,7 +28,8 @@ public final class UI {
         System.out.println("to show events press 2");
         System.out.println("to show market status 3");
         System.out.println("to participate in event press 4");
-        System.out.println("to exit program press 5");
+        System.out.println("to close event press 5");
+        System.out.println("to exit program press 6");
     }
 
     private boolean isUserInputValid(String input) {
@@ -51,16 +54,25 @@ public final class UI {
         do {
             System.out.println(prompt);
             userInput = input.nextLine();
-            isValid = isUserInputValid(userInput);
+                isValid = isValidPath(userInput);
             if (!isValid) {
+                //TODO: specify what is invalid about the path (does not exist, not readable, not a file, etc.)
                 System.out.println("Invalid Input, please input a valid path");
             }
         } while (!isValid);
         return userInput;
     }
 
+    private boolean isValidPath(String path) {
+        //check if the file exists and is readable
+        java.io.File file = new java.io.File(path);
+        return file.exists() && file.isFile() && file.canRead();
+        //TODO: check if the file is a valid XML file
+    }
+
     private void executeOption(MenuOption option) {
         switch (option){
+            //test :   C:\Users\almog\IdeaProjects\GuessMarket\test files\test1.xml
             case LOAD_FILE -> {
                 try {
                     controller.loadFile(getValidUserPath("Please input a valid file path:"));
@@ -69,8 +81,14 @@ public final class UI {
                 }
             }
             case GET_EVENTS -> {
-                controller.getEvents();
+                var events = controller.getEvents();
+                if (events == null || events.isEmpty()) {
+                    System.out.println("  (no events)");
+                } else {
+                    displayEvents(events);
+                }
             }
+
             case GET_EVENT_TRADING_STATUS -> {
                 controller.getEventTradingStatus();
             }
@@ -81,8 +99,39 @@ public final class UI {
                 controller.closeEvent();
             }
             case EXIT -> {
-//                engine.exit();
+                System.out.println("Exiting program...");
             }
+        }
+    }
+
+    private static void displayEvents(List<EventDTO> events) {
+        final int width = 64;
+        final String sep = "=".repeat(width);
+        for (var event : events) {
+            System.out.println(sep);
+            String title = "EVENT DETAILS (ID: " + event.getId() + ")";
+            int leftPad = Math.max(0, (width - title.length()) / 2);
+            System.out.println(" ".repeat(leftPad) + title);
+            System.out.println("-".repeat(width));
+            String name = event.getName() == null ? "" : event.getName().replace(", ", " ");
+            System.out.printf("%-14s: %s%n", "Name", name);
+            System.out.printf("%-14s: %s%n", "Description", event.getDescription() == null ? "" : event.getDescription());
+            var c = event.getComission();             if (c != null) System.out.printf("%-14s: %s%n", "Commission", String.format("%d%% (%s)", c.value(), c.type()));
+            if (event.getMethod() != null && event.getMethod().lmsr() != null)
+                System.out.printf("%-14s: %d%n", "LMSR b", event.getMethod().lmsr().getB());
+            System.out.println();
+            System.out.println("---- Options ----");
+            System.out.printf("%-4s %-54s%n", "#", "Option");
+            System.out.println("-".repeat(width));
+            int i = 1;
+            if (event.getOptions() != null) {
+                for (var opt : event.getOptions()) {
+                    String optText = opt == null ? "" : (opt.getOption() == null ? "" : opt.getOption().replace(", ", " "));
+                    System.out.printf("%-4d %-54s%n", i++, optText);
+                }
+            }
+            System.out.println(sep);
+            System.out.println();
         }
     }
 
@@ -101,25 +150,49 @@ public final class UI {
         myUI.run();
     }
 
-    private void run() {
-        boolean isInputValid = false;
+//    private void run() {
+//        boolean isInputValid = false;
+//        Scanner input = new Scanner(System.in);
+//        displayMenu();
+//        String option = input.next();
+//
+//        while (!option.equals(String.valueOf(MenuOption.EXIT.value))) {
+//            isInputValid = isUserInputValid(option);
+//            if (isInputValid) {
+//                int optionNumber = Integer.parseInt(option);
+//                MenuOption menuOption = intToMenuOption(optionNumber);
+//                executeOption(menuOption);
+//            }
+//            else {
+//                System.out.println("Invalid Input, please input a number between 1 to 5");
+//            }
+//            displayMenu();
+//            option = input.next();
+//
+//        }
+//    }
+private void run() {
         Scanner input = new Scanner(System.in);
         displayMenu();
-        String option = input.next();
-
-        //TODO: implement outer loop until user selects exit option
-        while (!isInputValid) {
-            isInputValid = isUserInputValid(option);
-            if (isInputValid) {
-                int optionNumber = Integer.parseInt(option);
-                MenuOption menuOption = intToMenuOption(optionNumber);
-                executeOption(menuOption);
+        while (true) {
+            String option = input.next().trim();
+            if (option.equalsIgnoreCase("back")) {
+                displayMenu(); continue;
             }
-            else {
-                System.out.println("Invalid Input, please input a number between 1 to 5");
-                displayMenu();
-                option = input.next();
+            if (option.equalsIgnoreCase("exit") || option.equals(String.valueOf(MenuOption.EXIT.value))) break;
+            boolean validNumber;
+            try {
+                validNumber = intToMenuOption(Integer.parseInt(option)) != null;
             }
-        }
+            catch (NumberFormatException e) {
+                validNumber = false;
+            }
+            if (!validNumber) {
+                System.out.println("Invalid input. Type BACK to show the menu.");
+                displayMenu(); continue;
+            }
+            executeOption(intToMenuOption(Integer.parseInt(option)));
+            System.out.println("Type 'BACK' to show the menu, or select another option (1-6).");
+        }     System.out.println("Exiting...");
     }
 }

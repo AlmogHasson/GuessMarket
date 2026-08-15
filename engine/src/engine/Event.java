@@ -1,8 +1,6 @@
 package engine;
 
 import generated.GMEvent;
-import generated.GMMethod;
-import generated.GMOptions;
 
 import java.util.ArrayList;
 import java.util.List;

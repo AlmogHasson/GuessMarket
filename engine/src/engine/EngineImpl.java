@@ -6,6 +6,7 @@ import generated.GuessMarket;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class EngineImpl implements Engine {
@@ -20,6 +21,10 @@ public class EngineImpl implements Engine {
         guessMarket.getGMEvents().getGMEvent().forEach(gmEvent -> {
             events.add(new Event(gmEvent));
         });
+    }
+
+    public EngineImpl() {
+        this.events = new ArrayList<>();
     }
 
     @Override

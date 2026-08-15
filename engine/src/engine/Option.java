@@ -10,4 +10,9 @@ public class Option {
     public Option(String gmOption) {
         this.option = gmOption;
     }
+
+    //getters
+    public String getOption() {
+        return option;
+    }
 }

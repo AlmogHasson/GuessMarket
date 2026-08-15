@@ -6,4 +6,8 @@ public class LMSR {
     public LMSR(int b) {
         this.b = b;
     }
+
+    public int getB() {
+        return b;
+    }
 }

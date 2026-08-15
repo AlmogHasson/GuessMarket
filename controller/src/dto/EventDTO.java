@@ -1,54 +1,49 @@
 package dto;
-
-import ComissionDTO;
-import MethodDTO;
-import OptionDTO;
-
 import java.util.List;
+import engine.Event;
 
 public record  EventDTO( // record = immutable data class
     int id,
     String description,
-    Comission comission,
-    List<Option> options,
-    Method method,
+    ComissionDTO comission,
+    List<OptionDTO> options,
+    MethodDTO method,
     String name
 ) {
-
     // Constructor to create dto.EventDTO from Event
-    public EventDTO(engine.Event event) {
+    public EventDTO(Event event) {
         this(
             event.getId(),
             event.getDescription(),
-            event.getComission(),
-            event.getOptions(),
-            event.getMethod(),
+            new ComissionDTO(event.getComission()),
+            event.getOptions().stream().map(OptionDTO::new).toList(),
+            new MethodDTO(new LMSRDTO(event.getMethod().getLmsr())),
             event.getName()
         );
     }
 
-    //implement all getters for the fields
-    public int id() {
+    //getters
+    public int getId() {
         return id;
     }
 
-    public String description() {
+    public String getDescription() {
         return description;
     }
 
-    public Comission comission() {
+    public ComissionDTO getComission() {
         return comission;
     }
 
-    public List<Option> options() {
+    public List<OptionDTO> getOptions() {
         return options;
     }
 
-    public Method method() {
+    public MethodDTO getMethod() {
         return method;
     }
 
-    public String name() {
+    public String getName() {
         return name;
     }
 }

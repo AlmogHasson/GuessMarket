@@ -10,4 +10,11 @@ public class Comission {
         this.value = comision.getValue();
         this.type = comision.getType();
     }
+    //getters
+    public int getValue() {
+        return value;
+    }
+    public String getType() {
+        return type;
+    }
 }
