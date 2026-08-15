@@ -150,27 +150,6 @@ public final class UI {
         myUI.run();
     }
 
-//    private void run() {
-//        boolean isInputValid = false;
-//        Scanner input = new Scanner(System.in);
-//        displayMenu();
-//        String option = input.next();
-//
-//        while (!option.equals(String.valueOf(MenuOption.EXIT.value))) {
-//            isInputValid = isUserInputValid(option);
-//            if (isInputValid) {
-//                int optionNumber = Integer.parseInt(option);
-//                MenuOption menuOption = intToMenuOption(optionNumber);
-//                executeOption(menuOption);
-//            }
-//            else {
-//                System.out.println("Invalid Input, please input a number between 1 to 5");
-//            }
-//            displayMenu();
-//            option = input.next();
-//
-//        }
-//    }
 private void run() {
         Scanner input = new Scanner(System.in);
         displayMenu();
@@ -179,7 +158,8 @@ private void run() {
             if (option.equalsIgnoreCase("back")) {
                 displayMenu(); continue;
             }
-            if (option.equalsIgnoreCase("exit") || option.equals(String.valueOf(MenuOption.EXIT.value))) break;
+            if (option.equalsIgnoreCase("exit") || option.equals(String.valueOf(MenuOption.EXIT.value)))
+                break;
             boolean validNumber;
             try {
                 validNumber = intToMenuOption(Integer.parseInt(option)) != null;
