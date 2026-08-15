@@ -23,11 +23,8 @@ public class EngineImpl implements Engine {
     }
 
     @Override
-    public void getEvents() {
-        for (Event e : events) {
-
-        }
-
+    public List<Event> getEvents() {
+        return events;
     }
 
     @Override

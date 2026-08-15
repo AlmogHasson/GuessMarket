@@ -7,5 +7,29 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="engine" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../engine/src/lib/jaxb/jaxb-jxc.jar!/" />
+          <root url="jar://$MODULE_DIR$/../engine/src/lib/jaxb/jaxb-xjc.jar!/" />
+          <root url="jar://$MODULE_DIR$/../engine/src/lib/jaxb/jaxb-core.jar!/" />
+          <root url="jar://$MODULE_DIR$/../engine/src/lib/jaxb/jaxb-impl.jar!/" />
+          <root url="jar://$MODULE_DIR$/../engine/src/lib/jaxb/angus-activation.jar!/" />
+          <root url="jar://$MODULE_DIR$/../engine/src/lib/jaxb/jakarta.xml.bind-api.jar!/" />
+          <root url="jar://$MODULE_DIR$/../engine/src/lib/jaxb/jakarta.activation-api.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../engine/src/lib/jaxb/jaxb-jxc.jar!/" />
+          <root url="jar://$MODULE_DIR$/../engine/src/lib/jaxb/jaxb-xjc.jar!/" />
+          <root url="jar://$MODULE_DIR$/../engine/src/lib/jaxb/jaxb-core.jar!/" />
+          <root url="jar://$MODULE_DIR$/../engine/src/lib/jaxb/jaxb-impl.jar!/" />
+          <root url="jar://$MODULE_DIR$/../engine/src/lib/jaxb/angus-activation.jar!/" />
+          <root url="jar://$MODULE_DIR$/../engine/src/lib/jaxb/jakarta.xml.bind-api.jar!/" />
+          <root url="jar://$MODULE_DIR$/../engine/src/lib/jaxb/jakarta.activation-api.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
 </module>

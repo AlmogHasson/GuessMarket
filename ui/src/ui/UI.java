@@ -1,7 +1,6 @@
 package ui;
-import engine.Engine;
-import engine.EngineImpl;
-import java.util.List;
+import api.GMController;
+
 import java.util.Scanner;
 
 public final class UI {
@@ -19,7 +18,8 @@ public final class UI {
             this.value = value;
         }
     }
-    private final Engine engine = new EngineImpl();
+
+    private final GMController controller = new GMController();
 
     private void displayMenu() {
         System.out.println("to load file press 1");
@@ -62,22 +62,26 @@ public final class UI {
     private void executeOption(MenuOption option) {
         switch (option){
             case LOAD_FILE -> {
-                engine.loadFile(getValidUserPath("Please input a valid file path:"));
+                try {
+                    controller.loadFile(getValidUserPath("Please input a valid file path:"));
+                } catch (Exception e) {
+                    System.out.println("Error occurred while loading file: " + e.getMessage());
+                }
             }
             case GET_EVENTS -> {
-                engine.getEvents();
+                controller.getEvents();
             }
             case GET_EVENT_TRADING_STATUS -> {
-                engine.getEventTradingStatus();
+                controller.getEventTradingStatus();
             }
             case PARTICIPATE_IN_EVENT -> {
-                engine.participateInEvent();
+                controller.participateInEvent();
             }
             case CLOSE_EVENT -> {
-                engine.closeEvent();
+                controller.closeEvent();
             }
             case EXIT -> {
-                engine.exit();
+//                engine.exit();
             }
         }
     }
@@ -103,6 +107,7 @@ public final class UI {
         displayMenu();
         String option = input.next();
 
+        //TODO: implement outer loop until user selects exit option
         while (!isInputValid) {
             isInputValid = isUserInputValid(option);
             if (isInputValid) {
