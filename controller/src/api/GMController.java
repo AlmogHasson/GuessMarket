@@ -17,8 +17,8 @@ public class GMController {
         return engine.getEvents().stream().map(event -> new EventDTO(event)).toList();
     }
 
-    public void getEventTradingStatus() {
-        engine.getEventTradingStatus();
+    public void getEventTradingStatus(int eventId) {
+        engine.getEventTradingStatus(eventId);
     }
 
     public void participateInEvent() {

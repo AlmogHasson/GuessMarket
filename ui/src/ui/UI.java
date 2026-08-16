@@ -56,6 +56,7 @@ public final class UI {
     private void executeOption(MenuOption option) {
         switch (option){
             //test :   C:\Users\almog\IdeaProjects\GuessMarket\test files\test1.xml
+            //test noa: /Users/noaallouche/uni/java course/project Gusss Market/multiple.xml
             case LOAD_FILE -> {
                 boolean loaded = false;
 
@@ -78,7 +79,12 @@ public final class UI {
                 }
             }
             case GET_EVENT_TRADING_STATUS -> {
-                controller.getEventTradingStatus();
+                var events = controller.getEvents();
+                int eventNumber = getEventNumber(events.size());
+                if (eventNumber == -1) {break;}
+                EventDTO selectedEvent = events.get(eventNumber - 1);
+                int eventId = selectedEvent.getId();
+                controller.getEventTradingStatus(eventId);
             }
             case PARTICIPATE_IN_EVENT -> {
                 controller.participateInEvent();
@@ -90,6 +96,26 @@ public final class UI {
                 System.out.println("Exiting program...");
             }
         }
+    }
+
+    //helper method to get event number from user input
+    private int getEventNumber(int numberOfEvents) {
+        Scanner input = new Scanner(System.in);
+        System.out.print("Choose event number: ");
+        int eventNumber;
+        try {
+            eventNumber = input.nextInt();
+        } catch (Exception e) {
+            System.out.println("Invalid input.");
+            return -1;
+        }
+
+        if (eventNumber < 1 || eventNumber > numberOfEvents) {
+            System.out.println("Invalid event number.");
+            return -1;
+        }
+
+        return eventNumber;
     }
 
     private static void displayEvents(List<EventDTO> events) {

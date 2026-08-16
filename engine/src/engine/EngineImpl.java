@@ -82,7 +82,7 @@ public class EngineImpl implements Engine {
     }
 
     @Override
-    public void getEventTradingStatus() {
+    public void getEventTradingStatus(int eventId) {
         System.out.println("in getEventTradingStatus");
     }
 
