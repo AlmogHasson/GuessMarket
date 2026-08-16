@@ -212,4 +212,7 @@ public class GMEvent {
         return this.name;
     }
 
+    public int getCommission() {
+        return comision.getValue();
+    }
 }

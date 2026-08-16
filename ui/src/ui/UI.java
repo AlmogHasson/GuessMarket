@@ -47,37 +47,26 @@ public final class UI {
         return false;
     }
 
-    private String getValidUserPath(String prompt) {
+    private String getPath(String prompt) {
         Scanner input = new Scanner(System.in);
-        String userInput;
-        boolean isValid = false;
-        do {
-            System.out.println(prompt);
-            userInput = input.nextLine();
-                isValid = isValidPath(userInput);
-            if (!isValid) {
-                //TODO: specify what is invalid about the path (does not exist, not readable, not a file, etc.)
-                System.out.println("Invalid Input, please input a valid path");
-            }
-        } while (!isValid);
-        return userInput;
-    }
-
-    private boolean isValidPath(String path) {
-        //check if the file exists and is readable
-        java.io.File file = new java.io.File(path);
-        return file.exists() && file.isFile() && file.canRead();
-        //TODO: check if the file is a valid XML file
+        System.out.println(prompt);
+        return input.nextLine();
     }
 
     private void executeOption(MenuOption option) {
         switch (option){
             //test :   C:\Users\almog\IdeaProjects\GuessMarket\test files\test1.xml
             case LOAD_FILE -> {
-                try {
-                    controller.loadFile(getValidUserPath("Please input a valid file path:"));
-                } catch (Exception e) {
-                    System.out.println("Error occurred while loading file: " + e.getMessage());
+                boolean loaded = false;
+
+                while (!loaded) { //loop until a valid file is loaded
+                    try {
+                        controller.loadFile(getPath("Please input a valid file path:"));
+                        System.out.println("File loaded successfully! Events are now updated and available.");
+                        loaded = true;
+                    } catch (Exception e) {
+                        System.out.println("Error occurred while loading file: " + e.getMessage());
+                    }
                 }
             }
             case GET_EVENTS -> {
@@ -88,7 +77,6 @@ public final class UI {
                     displayEvents(events);
                 }
             }
-
             case GET_EVENT_TRADING_STATUS -> {
                 controller.getEventTradingStatus();
             }
