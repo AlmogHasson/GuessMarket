@@ -1,7 +1,6 @@
 package engine;
 
 import generated.GMEvent;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,8 +11,10 @@ public class Event {
     private List<Option> options;
     private Method method;
     private String name;
+    EventTradingStatus eventTradingStatus;
 
-    //get the event from schema and load it with the ctor
+
+    //get the event from schema and load it
     public Event(GMEvent event) {
         this.id = event.getId();
         this.description = event.getDescription();
@@ -24,6 +25,8 @@ public class Event {
         );
         this.method = new Method(event.getGMMethod());
         this.name = String.join(", ", event.getName());
+        //TODO: ask if the below initialization is correct, or if it should be set differently
+        this.eventTradingStatus = new EventTradingStatus(this.options);
     }
 
     //getters
@@ -49,5 +52,9 @@ public class Event {
 
     public String getName() {
         return name;
+    }
+
+    public EventTradingStatus getEventTradingStatus() {
+        return eventTradingStatus;
     }
 }

@@ -1,6 +1,7 @@
 package ui;
 import api.GMController;
-import dto.EventDTO;
+import dto.EventSummaryDTO;
+import dto.EventTradingStatusDTO;
 
 import java.util.List;
 import java.util.Scanner;
@@ -54,11 +55,17 @@ public final class UI {
     }
 
     private void executeOption(MenuOption option) {
+
+        boolean loaded = controller.isFileLoaded();
+        if (option != MenuOption.LOAD_FILE && !loaded) {
+            System.out.println("No file loaded. Please load a file first.");
+            return;
+        }
+
         switch (option){
             //test :   C:\Users\almog\IdeaProjects\GuessMarket\test files\test1.xml
             //test noa: /Users/noaallouche/uni/java course/project Gusss Market/multiple.xml
             case LOAD_FILE -> {
-                boolean loaded = false;
 
                 while (!loaded) { //loop until a valid file is loaded
                     try {
@@ -81,10 +88,9 @@ public final class UI {
             case GET_EVENT_TRADING_STATUS -> {
                 var events = controller.getEvents();
                 int eventNumber = getEventNumber(events.size());
-                if (eventNumber == -1) {break;}
-                EventDTO selectedEvent = events.get(eventNumber - 1);
+                EventSummaryDTO selectedEvent = events.get(eventNumber - 1);
                 int eventId = selectedEvent.getId();
-                controller.getEventTradingStatus(eventId);
+                displayEventTradingStatus(controller.getEventTradingStatus(eventId));
             }
             case PARTICIPATE_IN_EVENT -> {
                 controller.participateInEvent();
@@ -98,27 +104,102 @@ public final class UI {
         }
     }
 
+    private void displayEventTradingStatus(EventTradingStatusDTO event) {
+        final int width = 72;
+        final String sep = "=".repeat(width);
+
+        displayEventTradingHeader(event, sep, width);
+
+        System.out.printf("%-24s: %s%n", "Status", event.isOpen() ? "OPEN" : "CLOSED");
+        System.out.println();
+
+        displayOptionTradingStatuses(event, width);
+
+        System.out.printf("%-24s: %.2f%n", "Account Balance", event.accountBalance());
+        System.out.printf("%-24s: %.2f%n", "Total Commission Paid", event.totalCommissionPaid());
+        System.out.println();
+
+        displayEventTradingHistory(event, width, sep);
+    }
+
+    private static void displayEventTradingHeader(EventTradingStatusDTO event, String sep, int width) {
+        //remove commas from event name
+        String eventName = event.eventName();
+        if (eventName != null) {
+            eventName = eventName.replace(",", "");
+        }
+        System.out.println(sep);
+        String title = "EVENT TRADING STATUS" + (eventName != null ? " - " + eventName : "");
+        int leftPad = Math.max(0, (width - title.length()) / 2);
+        System.out.println(" ".repeat(leftPad) + title);
+        System.out.println("-".repeat(width));
+        System.out.println();
+    }
+
+    private static void displayOptionTradingStatuses(EventTradingStatusDTO event, int width) {
+        System.out.println("---- Option Trading Status ----");
+        System.out.printf("%-4s %-28s %-12s %-12s%n", "#", "Option", "Current Value", "Total Shares Bought");
+        System.out.println("-".repeat(width));
+        var optionStatusList = event.optionTradingStatus();
+        if (optionStatusList == null || optionStatusList.isEmpty()) {
+            System.out.println("  (no options available)");
+        } else {
+            int i = 1;
+            for (var optStatus : optionStatusList) {
+                String opt = optStatus.optionName() == null ? "" : optStatus.optionName();
+                System.out.printf("%-4d %-28s %-12.2f %-12d%n", i++, opt, optStatus.currentValue(), optStatus.totalSharesBought());
+            }
+        }
+    }
+
+    private static void displayEventTradingHistory(EventTradingStatusDTO event, int width, String sep) {
+        System.out.println("---- Trading History (newest first) ----");
+        System.out.printf("%-4s %-28s %-12s %-12s%n", "#", "Option", "Shares", "Price Paid");
+        System.out.println("-".repeat(width));
+
+        //print trading history in reverse order (newest first)
+        var history = event.tradingHistory();
+        if (history == null || history.isEmpty()) {
+            System.out.println("  (no trades yet)");
+        } else {
+            int i = history.size();
+            for (int idx = history.size() - 1; idx >= 0; idx--) {
+                var t = history.get(idx);
+                String opt = t.optionName() == null ? "" : t.optionName();
+                System.out.printf("%-4d %-28s %-12d %-12.2f%n", i--, opt, t.sharesBought(), t.pricePaid());
+            }
+        }
+
+        System.out.println(sep);
+        System.out.println();
+    }
+
     //helper method to get event number from user input
     private int getEventNumber(int numberOfEvents) {
         Scanner input = new Scanner(System.in);
-        System.out.print("Choose event number: ");
-        int eventNumber;
-        try {
-            eventNumber = input.nextInt();
-        } catch (Exception e) {
-            System.out.println("Invalid input.");
-            return -1;
-        }
 
-        if (eventNumber < 1 || eventNumber > numberOfEvents) {
-            System.out.println("Invalid event number.");
-            return -1;
-        }
+        while (true) {
+            System.out.print("Choose event number: ");
 
-        return eventNumber;
+            if (!input.hasNextInt()) {
+                System.out.println("Invalid input. Please enter a number.");
+                input.nextLine(); // discard invalid input
+                continue;
+            }
+
+            int eventNumber = input.nextInt();
+            input.nextLine();
+
+            if (eventNumber < 1 || eventNumber > numberOfEvents) {
+                System.out.println("Invalid event number.");
+                continue;
+            }
+
+            return eventNumber;
+        }
     }
 
-    private static void displayEvents(List<EventDTO> events) {
+    private static void displayEvents(List<EventSummaryDTO> events) {
         final int width = 64;
         final String sep = "=".repeat(width);
         for (var event : events) {
@@ -186,7 +267,8 @@ private void run() {
                 displayMenu(); continue;
             }
             executeOption(intToMenuOption(Integer.parseInt(option)));
-            System.out.println("Type 'BACK' to show the menu, or select another option (1-6).");
-        }     System.out.println("Exiting...");
+            displayMenu();
+        }
+        System.out.println("Exiting...");
     }
 }

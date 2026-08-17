@@ -65,7 +65,6 @@ public class GuessMarket {
      *     
      */
 
-    // TODO: check if this is necessary and how to fit it in
     public void setGMEvents(GMEvents value) {
         this.gmEvents = value;
     }

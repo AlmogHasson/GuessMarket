@@ -6,7 +6,7 @@ public record OptionDTO (
 ) {
     // Constructor to create dto.OptionDTO from Option
     public OptionDTO(Option option) {
-        this(option.getOption());
+        this(option.getOptionName());
     }
 
     //implement all getters for the fields

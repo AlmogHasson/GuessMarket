@@ -1,6 +1,7 @@
 package api;
 
-import dto.EventDTO;
+import dto.EventSummaryDTO;
+import dto.EventTradingStatusDTO;
 import engine.Engine;
 import engine.EngineImpl;
 
@@ -13,12 +14,18 @@ public class GMController {
         engine.loadFile(path);
     }
 
-    public List<EventDTO> getEvents() {
-        return engine.getEvents().stream().map(event -> new EventDTO(event)).toList();
+    public List<EventSummaryDTO> getEvents() {
+        return engine.getEvents().stream().map(event -> new EventSummaryDTO(event)).toList();
     }
 
-    public void getEventTradingStatus(int eventId) {
-        engine.getEventTradingStatus(eventId);
+    public EventTradingStatusDTO getEventTradingStatus(int eventId) throws IllegalArgumentException {
+        return new EventTradingStatusDTO(
+                // get the event by ID and create a DTO from it
+                engine.getEvents().stream().filter(e ->
+                                e.getId() == eventId)
+                                .findFirst().orElseThrow(() ->
+                                new IllegalArgumentException("Event with ID " + eventId + " not found"))
+        );
     }
 
     public void participateInEvent() {
@@ -27,6 +34,10 @@ public class GMController {
 
     public void closeEvent() {
         engine.closeEvent();
+    }
+
+    public boolean isFileLoaded() {
+        return engine.getEvents() != null && !engine.getEvents().isEmpty();
     }
 
 

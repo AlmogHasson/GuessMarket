@@ -163,7 +163,4 @@ public class ObjectFactory {
     public JAXBElement<String> createGMOption(String value) {
         return new JAXBElement<>(_GMOption_QNAME, String.class, null, value);
     }
-
-    // TODO: see how to use this factory
-
 }

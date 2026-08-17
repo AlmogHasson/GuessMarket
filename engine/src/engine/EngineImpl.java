@@ -17,7 +17,7 @@ public class EngineImpl implements Engine {
     public void loadFile(String path) throws JAXBException {
         // validate the file path : exists, readable, not null or empty
         validateFilePath(path);
-        
+
         JAXBContext jaxbContext = JAXBContext.newInstance(GuessMarket.class);
         GuessMarket guessMarket = (GuessMarket) jaxbContext.createUnmarshaller().unmarshal(new File(path));
 
@@ -36,10 +36,42 @@ public class EngineImpl implements Engine {
         });
     }
 
+    @Override
+    public List<Event> getEvents() {
+        return events;
+    }
+
+    @Override
+    public EventTradingStatus getEventTradingStatus(int eventId) {
+        Event event = events.stream().filter(e -> e.getId() == eventId).findFirst().orElse(null);
+        if (event == null) {
+            throw new IllegalArgumentException("Event with ID " + eventId + " not found");
+        }
+        return event.getEventTradingStatus();
+    }
+
+    @Override
+    public void participateInEvent() {
+        System.out.println("in participateInEvent");
+    }
+
+    @Override
+    public void closeEvent() {
+        System.out.println("in closeEvent");
+    }
+
+
     private void validateCommissions(GuessMarket guessMarket) {
-        if (!areCommissionsValid(guessMarket.getGMEvents().getGMEvent())) {
-            //TODO: include the invalid event IDs in the exception message
-            throw new IllegalArgumentException("Commission must be between 0 and 90");
+        var invalidIds = guessMarket.getGMEvents().getGMEvent().stream()
+                .filter(e -> {
+                    int commission = e.getCommission();
+                    return commission < 0 || commission > 90;
+                })
+                .map(GMEvent::getId)
+                .toList();
+
+        if (!invalidIds.isEmpty()) {
+            throw new IllegalArgumentException("Invalid commission (must be 0-90) for event IDs: " + invalidIds);
         }
     }
 
@@ -53,10 +85,12 @@ public class EngineImpl implements Engine {
         if (path == null || path.trim().isEmpty()) {
             throw new IllegalArgumentException("File path cannot be null or empty");
         }
-        // check if the file exists
         File file = new File(path);
         if (!file.exists()) {
             throw new IllegalArgumentException("File does not exist");
+        }
+        if (!file.isFile()) {
+            throw new IllegalArgumentException("Path is not a file: " + file.getAbsolutePath());
         }
         // check if the file is readable
         if (!file.canRead()) {
@@ -64,42 +98,11 @@ public class EngineImpl implements Engine {
         }
     }
 
-    private boolean areCommissionsValid(List<GMEvent> gmEvents) {
-        return gmEvents.stream().allMatch(event -> {
-                int commission = event.getCommission();
-                return commission >= 0 && commission <= 90;
-            });
-    }
-
 
     public EngineImpl() {
         this.events = new ArrayList<>();
     }
 
-    @Override
-    public List<Event> getEvents() {
-        return events;
-    }
-
-    @Override
-    public void getEventTradingStatus(int eventId) {
-        System.out.println("in getEventTradingStatus");
-    }
-
-    @Override
-    public void participateInEvent() {
-        System.out.println("in participateInEvent");
-    }
-
-    @Override
-    public void closeEvent() {
-        System.out.println("in closeEvent");
-    }
-
-//    @Override
-//    public void exit() {
-//        System.out.println("exit");
-//    }
 
     private boolean hasUniqueIds(List<GMEvent> gmEvent) {
         return gmEvent.stream().map(GMEvent::getId).distinct().count() == gmEvent.size();

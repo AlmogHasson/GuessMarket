@@ -7,8 +7,9 @@ import java.util.List;
 public interface Engine {
     void loadFile(String path) throws JAXBException;
     List<Event> getEvents();
-    void getEventTradingStatus(int eventId);
+    //TODO: check if events are displayed LIFO
+    //TODO: check if when closed displays the winner option
+    EventTradingStatus getEventTradingStatus(int eventId);
     void participateInEvent(); //place a bet
     void closeEvent();
-    //void exit(); is exited/killed by garbage collector when ui dies-when we close the program
 }

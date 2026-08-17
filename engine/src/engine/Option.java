@@ -1,27 +1,27 @@
 package engine;
-import generated.GMOptions;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class Option {
-    protected String option;
+    protected String optionName;
     private int sharesBought=0;
 
     public Option(String gmOption) {
-        this.option = gmOption;
+        this.optionName = gmOption;
         this.sharesBought=0;
     }
 
     //getters
-    public String getOption() {
-        return option;
-    }
-
     public int getSharesBought() {
         return sharesBought;
     }
     public void addSharesBought(int shares) {
         this.sharesBought += shares;
+    }
+
+    public String getName() {
+        return optionName;
+    }
+
+    public String getOptionName() {
+        return optionName;
     }
 }

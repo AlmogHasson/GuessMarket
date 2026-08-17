@@ -2,36 +2,26 @@ package dto;
 
 import java.util.List;
 import engine.Event;
+import engine.Trade;
 
-public record EventTradingStatusDTO(int eventId,
-                                    String eventName,
-                                    List<OptionTradingStatusDTO> options,
-                                    double balance,
-                                    double totalCommission,
-                                    List<TradeDTO> tradingHistory,
-                                    boolean closed,
-                                    String winningOption) {
-
+public record EventTradingStatusDTO(
+        boolean isOpen,
+        String eventName,
+        List<OptionTradingDTO> optionTradingStatus,
+        float accountBalance, // for the user, not the event
+        float totalCommissionPaid,
+        List<TradeDTO> tradingHistory //history of trades for this event, for all users
+    )
+{
     // Constructor to create EventTradingStatusDTO from Event
-    public EventTradingStatusDTO(Event event, double balance, double totalCommission,
-                                 List<TradeDTO> tradingHistory, boolean closed, String winningOption) {
+    public EventTradingStatusDTO(Event event) {
         this(
-            event.getId(),
+            event.getEventTradingStatus().isOpen(),
             event.getName(),
-            event.getOptions().stream()
-                .map(option -> new OptionTradingStatusDTO(
-                    option.getOption(),
-                    0.0,  // currentValue - you'll need to calculate this from LMSR
-                    option.getSharesBought()
-                ))
-                .toList(),
-            balance,
-            totalCommission,
-            tradingHistory,
-            closed,
-            winningOption
+            event.getEventTradingStatus().getOptionTradingStatuses().stream().map(OptionTradingDTO::new).toList(),
+            event.getEventTradingStatus().getAccountBalance(),
+            event.getEventTradingStatus().getTotalCommissionPaid(),
+            event.getEventTradingStatus().getTradingHistory().stream().map(TradeDTO::new).toList()
         );
     }
-}
-
 }
