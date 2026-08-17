@@ -27,8 +27,8 @@ public class GMController {
         return new PurchaseDTO(engine.participateInEvent(eventId, optionNumber, shares));
     }
 
-    public void closeEvent() {
-        engine.closeEvent();
+    public void closeEvent(int eventID,int winningOption) {
+        engine.closeEvent(eventID, winningOption);
     }
 
     public boolean isFileLoaded() {

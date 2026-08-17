@@ -11,5 +11,5 @@ public interface Engine {
     //TODO: check if when closed displays the winner option
     EventTradingStatus getEventTradingStatus(int eventId);
     Purchase participateInEvent(int eventId, int optionNumber, int shares); //place a bet
-    void closeEvent();
+    void closeEvent(int eventID,int winningOption);
 }

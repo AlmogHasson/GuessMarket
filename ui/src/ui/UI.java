@@ -130,7 +130,22 @@ public final class UI {
 
             }
             case CLOSE_EVENT -> {
-                controller.closeEvent();
+                displayEvents(controller.getEvents().stream().filter(event -> event.isOpen()).toList());
+                int eventID = getEventNumber(controller.getEvents().size());
+                EventSummaryDTO event = controller.getEvents().get(eventID-1);
+                displayEventTradingStatus(controller.getEventTradingStatus(eventID));
+                
+                Scanner input = new Scanner(System.in);
+                System.out.print("Choose winning option: ");
+                int winningOption = input.nextInt();
+
+                try {
+                    controller.closeEvent(eventID, winningOption);
+                }catch (Exception e) {
+                    System.out.println("Error occurred while participating in event: " + e.getMessage());
+                }
+
+                displayEventTradingStatus(controller.getEventTradingStatus(eventID));
             }
             case EXIT -> {
                 System.out.println("Exiting program...");

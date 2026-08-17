@@ -69,8 +69,29 @@ public class EngineImpl implements Engine {
 
 
     @Override
-    public void closeEvent() {
-        System.out.println("in closeEvent");
+    public void closeEvent(int eventId,int winningOption)throws  IllegalArgumentException{
+        Event event = events.stream().filter(e -> e.getId() == eventId).findFirst().orElse(null);
+        if (event == null) {
+            throw new IllegalArgumentException("Event with ID " + eventId + " not found");
+        }
+        if (winningOption < 0 || winningOption > event.getOptions().size()) {
+            throw new IllegalArgumentException("Invalid option number: " + winningOption);
+        }
+
+        EventTradingStatus ETS = event.getEventTradingStatus();
+        ETS.close();
+
+
+        float winningShares = event.getOptions().get(winningOption-1).getTotalSharesBought();
+        String commissionType = event.getComission().getType();
+        float commission = commissionType.equals("on-close")
+                ? winningShares * event.getComission().getValue() / 100 : 0.0f;
+
+        ETS.updateTotalCommissionPaid(ETS.getTotalCommissionPaid() + commission);
+
+        float payOut = winningShares - commission;
+        ETS.updateAccountBalance(ETS.getAccountBalance() - payOut);
+
     }
 
 

@@ -62,6 +62,10 @@ public class EventTradingStatus {
     public void updateHistory(Trade trade) {
         tradingHistory.add(trade);
     }
+
+    public void close() {
+        isOpen = false;
+    }
 }
 
 
