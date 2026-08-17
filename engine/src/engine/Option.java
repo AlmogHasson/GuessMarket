@@ -4,11 +4,13 @@ public class Option {
     private String optionName;
     private float currentValue;   // 0..1
     private int totalSharesBought;
+    boolean isWinner;
 
     public Option(String optionName) {
         this.optionName = optionName;
         this.currentValue = 0.5f;  // Default to 50% chance
         this.totalSharesBought = 0;
+        this.isWinner = false;
     }
 
     // Getters
@@ -30,5 +32,13 @@ public class Option {
 
     public void updateValue(float newValue) {
         currentValue = newValue;
+    }
+
+    public boolean getIsWinner() {
+        return isWinner;
+    }
+
+    public void setWinner() {
+        isWinner = true;
     }
 }

@@ -8,6 +8,7 @@ import jakarta.xml.bind.JAXBException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class EngineImpl implements Engine {
     List<Event> events;
@@ -51,12 +52,17 @@ public class EngineImpl implements Engine {
     }
 
     @Override
-    public Purchase participateInEvent(int eventId, int optionNumber, int shares) throws IllegalArgumentException {
+    public Purchase participateInEvent(int eventId, int optionNumber, int shares) {
         Event event = events.stream().filter(e -> e.getId() == eventId).findFirst().orElse(null);
+
+        if (!event.isOpen()){
+            return null;
+        }
+
         if (event == null) {
             throw new IllegalArgumentException("Event with ID " + eventId + " not found");
         }
-        if (optionNumber < 0 || optionNumber >= event.getOptions().size()) {
+        if (optionNumber < 0 || optionNumber > event.getOptions().size()) {
             throw new IllegalArgumentException("Invalid option number: " + optionNumber);
         }
         if (shares <= 0) {
@@ -80,6 +86,7 @@ public class EngineImpl implements Engine {
 
         EventTradingStatus ETS = event.getEventTradingStatus();
         ETS.close();
+        event.getOptions().get(winningOption-1).setWinner();
 
 
         float winningShares = event.getOptions().get(winningOption-1).getTotalSharesBought();

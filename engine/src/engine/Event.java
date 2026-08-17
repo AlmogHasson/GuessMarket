@@ -26,7 +26,6 @@ public class Event {
         );
         this.method = new Method(event.getGMMethod());
         this.name = String.join(", ", event.getName());
-        //TODO: ask if the below initialization is correct, or if it should be set differently
         this.eventTradingStatus = new EventTradingStatus(
                 this.name, this.options,
                 method.getLmsr().calculateBalance(
@@ -127,4 +126,7 @@ public class Event {
         );
     }
 
+    public boolean isOpen() {
+        return getEventTradingStatus().isOpen();
+    }
 }

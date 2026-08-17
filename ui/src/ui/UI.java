@@ -5,6 +5,7 @@ import dto.EventTradingStatusDTO;
 import dto.PurchaseDTO;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.stream.Stream;
 
@@ -100,6 +101,12 @@ public final class UI {
 
                 displayEventTradingStatus(controller.getEventTradingStatus(eventID));
                 //let the user choose an option and then choose amount of shares to buy, then call participateInEvent() with the chosen option and amount
+
+                if (!controller.getEvents().get(eventID-1).isOpen()){
+                    System.out.println("This Event Is Closed For Participation");
+                    return;
+                }
+
                 Scanner input = new Scanner(System.in);
 
                 System.out.print("Choose option number to participate in: ");
@@ -110,12 +117,12 @@ public final class UI {
 
                 boolean participatedSuccessfully = false;
 
-                PurchaseDTO purchase = null;
 
                 while (!participatedSuccessfully) {
                     try {
-                        purchase = controller.participateInEvent(eventID, optionNumber, shares);
+                        PurchaseDTO purchase = controller.participateInEvent(eventID, optionNumber, shares);
                         participatedSuccessfully = true;
+                        displayDetailsAfterPurchase(purchase, eventID);
                     } catch (Exception e) {
                         System.out.println("Error occurred while participating in event: " + e.getMessage());
                         System.out.print("Choose option number to participate in: ");
@@ -124,9 +131,6 @@ public final class UI {
                         shares = input.nextInt();
                     }
                 }
-
-                if (purchase != null )
-                    displayDetailsAfterPurchase(purchase,eventID);
 
             }
             case CLOSE_EVENT -> {
@@ -191,8 +195,7 @@ public final class UI {
 
         displayEventTradingHeader(event, sep, width);
 
-        System.out.printf("%-24s: %s%n", "Status", event.isOpen() ? "OPEN" : "CLOSED");
-        System.out.println();
+
 
         displayOptionTradingStatuses(event, width);
 
@@ -204,6 +207,9 @@ public final class UI {
     }
 
     private static void displayEventTradingHeader(EventTradingStatusDTO event, String sep, int width) {
+        System.out.printf("%-24s: %s%n", "Status", event.isOpen() ? "OPEN" : "CLOSED");
+        System.out.println();
+
         //remove commas from event name
         String eventName = event.eventName();
         if (eventName != null) {
@@ -219,17 +225,34 @@ public final class UI {
 
     private static void displayOptionTradingStatuses(EventTradingStatusDTO event, int width) {
         System.out.println("---- Option Trading Status ----");
-        System.out.printf("%-4s %-28s %-12s %-12s%n", "#", "Option", "Current Value", "Total Shares Bought");
+
+        System.out.printf(
+                "%-4s %-28s %-15s %-20s %-10s%n",
+                "#", "Option", "Current Value", "Total Shares Bought", "Status"
+        );
+
         System.out.println("-".repeat(width));
+
         var optionStatusList = event.optionTradingStatus();
+
         if (optionStatusList == null || optionStatusList.isEmpty()) {
             System.out.println("  (no options available)");
-        } else {
-            int i = 1;
-            for (var optStatus : optionStatusList) {
-                String opt = optStatus.optionName() == null ? "" : optStatus.optionName();
-                System.out.printf("%-4d %-28s %-12.2f %-12d%n", i++, opt, optStatus.currentValue(), optStatus.totalSharesBought());
-            }
+            return;
+        }
+
+        int i = 1;
+
+        for (var optStatus : optionStatusList) {
+            String optionName = optStatus.optionName() == null ? "" : optStatus.optionName();
+
+            String status = optStatus.isWinner() ? "WINNER" : "";
+
+            System.out.printf(
+                    "%-4d %-28s %-15.2f %-20d %-10s%n",
+                    i++, optionName, optStatus.currentValue(),
+                    optStatus.totalSharesBought(),
+                    status
+            );
         }
     }
 

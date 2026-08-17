@@ -5,13 +5,15 @@ import engine.Option;
 public record OptionDTO(
         String optionName,
         float currentValue,
-        int totalSharesBought
+        int totalSharesBought,
+        boolean isWinner
     )
 {
     public OptionDTO(Option option) {
         this(option.getOptionName(),
                 option.getCurrentValue(),
-                option.getTotalSharesBought());
+                option.getTotalSharesBought(),
+                option.getIsWinner());
     }
 
     //getters

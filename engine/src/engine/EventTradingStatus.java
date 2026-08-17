@@ -48,12 +48,10 @@ public class EventTradingStatus {
     public String getName() {
         return eventName;
     }
-
-
+    
     public void updateAccountBalance(float newBalance) {
         this.accountBalance = newBalance;
     }
-
 
     public void updateTotalCommissionPaid(float newTotal) {
         this.totalCommissionPaid = newTotal;

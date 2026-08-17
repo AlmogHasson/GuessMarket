@@ -1,7 +1,7 @@
 package engine;
 
 public class LMSR {
-    private int b;
+    private final int b;
 
     public LMSR(int b) {
         this.b = b;
