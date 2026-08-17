@@ -10,6 +10,6 @@ public interface Engine {
     //TODO: check if events are displayed LIFO
     //TODO: check if when closed displays the winner option
     EventTradingStatus getEventTradingStatus(int eventId);
-    void participateInEvent(); //place a bet
+    Purchase participateInEvent(int eventId, int optionNumber, int shares); //place a bet
     void closeEvent();
 }

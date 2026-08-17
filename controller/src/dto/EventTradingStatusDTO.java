@@ -2,6 +2,7 @@ package dto;
 
 import java.util.List;
 import engine.Event;
+import engine.EventTradingStatus;
 
 public record EventTradingStatusDTO(
         boolean isOpen,
@@ -13,14 +14,14 @@ public record EventTradingStatusDTO(
     )
 {
     // Constructor to create EventTradingStatusDTO from Event
-    public EventTradingStatusDTO(Event event) {
+    public EventTradingStatusDTO(EventTradingStatus ETS) {
         this(
-            event.getEventTradingStatus().isOpen(),
-            event.getName(),
-            event.getEventTradingStatus().getOptionTradingStatuses().stream().map(OptionDTO::new).toList(),
-            event.getEventTradingStatus().getAccountBalance(),
-            event.getEventTradingStatus().getTotalCommissionPaid(),
-            event.getEventTradingStatus().getTradingHistory().stream().map(TradeDTO::new).toList()
+            ETS.isOpen(),
+            ETS.getName(),
+            ETS.getOptionTradingStatuses().stream().map(OptionDTO::new).toList(),
+            ETS.getAccountBalance(),
+            ETS.getTotalCommissionPaid(),
+            ETS.getTradingHistory().stream().map(TradeDTO::new).toList()
         );
     }
 }

@@ -51,9 +51,22 @@ public class EngineImpl implements Engine {
     }
 
     @Override
-    public void participateInEvent() {
-        System.out.println("in participateInEvent");
+    public Purchase participateInEvent(int eventId, int optionNumber, int shares) throws IllegalArgumentException {
+        Event event = events.stream().filter(e -> e.getId() == eventId).findFirst().orElse(null);
+        if (event == null) {
+            throw new IllegalArgumentException("Event with ID " + eventId + " not found");
+        }
+        if (optionNumber < 0 || optionNumber >= event.getOptions().size()) {
+            throw new IllegalArgumentException("Invalid option number: " + optionNumber);
+        }
+        if (shares <= 0) {
+            throw new IllegalArgumentException("Shares must be greater than 0");
+        }
+
+        return event.participate(optionNumber, shares);
     }
+
+
 
     @Override
     public void closeEvent() {

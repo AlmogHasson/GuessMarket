@@ -2,9 +2,11 @@ package ui;
 import api.GMController;
 import dto.EventSummaryDTO;
 import dto.EventTradingStatusDTO;
+import dto.PurchaseDTO;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Stream;
 
 public final class UI {
     private enum MenuOption {
@@ -63,8 +65,7 @@ public final class UI {
         }
 
         switch (option){
-            //test :   C:\Users\almog\IdeaProjects\GuessMarket\test files\test1.xml
-            //test noa: /Users/noaallouche/uni/java course/project Gusss Market/multiple.xml
+
             case LOAD_FILE -> {
 
                 while (!loaded) { //loop until a valid file is loaded
@@ -93,7 +94,40 @@ public final class UI {
                 displayEventTradingStatus(controller.getEventTradingStatus(eventId));
             }
             case PARTICIPATE_IN_EVENT -> {
-                controller.participateInEvent();
+                displayEvents(controller.getEvents().stream().filter(event -> event.isOpen()).toList());
+
+                int eventID = getEventNumber(controller.getEvents().size());
+
+                displayEventTradingStatus(controller.getEventTradingStatus(eventID));
+                //let the user choose an option and then choose amount of shares to buy, then call participateInEvent() with the chosen option and amount
+                Scanner input = new Scanner(System.in);
+
+                System.out.print("Choose option number to participate in: ");
+                int optionNumber = input.nextInt();
+
+                System.out.print("Choose amount of shares to buy: ");
+                int shares = input.nextInt();
+
+                boolean participatedSuccessfully = false;
+
+                PurchaseDTO purchase = null;
+
+                while (!participatedSuccessfully) {
+                    try {
+                        purchase = controller.participateInEvent(eventID, optionNumber, shares);
+                        participatedSuccessfully = true;
+                    } catch (Exception e) {
+                        System.out.println("Error occurred while participating in event: " + e.getMessage());
+                        System.out.print("Choose option number to participate in: ");
+                        optionNumber = input.nextInt();
+                        System.out.print("Choose amount of shares to buy: ");
+                        shares = input.nextInt();
+                    }
+                }
+
+                if (purchase != null )
+                    displayDetailsAfterPurchase(purchase,eventID);
+
             }
             case CLOSE_EVENT -> {
                 controller.closeEvent();
@@ -102,6 +136,38 @@ public final class UI {
                 System.out.println("Exiting program...");
             }
         }
+    }
+
+    private void displayDetailsAfterPurchase(PurchaseDTO purchase, int eventID) {
+        displayPurchase(purchase);
+        displayEventTradingStatus(controller.getEventTradingStatus(eventID));
+    }
+
+    private void displayPurchase(PurchaseDTO purchase) {
+        System.out.println();
+        System.out.println("============================================================");
+        System.out.println("                 PURCHASE COMPLETED");
+        System.out.println("============================================================");
+
+        System.out.printf("%-20s : $%.2f%n", "Shares Cost", purchase.sharePaid());
+
+        if (purchase.commissionPaid() > 0) {
+            System.out.printf("%-20s : $%.2f%n", "Commission", purchase.commissionPaid());
+        }
+
+        System.out.println("------------------------------------------------------------");
+        System.out.printf("%-20s : $%.2f%n", "Total Paid", purchase.totalPaid());
+
+        System.out.println("============================================================");
+        System.out.println();
+
+        System.out.println("UPDATED EVENT STATUS");
+        System.out.println();
+
+    }
+
+    private boolean validateOptionNumber(int optionNumber) {
+        return optionNumber == 1 || optionNumber == 2;
     }
 
     private void displayEventTradingStatus(EventTradingStatusDTO event) {
@@ -211,7 +277,7 @@ public final class UI {
             String name = event.getName() == null ? "" : event.getName().replace(", ", " ");
             System.out.printf("%-14s: %s%n", "Name", name);
             System.out.printf("%-14s: %s%n", "Description", event.getDescription() == null ? "" : event.getDescription());
-            var c = event.getComission();             if (c != null) System.out.printf("%-14s: %s%n", "Commission", String.format("%d%% (%s)", c.value(), c.type()));
+            var c = event.getCommission();             if (c != null) System.out.printf("%-14s: %s%n", "Commission", String.format("%d%% (%s)", c.value(), c.type()));
             if (event.getMethod() != null && event.getMethod().lmsr() != null)
                 System.out.printf("%-14s: %d%n", "LMSR b", event.getMethod().lmsr().getB());
             System.out.println();

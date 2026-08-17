@@ -3,9 +3,9 @@ package engine;
 public class Trade {
     private String optionName;
     private int sharesBought;
-    private double pricePaid;
+    private float pricePaid;
 
-    public Trade(String optionName, int sharesBought, double pricePaid) {
+    public Trade(String optionName, int sharesBought, float pricePaid) {
         this.optionName = optionName;
         this.sharesBought = sharesBought;
         this.pricePaid = pricePaid;
@@ -20,7 +20,7 @@ public class Trade {
         return sharesBought;
     }
 
-    public double getPricePaid() {
+    public float getPricePaid() {
         return pricePaid;
     }
 }

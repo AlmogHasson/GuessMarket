@@ -2,6 +2,7 @@ package api;
 
 import dto.EventSummaryDTO;
 import dto.EventTradingStatusDTO;
+import dto.PurchaseDTO;
 import engine.Engine;
 import engine.EngineImpl;
 
@@ -19,17 +20,11 @@ public class GMController {
     }
 
     public EventTradingStatusDTO getEventTradingStatus(int eventId) throws IllegalArgumentException {
-        return new EventTradingStatusDTO(
-                // get the event by ID and create a DTO from it
-                engine.getEvents().stream().filter(e ->
-                                e.getId() == eventId)
-                                .findFirst().orElseThrow(() ->
-                                new IllegalArgumentException("Event with ID " + eventId + " not found"))
-        );
+        return new EventTradingStatusDTO(engine.getEventTradingStatus(eventId));
     }
 
-    public void participateInEvent() {
-        engine.participateInEvent();
+    public PurchaseDTO participateInEvent(int eventId, int optionNumber, int shares) {
+        return new PurchaseDTO(engine.participateInEvent(eventId, optionNumber, shares));
     }
 
     public void closeEvent() {
@@ -39,11 +34,5 @@ public class GMController {
     public boolean isFileLoaded() {
         return engine.getEvents() != null && !engine.getEvents().isEmpty();
     }
-
-
-//    @Override
-//    public void exit() {
-//        System.out.println("exit");
-//    }
 
 }

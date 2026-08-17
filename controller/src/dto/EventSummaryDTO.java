@@ -8,7 +8,8 @@ public record EventSummaryDTO( // record = immutable data class
        CommissionDTO comission,
        List<OptionDTO> options,
        MethodDTO method,
-       String name
+       String name,
+       boolean isOpen
 ) {
     // Constructor to create dto.EventDTO from Event
     public EventSummaryDTO(Event event) {
@@ -18,7 +19,8 @@ public record EventSummaryDTO( // record = immutable data class
             new CommissionDTO(event.getComission()),
             event.getOptions().stream().map(OptionDTO::new).toList(),
             new MethodDTO(new LMSRDTO(event.getMethod().getLmsr())),
-            event.getName()
+            event.getName(),
+            event.getEventTradingStatus().isOpen()
         );
     }
 
@@ -27,11 +29,15 @@ public record EventSummaryDTO( // record = immutable data class
         return id;
     }
 
+    public boolean isOpen(){
+        return isOpen;
+    }
+
     public String getDescription() {
         return description;
     }
 
-    public CommissionDTO getComission() {
+    public CommissionDTO getCommission() {
         return comission;
     }
 

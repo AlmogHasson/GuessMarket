@@ -7,7 +7,7 @@ public class Option {
 
     public Option(String optionName) {
         this.optionName = optionName;
-        this.currentValue = 0.0f;
+        this.currentValue = 0.5f;  // Default to 50% chance
         this.totalSharesBought = 0;
     }
 
@@ -22,5 +22,13 @@ public class Option {
 
     public int getTotalSharesBought() {
         return totalSharesBought;
+    }
+
+    public void buyShares(int shares) {
+        totalSharesBought += shares;
+    }
+
+    public void updateValue(float newValue) {
+        currentValue = newValue;
     }
 }
