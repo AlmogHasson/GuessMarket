@@ -1,27 +1,26 @@
 package engine;
 
 public class Option {
-    protected String optionName;
-    private int sharesBought=0;
+    private String optionName;
+    private float currentValue;   // 0..1
+    private int totalSharesBought;
 
-    public Option(String gmOption) {
-        this.optionName = gmOption;
-        this.sharesBought=0;
+    public Option(String optionName) {
+        this.optionName = optionName;
+        this.currentValue = 0.0f;
+        this.totalSharesBought = 0;
     }
 
-    //getters
-    public int getSharesBought() {
-        return sharesBought;
-    }
-    public void addSharesBought(int shares) {
-        this.sharesBought += shares;
-    }
-
-    public String getName() {
-        return optionName;
-    }
-
+    // Getters
     public String getOptionName() {
         return optionName;
+    }
+
+    public float getCurrentValue() {
+        return currentValue;
+    }
+
+    public int getTotalSharesBought() {
+        return totalSharesBought;
     }
 }

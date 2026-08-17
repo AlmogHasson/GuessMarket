@@ -1,18 +1,17 @@
 package engine;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class EventTradingStatus {
         private boolean isOpen;
-        private List<OptionTradingStatus> options;
+        private List<Option> options;
         private float accountBalance; // for the user, not the event
         private float totalCommissionPaid;
         private List<Trade> tradingHistory;
 
     public EventTradingStatus(List<Option> options) {
         this.isOpen = true;
-        this.options = options.stream().map(OptionTradingStatus::new).toList();
+        this.options = options;
         this.accountBalance = 0.0f;
         this.totalCommissionPaid = 0.0f;
         this.tradingHistory = List.of();
@@ -23,7 +22,7 @@ public class EventTradingStatus {
         return isOpen;
     }
 
-    public List<OptionTradingStatus> getOptions() {
+    public List<Option> getOptions() {
         return options;
     }
 
@@ -40,7 +39,7 @@ public class EventTradingStatus {
     }
 
     //getOptionTradingStatuses() method to return the list of OptionTradingStatus objects
-    public List<OptionTradingStatus> getOptionTradingStatuses() {
+    public List<Option> getOptionTradingStatuses() {
         return options;
     }
 }

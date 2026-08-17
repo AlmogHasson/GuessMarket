@@ -221,7 +221,7 @@ public final class UI {
             int i = 1;
             if (event.getOptions() != null) {
                 for (var opt : event.getOptions()) {
-                    String optText = opt == null ? "" : (opt.getOption() == null ? "" : opt.getOption().replace(", ", " "));
+                    String optText = opt == null ? "" : (opt.getOptionName() == null ? "" : opt.getOptionName().replace(", ", " "));
                     System.out.printf("%-4d %-54s%n", i++, optText);
                 }
             }

@@ -1,16 +1,30 @@
 package dto;
+
 import engine.Option;
 
-public record OptionDTO (
-    String option
-) {
-    // Constructor to create dto.OptionDTO from Option
+public record OptionDTO(
+        String optionName,
+        float currentValue,
+        int totalSharesBought
+    )
+{
     public OptionDTO(Option option) {
-        this(option.getOptionName());
+        this(option.getOptionName(),
+                option.getCurrentValue(),
+                option.getTotalSharesBought());
     }
 
-    //implement all getters for the fields
-    public String getOption() {
-        return option;
+    //getters
+    public String getOptionName() {
+        return optionName;
+}
+
+    public float getCurrentValue() {
+        return currentValue;
     }
+
+    public int getTotalSharesBought() {
+        return totalSharesBought;
+    }
+
 }
