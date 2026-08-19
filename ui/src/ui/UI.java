@@ -16,7 +16,10 @@ public final class UI {
         GET_EVENT_TRADING_STATUS(3),
         PARTICIPATE_IN_EVENT(4),
         CLOSE_EVENT(5),
-        EXIT(6);
+        SAVE_STATE(6),
+        LOAD_STATE(7),
+        EXIT(8);
+
 
         private final int value;
 
@@ -33,7 +36,9 @@ public final class UI {
         System.out.println("to show market status 3");
         System.out.println("to participate in event press 4");
         System.out.println("to close event press 5");
-        System.out.println("to exit program press 6");
+        System.out.println("to save system state press 6");
+        System.out.println("to load saved system state press 7");
+        System.out.println("to exit program press 8");
     }
 
     private boolean isUserInputValid(String input) {
@@ -60,7 +65,7 @@ public final class UI {
     private void executeOption(MenuOption option) {
 
         boolean loaded = controller.isFileLoaded();
-        if (option != MenuOption.LOAD_FILE && !loaded) {
+        if (option != MenuOption.LOAD_FILE && !loaded && option != MenuOption.LOAD_STATE) {
             System.out.println("No file loaded. Please load a file first.");
             return;
         }
@@ -96,42 +101,17 @@ public final class UI {
             }
             case PARTICIPATE_IN_EVENT -> {
                 displayEvents(controller.getEvents().stream().filter(event -> event.isOpen()).toList());
-
                 int eventID = getEventNumber(controller.getEvents().size());
-
                 displayEventTradingStatus(controller.getEventTradingStatus(eventID));
-                //let the user choose an option and then choose amount of shares to buy, then call participateInEvent() with the chosen option and amount
-
                 if (!controller.getEvents().get(eventID-1).isOpen()){
                     System.out.println("This Event Is Closed For Participation");
                     return;
                 }
-
                 Scanner input = new Scanner(System.in);
-
-                System.out.print("Choose option number to participate in: ");
-                int optionNumber = input.nextInt();
-
-                System.out.print("Choose amount of shares to buy: ");
-                int shares = input.nextInt();
-
-                boolean participatedSuccessfully = false;
-
-
-                while (!participatedSuccessfully) {
-                    try {
-                        PurchaseDTO purchase = controller.participateInEvent(eventID, optionNumber, shares);
-                        participatedSuccessfully = true;
-                        displayDetailsAfterPurchase(purchase, eventID);
-                    } catch (Exception e) {
-                        System.out.println("Error occurred while participating in event: " + e.getMessage());
-                        System.out.print("Choose option number to participate in: ");
-                        optionNumber = input.nextInt();
-                        System.out.print("Choose amount of shares to buy: ");
-                        shares = input.nextInt();
-                    }
-                }
-
+                //let the user choose an option and then choose amount of shares to buy
+                int optionNumber = getOptionNumber(input);
+                int shares = getSharesAmount(input);
+                participateUntilSuccessful(eventID, optionNumber, shares, input);
             }
             case CLOSE_EVENT -> {
                 displayEvents(controller.getEvents().stream().filter(event -> event.isOpen()).toList());
@@ -151,10 +131,65 @@ public final class UI {
 
                 displayEventTradingStatus(controller.getEventTradingStatus(eventID));
             }
+            case SAVE_STATE -> {
+                String path = getPath(
+                        "Enter the full path and file name without extension:"
+                );
+
+                try {
+                    controller.saveState(path);
+                    System.out.println("System state saved successfully.");
+                } catch (Exception e) {
+                    System.out.println(
+                            "Error occurred while saving system state: " + e.getMessage()
+                    );
+                }
+            }
+            case LOAD_STATE -> {
+                String path = getPath(
+                        "Enter the full path and file name without extension:"
+                );
+
+                try {
+                    controller.loadState(path);
+                    System.out.println("System state loaded successfully.");
+                } catch (Exception e) {
+                    System.out.println(
+                            "Error occurred while loading system state: " + e.getMessage()
+                    );
+                }
+            }
             case EXIT -> {
                 System.out.println("Exiting program...");
             }
         }
+    }
+
+    private void participateUntilSuccessful(int eventID, int optionNumber, int shares, Scanner input) {
+        boolean participatedSuccessfully = false;
+
+
+        while (!participatedSuccessfully) {
+            try {
+                PurchaseDTO purchase = controller.participateInEvent(eventID, optionNumber, shares);
+                participatedSuccessfully = true;
+                displayDetailsAfterPurchase(purchase, eventID);
+            } catch (Exception e) {
+                System.out.println("Error occurred while participating in event: " + e.getMessage());
+                optionNumber = getOptionNumber(input);
+                shares = getSharesAmount(input);
+            }
+        }
+    }
+
+    private int getOptionNumber(Scanner input) {
+        System.out.print("Choose option number to participate in: ");
+        return input.nextInt();
+    }
+
+    private int getSharesAmount(Scanner input) {
+        System.out.print("Choose amount of shares to buy: ");
+        return input.nextInt();
     }
 
     private void displayDetailsAfterPurchase(PurchaseDTO purchase, int eventID) {
@@ -344,7 +379,7 @@ public final class UI {
     }
 
 
-    static void main() {
+    public static void main(String[] args) {
         UI myUI = new UI();
         myUI.run();
     }

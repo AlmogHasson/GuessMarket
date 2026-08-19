@@ -6,9 +6,15 @@ import generated.GuessMarket;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 public class EngineImpl implements Engine {
     List<Event> events;
@@ -55,14 +61,15 @@ public class EngineImpl implements Engine {
     public Purchase participateInEvent(int eventId, int optionNumber, int shares) {
         Event event = events.stream().filter(e -> e.getId() == eventId).findFirst().orElse(null);
 
+        if (event == null) {
+            throw new IllegalArgumentException("Event with ID " + eventId + " not found");
+        }
+
         if (!event.isOpen()){
             return null;
         }
 
-        if (event == null) {
-            throw new IllegalArgumentException("Event with ID " + eventId + " not found");
-        }
-        if (optionNumber < 0 || optionNumber > event.getOptions().size()) {
+        if (optionNumber < 1 || optionNumber > event.getOptions().size()) {
             throw new IllegalArgumentException("Invalid option number: " + optionNumber);
         }
         if (shares <= 0) {
@@ -149,4 +156,29 @@ public class EngineImpl implements Engine {
         return gmEvent.stream().map(GMEvent::getId).distinct().count() == gmEvent.size();
     }
 
+    @Override
+    public void saveState(String path) throws IOException {
+        try (ObjectOutputStream out =
+                     new ObjectOutputStream(
+                             new FileOutputStream(path + ".gm"))) {
+
+            out.writeObject(events);
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void loadState(String path) throws IOException, ClassNotFoundException {
+        List<Event> loadedEvents;
+
+        try (ObjectInputStream in =
+                     new ObjectInputStream(
+                             new FileInputStream(path + ".gm"))) {
+
+            loadedEvents = (List<Event>) in.readObject();
+        }
+
+        events = loadedEvents;
+
+    }
 }

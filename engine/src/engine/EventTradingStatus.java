@@ -2,8 +2,11 @@ package engine;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.Serializable;
 
-public class EventTradingStatus {
+public class EventTradingStatus implements Serializable {
+    private static final long serialVersionUID = 1L;
+
         private String eventName;
         private boolean isOpen;
         private List<Option> options;

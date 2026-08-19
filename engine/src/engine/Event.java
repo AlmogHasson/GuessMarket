@@ -5,7 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Event {
+import java.io.Serializable;
+
+public class Event implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private int id;
     private String description;
     private Comission comission;
@@ -13,6 +17,7 @@ public class Event {
     private Method method;
     private String name;
     EventTradingStatus eventTradingStatus;
+
 
 
     //get the event from schema and load it

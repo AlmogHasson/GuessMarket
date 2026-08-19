@@ -8,6 +8,7 @@ import engine.EngineImpl;
 
 import java.util.List;
 import java.util.Optional;
+import java.io.IOException;
 
 public class GMController {
     private Engine engine = new EngineImpl();
@@ -34,6 +35,15 @@ public class GMController {
 
     public boolean isFileLoaded() {
         return engine.getEvents() != null && !engine.getEvents().isEmpty();
+    }
+
+    //bonus: save and load the state of the engine to a file
+    public void saveState(String path) throws IOException {
+        engine.saveState(path);
+    }
+
+    public void loadState(String path) throws IOException, ClassNotFoundException {
+        engine.loadState(path);
     }
 
 }

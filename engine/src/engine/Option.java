@@ -1,6 +1,12 @@
 package engine;
 
-public class Option {
+import java.io.Serial;
+import java.io.Serializable;
+
+public class Option implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private String optionName;
     private float currentValue;   // 0..1
     private int totalSharesBought;

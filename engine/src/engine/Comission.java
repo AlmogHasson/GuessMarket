@@ -1,8 +1,11 @@
 package engine;
 
 import generated.Comision;
+import java.io.Serializable;
 
-public class Comission {
+public class Comission implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private int value;
     private String type;
 

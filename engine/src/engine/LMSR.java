@@ -1,6 +1,12 @@
 package engine;
 
-public class LMSR {
+import java.io.Serial;
+import java.io.Serializable;
+
+public class LMSR implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private final int b;
 
     public LMSR(int b) {
