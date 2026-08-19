@@ -63,8 +63,8 @@ public final class UI {
     }
 
     private void executeOption(MenuOption option) {
-
         boolean loaded = controller.isFileLoaded();
+
         if (option != MenuOption.LOAD_FILE && !loaded && option != MenuOption.LOAD_STATE) {
             System.out.println("No file loaded. Please load a file first.");
             return;
@@ -73,7 +73,6 @@ public final class UI {
         switch (option){
 
             case LOAD_FILE -> {
-
                 while (!loaded) { //loop until a valid file is loaded
                     try {
                         controller.loadFile(getPath("Please input a valid file path:"));
@@ -149,14 +148,20 @@ public final class UI {
                 String path = getPath(
                         "Enter the full path and file name without extension:"
                 );
-
-                try {
-                    controller.loadState(path);
-                    System.out.println("System state loaded successfully.");
-                } catch (Exception e) {
-                    System.out.println(
-                            "Error occurred while loading system state: " + e.getMessage()
-                    );
+                boolean isFileStateLoaded = false;
+                while (!isFileStateLoaded) {
+                    try {
+                        controller.loadState(path);
+                        System.out.println("System state loaded successfully.");
+                        isFileStateLoaded = true;
+                    } catch (Exception e) {
+                        System.out.println(
+                                "Error occurred while loading system state: "
+                                        + e.getMessage() +
+                                        "Please try again"
+                        );
+                        path = getPath("Enter the full path and file name without extension:");
+                    }
                 }
             }
             case EXIT -> {
@@ -389,20 +394,20 @@ private void run() {
         displayMenu();
         while (true) {
             String option = input.next().trim();
-            if (option.equalsIgnoreCase("back")) {
-                displayMenu(); continue;
-            }
-            if (option.equalsIgnoreCase("exit") || option.equals(String.valueOf(MenuOption.EXIT.value)))
+
+            if (option.equals(String.valueOf(MenuOption.EXIT.value)))
                 break;
+
             boolean validNumber;
+
             try {
-                validNumber = intToMenuOption(Integer.parseInt(option)) != null;
+                validNumber = (intToMenuOption(Integer.parseInt(option)) != null);
             }
             catch (NumberFormatException e) {
                 validNumber = false;
             }
             if (!validNumber) {
-                System.out.println("Invalid input. Type BACK to show the menu.");
+                System.out.println("Invalid input.");
                 displayMenu(); continue;
             }
             executeOption(intToMenuOption(Integer.parseInt(option)));
