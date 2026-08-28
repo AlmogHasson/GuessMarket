@@ -1,0 +1,154 @@
+.root {
+    -fx-font-family: "Segoe UI";
+    -fx-background-color: #f6f7f9;
+}
+
+/* ---------- TOP ---------- */
+
+.label {
+    -fx-text-fill: #1f2937;
+}
+
+.button {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #1d4ed8;
+}
+
+.progress-bar {
+    -fx-pref-height: 6;
+}
+
+.progress-bar > .track {
+    -fx-background-color: #e5e7eb;
+    -fx-background-radius: 10;
+}
+
+.progress-bar > .bar {
+    -fx-background-color: #2563eb;
+    -fx-background-radius: 10;
+}
+
+
+/* ---------- TABS ---------- */
+
+.tab-pane {
+    -fx-background-color: transparent;
+}
+
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.tab {
+    -fx-background-color: transparent;
+    -fx-padding: 8 16;
+}
+
+.tab:selected {
+    -fx-background-color: white;
+    -fx-background-radius: 8 8 0 0;
+}
+
+.tab .tab-label {
+    -fx-text-fill: #6b7280;
+    -fx-font-weight: normal;
+}
+
+.tab:selected .tab-label {
+    -fx-text-fill: #111827;
+    -fx-font-weight: bold;
+}
+
+
+/* ---------- COMBO BOX ---------- */
+
+.combo-box {
+    -fx-background-color: white;
+    -fx-border-color: #d1d5db;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-padding: 2 4;
+}
+
+.combo-box:hover {
+    -fx-border-color: #9ca3af;
+}
+
+
+/* ---------- TABLE ---------- */
+
+.table-view {
+    -fx-background-color: white;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #f9fafb;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #e5e7eb transparent;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #374151;
+    -fx-font-weight: bold;
+}
+
+.table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #f3f4f6 transparent;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #dbeafe;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #f9fafb;
+}
+
+.table-cell {
+    -fx-border-color: transparent;
+    -fx-padding: 8;
+}
+
+
+/* ---------- SPLIT PANE ---------- */
+
+.split-pane {
+    -fx-background-color: transparent;
+    -fx-padding: 10;
+}
+
+.split-pane-divider {
+    -fx-background-color: #e5e7eb;
+    -fx-padding: 1;
+}
+
+
+/* ---------- SCROLL BAR ---------- */
+
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #d1d5db;
+    -fx-background-radius: 10;
+}
+
+.scroll-bar .track {
+    -fx-background-color: transparent;
+}

@@ -8,5 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="controller" />
+    <orderEntry type="library" name="javafx-25-sdk" level="project" />
   </component>
 </module>
