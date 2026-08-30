@@ -1,6 +1,7 @@
 package engine;
 
 import generated.GMEvent;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -19,21 +20,22 @@ public class Event implements Serializable {
     EventTradingStatus eventTradingStatus;
 
 
-
     //get the event from schema and load it
     public Event(GMEvent event) {
         this.id = event.getId();
         this.description = event.getDescription();
-        this.comission = new Comission(event.getComision());
+        this.comission = new Comission(event.getCommission());
         this.options = new ArrayList<>();
         event.getGMOptions().getGMOption().forEach(option ->
                 this.options.add(new Option(option))
         );
-        this.method = new Method(event.getGMMethod());
-        this.name = String.join(", ", event.getName());
+        this.method = event.getGMMethod().getGMLMSR() != null
+                ? new LMSR(event.getGMMethod().getGMLMSR().getB())
+                : new OrderBook(event.getGMMethod().getGMOrderBook().getD());
+        this.name = String.join(" ", event.getName());
         this.eventTradingStatus = new EventTradingStatus(
                 this.name, this.options,
-                method.getLmsr().calculateBalance(
+                method.calculateBalance(
                         options.get(0).getTotalSharesBought(),
                         options.get(1).getTotalSharesBought())
         );
@@ -114,7 +116,7 @@ public class Event implements Serializable {
     }
 
     private void updateOptionsValues() {
-        float firstOptionValue = method.getLmsr().calculateOptionValue(
+        float firstOptionValue = method.calculateOptionValue(
                 options.get(0).getTotalSharesBought(),
                 options.get(1).getTotalSharesBought()
         );
@@ -125,7 +127,7 @@ public class Event implements Serializable {
 
 
     private float getBalance() {
-        return method.getLmsr().calculateBalance(
+        return method.calculateBalance(
                 options.get(0).getTotalSharesBought(),
                 options.get(1).getTotalSharesBought()
         );

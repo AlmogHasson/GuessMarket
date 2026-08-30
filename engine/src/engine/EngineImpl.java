@@ -9,7 +9,6 @@ import jakarta.xml.bind.JAXBException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -112,7 +111,7 @@ public class EngineImpl implements Engine {
     private void validateCommissions(GuessMarket guessMarket) {
         var invalidIds = guessMarket.getGMEvents().getGMEvent().stream()
                 .filter(e -> {
-                    int commission = e.getCommission();
+                    int commission = e.getCommission().getValue();
                     return commission < 0 || commission > 90;
                 })
                 .map(GMEvent::getId)

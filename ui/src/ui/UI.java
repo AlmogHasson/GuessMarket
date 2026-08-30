@@ -356,8 +356,8 @@ public final class UI {
             System.out.printf("%-14s: %s%n", "Name", name);
             System.out.printf("%-14s: %s%n", "Description", event.getDescription() == null ? "" : event.getDescription());
             var c = event.getCommission();             if (c != null) System.out.printf("%-14s: %s%n", "Commission", String.format("%d%% (%s)", c.value(), c.type()));
-            if (event.getMethod() != null && event.getMethod().lmsr() != null)
-                System.out.printf("%-14s: %d%n", "LMSR b", event.getMethod().lmsr().getB());
+            if (event.getMethod() != null && event.getMethod().getName() != null)
+                System.out.printf("%-14s: %d%n", "LMSR b", event.getMethod().getValue());
             System.out.println();
             System.out.println("---- Options ----");
             System.out.printf("%-4s %-54s%n", "#", "Option");

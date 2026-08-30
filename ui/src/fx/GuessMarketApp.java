@@ -13,8 +13,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class GuessMarketApp extends Application {
-    private final GMController controller = new GMController();    //engine
-    //gui controller
+
 
 
     @Override

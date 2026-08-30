@@ -11,5 +11,4 @@ public record CommissionDTO(
         this(comission.getValue(), comission.getType());
 
     }
-
 }

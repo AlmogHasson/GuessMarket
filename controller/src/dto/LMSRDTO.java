@@ -4,14 +4,18 @@ import engine.LMSR;
 
 public record LMSRDTO(
         int b
-) {
-    // Constructor to create dto.LMSRDTO from LMSR
+) implements MethodDTO {
+
+    // Constructor to create LMSRDTO from LMSR
     public LMSRDTO(LMSR lmsr) {
-        this(lmsr.getB());
+        this(lmsr.getValue());
     }
 
-    //getters
-    public int getB() {
+    @Override
+    public int getValue() {
         return b;
     }
+
+    @Override
+    public String getName() { return "lmsr";}
 }

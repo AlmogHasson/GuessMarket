@@ -18,7 +18,9 @@ public record EventSummaryDTO( // record = immutable data class
             event.getDescription(),
             new CommissionDTO(event.getComission()),
             event.getOptions().stream().map(OptionDTO::new).toList(),
-            new MethodDTO(new LMSRDTO(event.getMethod().getLmsr())),
+            (event.getMethod() instanceof engine.LMSR
+            ? new LMSRDTO((engine.LMSR) event.getMethod())
+            : new OrderBookDTO((engine.OrderBook) event.getMethod())),
             event.getName(),
             event.getEventTradingStatus().isOpen()
         );

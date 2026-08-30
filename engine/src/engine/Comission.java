@@ -1,6 +1,7 @@
 package engine;
 
-import generated.Comision;
+import generated.Commission;
+
 import java.io.Serializable;
 
 public class Comission implements Serializable {
@@ -9,9 +10,9 @@ public class Comission implements Serializable {
     private int value;
     private String type;
 
-    public Comission(Comision comision) {
-        this.value = comision.getValue();
-        this.type = comision.getType();
+    public Comission(Commission commission) {
+        this.value = commission.getValue();
+        this.type = commission.getType();
     }
     //getters
     public int getValue() {
