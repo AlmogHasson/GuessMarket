@@ -96,7 +96,7 @@ public class EngineImpl implements Engine {
 
 
         float winningShares = event.getOptions().get(winningOption-1).getTotalSharesBought();
-        String commissionType = event.getComission().getType();
+        String commissionType = event.getComission().getCommissionType();
         float commission = commissionType.equals("on-close")
                 ? winningShares * event.getComission().getValue() / 100 : 0.0f;
 

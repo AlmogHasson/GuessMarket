@@ -8,17 +8,17 @@ public class Comission implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private int value;
-    private String type;
+    private String commissionType;
 
     public Comission(Commission commission) {
         this.value = commission.getValue();
-        this.type = commission.getType();
+        this.commissionType = commission.getType();
     }
     //getters
     public int getValue() {
         return value;
     }
-    public String getType() {
-        return type;
+    public String getCommissionType() {
+        return commissionType;
     }
 }

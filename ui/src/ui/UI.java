@@ -5,9 +5,7 @@ import dto.EventTradingStatusDTO;
 import dto.PurchaseDTO;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Scanner;
-import java.util.stream.Stream;
 
 public final class UI {
     private enum MenuOption {
@@ -355,7 +353,7 @@ public final class UI {
             String name = event.getName() == null ? "" : event.getName().replace(", ", " ");
             System.out.printf("%-14s: %s%n", "Name", name);
             System.out.printf("%-14s: %s%n", "Description", event.getDescription() == null ? "" : event.getDescription());
-            var c = event.getCommission();             if (c != null) System.out.printf("%-14s: %s%n", "Commission", String.format("%d%% (%s)", c.value(), c.type()));
+            var c = event.getCommission();             if (c != null) System.out.printf("%-14s: %s%n", "Commission", String.format("%d%% (%s)", c.value(), c.commissionType()));
             if (event.getMethod() != null && event.getMethod().getName() != null)
                 System.out.printf("%-14s: %d%n", "LMSR b", event.getMethod().getValue());
             System.out.println();

@@ -90,7 +90,7 @@ public class Event implements Serializable {
         // commission is charged only for on-purchase commission type
         float commissionCost = 0.0f;
 
-        if (Objects.equals(comission.getType(), "on-purchase")) {
+        if (Objects.equals(comission.getCommissionType(), "on-purchase")) {
             commissionCost = sharesCost * comission.getValue() / 100;
         }
 

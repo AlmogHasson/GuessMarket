@@ -4,11 +4,11 @@ import engine.Comission;
 
 public record CommissionDTO(
         int value,
-        String type
+        String commissionType
 )
 {
     public CommissionDTO(Comission comission) {
-        this(comission.getValue(), comission.getType());
+        this(comission.getValue(), comission.getCommissionType());
 
     }
 }
