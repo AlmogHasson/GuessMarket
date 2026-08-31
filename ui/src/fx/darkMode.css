@@ -1,0 +1,367 @@
+/* ============================================================
+   GuessMarket - Visual Studio 2022 Dark theme (purple accent)
+   Mirrors every selector in style.css
+   ============================================================ */
+
+.root {
+    -fx-font-family: "Segoe UI";
+    -fx-background-color: #2d2d30;
+
+    /* Flip Modena's own defaults so anything not styled below
+       (dialogs, tooltips, context menus) comes out dark too. */
+    -fx-base: #252526;
+    -fx-background: #2d2d30;
+    -fx-control-inner-background: #252526;
+    -fx-text-background-color: #f1f1f1;
+    -fx-accent: #a252c8;
+    -fx-focus-color: #c586e0;
+    -fx-faint-focus-color: #c586e022;
+    -fx-selection-bar: #5c2d91;
+    -fx-selection-bar-non-focused: #3f2a52;
+}
+
+/* ---------- TOP ---------- */
+
+.label {
+    -fx-text-fill: #f1f1f1;
+}
+
+.button {
+    -fx-background-color: #a252c8;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #b76fd8;
+}
+
+.button:pressed {
+    -fx-background-color: #8a3fae;
+}
+
+.button:disabled {
+    -fx-background-color: #3f3f46;
+    -fx-text-fill: #7a7a7a;
+    -fx-opacity: 1;
+}
+
+.progress-bar {
+    -fx-min-height: 10;
+    -fx-pref-height: 10;
+    -fx-max-height: 10;
+}
+
+.progress-bar > .track {
+    -fx-background-color: #3f3f46;
+    -fx-background-insets: 0;
+    -fx-background-radius: 10;
+}
+
+.progress-bar > .bar {
+    -fx-background-color: linear-gradient(to right, #68217a, #c586e0);
+    -fx-background-insets: 0;
+    -fx-background-radius: 10;
+    -fx-padding: 0;
+}
+
+/* ---------- TABS ---------- */
+
+.tab-pane {
+    -fx-background-color: transparent;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.tab-pane > .tab-header-area {
+    -fx-padding: 0 0 -1 8;
+}
+
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: #2d2d30;
+}
+
+.tab {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-padding: 8 16;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.tab .tab-label {
+    -fx-text-fill: #9b9b9b;
+    -fx-font-weight: normal;
+}
+
+.tab:hover .tab-label {
+    -fx-text-fill: #f1f1f1;
+}
+
+.tab:selected {
+    -fx-background-color: #252526;
+
+    /* round only top corners */
+    -fx-background-radius: 8 8 0 0;
+
+    /* accent strip along the top, VS Code style */
+    -fx-border-color: #c586e0 transparent transparent transparent;
+    -fx-border-width: 2 0 0 0;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.tab:selected .tab-label {
+    -fx-text-fill: #c586e0;
+    -fx-font-weight: bold;
+}
+
+/* Content attached directly to selected tab */
+.tab-pane > .tab-content-area {
+    -fx-background-color: #252526;
+    -fx-background-radius: 8;
+}
+
+/* ---------- COMBO BOX ---------- */
+
+.combo-box {
+    -fx-background-color: #3f3f46;
+    -fx-border-color: #54545c;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-padding: 2 4;
+}
+
+.combo-box:hover {
+    -fx-border-color: #c586e0;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: #f1f1f1;
+    -fx-background-color: transparent;
+}
+
+.combo-box .arrow,
+.combo-box .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.combo-box .arrow {
+    -fx-background-color: #9b9b9b;
+}
+
+/* the drop-down popup is a separate scene graph - it needs its own rules */
+.combo-box-popup .list-view {
+    -fx-background-color: #252526;
+    -fx-border-color: #54545c;
+    -fx-background-radius: 7;
+    -fx-border-radius: 7;
+}
+
+.combo-box-popup .list-view .list-cell {
+    -fx-background-color: #252526;
+    -fx-text-fill: #f1f1f1;
+    -fx-padding: 6 10;
+}
+
+.combo-box-popup .list-view .list-cell:filled:hover {
+    -fx-background-color: #3f3f46;
+    -fx-text-fill: #ffffff;
+}
+
+.combo-box-popup .list-view .list-cell:filled:selected {
+    -fx-background-color: #5c2d91;
+    -fx-text-fill: #ffffff;
+}
+
+/* ---------- TABLE ---------- */
+
+.table-view {
+    -fx-background-color: #1e1e1e;
+    -fx-border-color: #3f3f46;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-table-cell-border-color: transparent;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #333337;
+    -fx-background-radius: 8 8 0 0;
+}
+
+/* the empty strip right of the last column */
+.table-view .column-header-background .filler {
+    -fx-background-color: #333337;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #3f3f46 transparent;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #c586e0;
+    -fx-font-weight: bold;
+}
+
+.table-row-cell {
+    -fx-background-color: #1e1e1e;
+    -fx-border-color: transparent transparent #333337 transparent;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #2a2a2d;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #5c2d91;
+}
+
+/* Keep selected row purple even when hovered */
+.table-row-cell:selected:hover {
+    -fx-background-color: #5c2d91;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #3f3f46;
+}
+
+.table-row-cell .table-cell {
+    -fx-text-fill: #f1f1f1;
+}
+
+.table-row-cell:selected .table-cell {
+    -fx-text-fill: #ffffff;
+}
+
+.table-cell {
+    -fx-border-color: transparent;
+    -fx-padding: 8;
+}
+
+/* "No content in table" text */
+.table-view .placeholder .label {
+    -fx-text-fill: #9b9b9b;
+}
+
+/* ---------- SPLIT PANE ---------- */
+
+.split-pane {
+    -fx-background-color: transparent;
+    -fx-padding: 10;
+}
+
+.split-pane-divider {
+    -fx-background-color: #3f3f46;
+    -fx-padding: 1;
+}
+
+.split-pane-divider:hover {
+    -fx-background-color: #c586e0;
+}
+
+/* ---------- SCROLL BAR ---------- */
+
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #54545c;
+    -fx-background-radius: 10;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #6a6a75;
+}
+
+.scroll-bar .track {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-opacity: 0;
+    -fx-padding: 0;
+}
+
+.scroll-pane,
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* ---------- DIALOGS ---------- */
+
+.dialog-pane {
+    -fx-background-color: #252526;
+}
+
+.dialog-pane .label,
+.dialog-pane .content .label,
+.dialog-pane .header-panel .label {
+    -fx-text-fill: #f1f1f1;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: #333337;
+}
+
+/* ---------- COMPONENT CLASSES (moved out of main.fxml) ---------- */
+
+.card {
+    -fx-background-color: #252526;
+    -fx-background-radius: 10;
+    -fx-border-color: #3f3f46;
+    -fx-border-radius: 10;
+}
+
+.transparent {
+    -fx-background-color: transparent;
+}
+
+.rounded {
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+}
+
+.brand-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #c586e0;
+}
+
+.page-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f1f1f1;
+}
+
+.section-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f1f1f1;
+}
+
+.subsection-title {
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f1f1f1;
+}
+
+.muted {
+    -fx-text-fill: #9b9b9b;
+}
+
+.strong {
+    -fx-font-weight: bold;
+    -fx-text-fill: #f1f1f1;
+}
+
+.primary-button {
+    -fx-font-size: 15px;
+}

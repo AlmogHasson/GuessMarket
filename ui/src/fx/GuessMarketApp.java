@@ -24,7 +24,7 @@ public class GuessMarketApp extends Application {
 
         scene.getStylesheets().add(
                 GuessMarketApp.class
-                        .getResource("style.css")
+                        .getResource("darkMode.css")
                         .toExternalForm()
         );
 
@@ -38,6 +38,5 @@ public class GuessMarketApp extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
 
 }

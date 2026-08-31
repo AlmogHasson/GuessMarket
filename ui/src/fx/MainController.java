@@ -12,6 +12,7 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -26,6 +27,12 @@ public class MainController {
     private final GMController controller = new GMController();    //engine controller
 
     private BooleanProperty fileLoadedProperty;
+
+    @FXML
+    private ComboBox<String> themeComboBox;
+
+    @FXML
+    private BorderPane rootPane;
 
     @FXML
     private Label balance;
@@ -417,6 +424,11 @@ public class MainController {
     @FXML
     void onCommissionTypeFilterChanged(ActionEvent event) {
         filterEvents();
+    }
+
+    @FXML
+    void setTheme(ActionEvent event) {
+
     }
 
 }
