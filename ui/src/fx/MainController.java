@@ -2,6 +2,7 @@ package fx;
 
 import api.GMController;
 import dto.*;
+import javafx.animation.FadeTransition;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -13,13 +14,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.util.Duration;
 import javafx.util.StringConverter;
-
 import java.io.File;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -202,6 +201,83 @@ public class MainController {
     @FXML
     private TableView<?> usersTable;
 
+    private record LmsrPricingRow(
+            String option,
+            String price,
+            String probability,
+            String sharesBought
+    ) {
+    }
+
+    private record LmsrTradeRow(
+            String option,
+            String quantity,
+            String totalPaid
+    ) {
+    }
+
+//    ----------- added for testing purposes -----------
+
+    @FXML
+    private Label eventDetailsTitle;
+
+    @FXML
+    private VBox option1Section;
+
+    @FXML
+    private VBox option2Section;
+
+    @FXML
+    private VBox detailsCard;
+
+    @FXML
+    private VBox orderBookParticipationPane;
+
+    @FXML
+    private VBox lmsrDetailsPane;
+
+
+    @FXML
+    private Label lmsrEventName;
+
+    @FXML
+    private Label lmsrStatus;
+
+    @FXML
+    private Label lmsrAccountBalance;
+
+    @FXML
+    private Label lmsrTotalCommissionPaid;
+
+
+    @FXML
+    private TableView<OptionDTO> lmsrOptionsTable;
+
+    @FXML
+    private TableColumn<OptionDTO, String> lmsrOptionNameCol;
+
+    @FXML
+    private TableColumn<OptionDTO, String> lmsrCurrentValueCol;
+
+    @FXML
+    private TableColumn<OptionDTO, Number> lmsrTotalSharesCol;
+
+
+    @FXML
+    private TableView<TradeDTO> lmsrTradesTable;
+
+    @FXML
+    private TableColumn<TradeDTO, String> lmsrTradeOptionCol;
+
+    @FXML
+    private TableColumn<TradeDTO, Number> lmsrTradeSharesCol;
+
+    @FXML
+    private TableColumn<TradeDTO, String> lmsrTradePriceCol;
+
+//    ----------------------------------------------
+
+
     @FXML
     void loadFile(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
@@ -282,49 +358,51 @@ public class MainController {
     @FXML
     public void initialize() {
         initFilters();
+        themeComboBox.getItems().add("Dark");
+        themeComboBox.getItems().add("Light");
         eventsTable.getSelectionModel().selectedItemProperty().addListener((
                 obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 // Load event details into the UI
                 EventTradingStatusDTO singleEvent = controller.getEventTradingStatus(newSelection.getId());
-                displayEventDetails(singleEvent);
+//                displayEventDetails(singleEvent);
             }
         });
     }
 
-    private void displayEventDetails(EventTradingStatusDTO singleEvent) {
-        displayOptionDetails(singleEvent.optionTradingStatus().getFirst(), option1VBox, option1Label,
-                singleEvent.tradingHistory().stream()
-                        .filter(trade ->
-                                Objects.equals(trade.optionName(), singleEvent.optionTradingStatus().getFirst().optionName()))
-                        .toList());
-        displayOptionDetails(singleEvent.optionTradingStatus().get(1), option2VBox, option2Label,
-                singleEvent.tradingHistory().stream().
-                        filter(trade ->
-                                Objects.equals(trade.optionName(), singleEvent.optionTradingStatus().get(1).optionName()))
-                        .toList());
-    }
+//    private void displayEventDetails(EventTradingStatusDTO singleEvent) {
+//        displayOptionDetails(singleEvent.optionTradingStatus().getFirst(), option1VBox, option1Label,
+//                singleEvent.tradingHistory().stream()
+//                        .filter(trade ->
+//                                Objects.equals(trade.optionName(), singleEvent.optionTradingStatus().getFirst().optionName()))
+//                        .toList());
+//        displayOptionDetails(singleEvent.optionTradingStatus().get(1), option2VBox, option2Label,
+//                singleEvent.tradingHistory().stream().
+//                        filter(trade ->
+//                                Objects.equals(trade.optionName(), singleEvent.optionTradingStatus().get(1).optionName()))
+//                        .toList());
+//    }
 
-    private void displayOptionDetails(
-            OptionDTO option, VBox optionBox,
-            Label optionLabel, List<TradeDTO> trades)
-    {
-        ObservableList<TradeDTO> tradesList =
-                javafx.collections.FXCollections.observableArrayList(trades);
-
-
-        optionLabel.setText(option.getOptionName());
-        HBox hBox = (HBox) optionBox.getChildren().getFirst();
-        ((Label) hBox.getChildren().get(1)).setText(String.valueOf(option.getCurrentValue()));
-        ((Label) hBox.getChildren().get(3)).setText(String.valueOf(option.getTotalSharesBought()));
-        option1PaidCol.setCellValueFactory(c->
-                new ReadOnlyObjectWrapper<>(c.getValue().pricePaid()));
-        option1SharesCol.setCellValueFactory(c ->
-                new ReadOnlyObjectWrapper<>(c.getValue().sharesBought()));
-        //TODO::enable when we have users
-//        option1UserCol.setCellValueFactory(c ->
-//                new ReadOnlyStringWrapper(c.getValue().getUserName()));
-    }
+//    private void displayOptionDetails(
+//            OptionDTO option, VBox optionBox,
+//            Label optionLabel, List<TradeDTO> trades)
+//    {
+//        ObservableList<TradeDTO> tradesList =
+//                javafx.collections.FXCollections.observableArrayList(trades);
+//
+//
+//        optionLabel.setText(option.getOptionName());
+//        HBox hBox = (HBox) optionBox.getChildren().getFirst();
+//        ((Label) hBox.getChildren().get(1)).setText(String.valueOf(option.getCurrentValue()));
+//        ((Label) hBox.getChildren().get(3)).setText(String.valueOf(option.getTotalSharesBought()));
+//        option1PaidCol.setCellValueFactory(c->
+//                new ReadOnlyObjectWrapper<>(c.getValue().pricePaid()));
+//        option1SharesCol.setCellValueFactory(c ->
+//                new ReadOnlyObjectWrapper<>(c.getValue().sharesBought()));
+//        //TODO::enable when we have users
+////        option1UserCol.setCellValueFactory(c ->
+////                new ReadOnlyStringWrapper(c.getValue().getUserName()));
+//    }
 
     private void initFilters() {
         fileLoadedProperty = new SimpleBooleanProperty(false);
@@ -370,7 +448,7 @@ public class MainController {
             protected Void call() throws Exception {
                 for (int i = 0; i <= 100; i++) {
                     updateProgress(i, 100);
-                    Thread.sleep(20);
+                    Thread.sleep(15);
                 }
                 controller.loadFile(xmlFilePath);
                 return null;
@@ -426,9 +504,29 @@ public class MainController {
         filterEvents();
     }
 
+    // add theme changing animation of 2 seconds
     @FXML
+
     void setTheme(ActionEvent event) {
+        String selectedTheme = themeComboBox.getValue().toLowerCase();
 
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(250), rootPane);
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0.0);
+
+        fadeOut.setOnFinished(e -> {
+            rootPane.getStylesheets().setAll(
+                    Objects.requireNonNull(
+                            getClass().getResource("themes/" + selectedTheme + ".css")
+                    ).toExternalForm()
+            );
+
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(250), rootPane);
+            fadeIn.setFromValue(0.0);
+            fadeIn.setToValue(1.0);
+            fadeIn.play();
+        });
+
+        fadeOut.play();
     }
-
 }
