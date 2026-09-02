@@ -8,7 +8,7 @@ public class Option implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String optionName;
-    private float currentValue;   // 0..1
+    private double currentValue;   // 0..1
     private int totalSharesBought;
     boolean isWinner;
 
@@ -24,7 +24,7 @@ public class Option implements Serializable {
         return optionName;
     }
 
-    public float getCurrentValue() {
+    public double getCurrentValue() {
         return currentValue;
     }
 
@@ -36,7 +36,7 @@ public class Option implements Serializable {
         totalSharesBought += shares;
     }
 
-    public void updateValue(float newValue) {
+    public void updateValue(double newValue) {
         currentValue = newValue;
     }
 

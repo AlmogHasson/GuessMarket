@@ -77,24 +77,24 @@ public class Event implements Serializable {
 
         Option option = options.get(optionNumber - 1);
 
-        float beforeBalance = getBalance();
+        double beforeBalance = getBalance();
 
         // update shares
         option.buyShares(shares);
 
-        float afterBalance = getBalance();
+        double afterBalance = getBalance();
 
         // cost of the shares themselves
-        float sharesCost = afterBalance - beforeBalance;
+        double sharesCost = afterBalance - beforeBalance;
 
         // commission is charged only for on-purchase commission type
-        float commissionCost = 0.0f;
+        double commissionCost = 0.0f;
 
         if (Objects.equals(comission.getCommissionType(), "on-purchase")) {
             commissionCost = sharesCost * comission.getValue() / 100;
         }
 
-        float totalCost = sharesCost + commissionCost;
+        double totalCost = sharesCost + commissionCost;
 
         EventTradingStatus event = getEventTradingStatus();
 
@@ -116,7 +116,7 @@ public class Event implements Serializable {
     }
 
     private void updateOptionsValues() {
-        float firstOptionValue = method.calculateOptionValue(
+        double firstOptionValue = method.calculateOptionValue(
                 options.get(0).getTotalSharesBought(),
                 options.get(1).getTotalSharesBought()
         );
@@ -126,7 +126,7 @@ public class Event implements Serializable {
     }
 
 
-    private float getBalance() {
+    private double getBalance() {
         return method.calculateBalance(
                 options.get(0).getTotalSharesBought(),
                 options.get(1).getTotalSharesBought()

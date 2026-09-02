@@ -13,7 +13,7 @@ public class GuessMarketApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(GuessMarketApp.class.getResource("mainmain.fxml"));
+        FXMLLoader loader = new FXMLLoader(GuessMarketApp.class.getResource("main.fxml"));
 
         Scene scene = new Scene(loader.load(), 1200, 700);
 
@@ -35,3 +35,8 @@ public class GuessMarketApp extends Application {
     }
 
 }
+
+
+//TODO:: check if the icon on the window can be changed - if so put a graph or a coin icon
+//TODO:: check if the top of the window can also be styled
+//TODO:: make it possible to disable animations throughout the app

@@ -5,7 +5,7 @@ import engine.Trade;
 public record TradeDTO(
         String optionName,
         int sharesBought,
-        float pricePaid
+        double pricePaid
     )
 {
     public TradeDTO (Trade trade) {

@@ -3,9 +3,9 @@ package dto;
 import engine.Purchase;
 
 public record PurchaseDTO(
-        float totalPaid,
-        float sharePaid,
-        float commissionPaid
+        double totalPaid,
+        double sharePaid,
+        double commissionPaid
         )
 {
         public PurchaseDTO(Purchase p) {

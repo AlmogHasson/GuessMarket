@@ -37,6 +37,7 @@ public class EngineImpl implements Engine {
     }
 
     private void loadEvents(GuessMarket guessMarket) {
+        events.clear();
         guessMarket.getGMEvents().getGMEvent().forEach(gmEvent -> {
             events.add(new Event(gmEvent));
         });
@@ -95,14 +96,15 @@ public class EngineImpl implements Engine {
         event.getOptions().get(winningOption-1).setWinner();
 
 
-        float winningShares = event.getOptions().get(winningOption-1).getTotalSharesBought();
+
+        double winningShares = event.getOptions().get(winningOption-1).getTotalSharesBought();
         String commissionType = event.getComission().getCommissionType();
-        float commission = commissionType.equals("on-close")
-                ? winningShares * event.getComission().getValue() / 100 : 0.0f;
+        double commission = commissionType.equals("on-close")
+                ? winningShares * event.getComission().getValue() / 100 : 0.0;
 
         ETS.updateTotalCommissionPaid(ETS.getTotalCommissionPaid() + commission);
 
-        float payOut = winningShares - commission;
+        double payOut = winningShares - commission;
         ETS.updateAccountBalance(ETS.getAccountBalance() - payOut);
 
     }

@@ -13,12 +13,12 @@ public class OrderBook implements Method{
     }
 
     @Override
-    public float calculateOptionValue(int firstOptionShares, int secondOptionShares) {
+    public double calculateOptionValue(int firstOptionShares, int secondOptionShares) {
         return 0;
     }
 
     @Override
-    public float calculateBalance(int totalSharesBought, int totalSharesBought1) {
+    public double calculateBalance(int totalSharesBought, int totalSharesBought1) {
         return 0;
     }
 }

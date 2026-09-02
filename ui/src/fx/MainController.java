@@ -3,6 +3,10 @@ package fx;
 import api.GMController;
 import dto.*;
 import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
+import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -13,12 +17,13 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 import java.io.File;
+import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -88,7 +93,7 @@ public class MainController {
     private Label option1Label;
 
     @FXML
-    private TableColumn<TradeDTO, Float> option1PaidCol;
+    private TableColumn<TradeDTO, Double> option1PaidCol;
 
     @FXML
     private Label option1Shares;
@@ -216,67 +221,47 @@ public class MainController {
     ) {
     }
 
-//    ----------- added for testing purposes -----------
-
     @FXML
-    private Label eventDetailsTitle;
+    private StackPane eventDetailsContent;
 
-    @FXML
-    private VBox option1Section;
-
-    @FXML
-    private VBox option2Section;
-
-    @FXML
-    private VBox detailsCard;
-
-    @FXML
-    private VBox orderBookParticipationPane;
-
-    @FXML
-    private VBox lmsrDetailsPane;
+    @FXML private GridPane orderBookDetailsPane;
+    @FXML private VBox lmsrDetailsPane;
+    @FXML private Label lmsrEventName;
+    @FXML private Label lmsrEventStatus;
+    @FXML private Label lmsrAccountBalance;
+    @FXML private Label lmsrTotalCommissionPaid;
+    @FXML private TextArea lmsrEventDescription;
+    @FXML private GridPane lmsrOptionsGrid;
 
 
-    @FXML
-    private Label lmsrEventName;
+// ---------- LMSR OPTION 1 ----------
 
-    @FXML
-    private Label lmsrStatus;
-
-    @FXML
-    private Label lmsrAccountBalance;
-
-    @FXML
-    private Label lmsrTotalCommissionPaid;
+    @FXML private Label lmsrOption1Label;
+    @FXML private TableView<OptionDTO> lmsrOption1Table;
+    @FXML private TableColumn<OptionDTO, Double> lmsrOption1ValueCol;
+    @FXML private TableColumn<OptionDTO, Integer> lmsrOption1TotalSharesCol;
+    @FXML private VBox lmsrOption1Box;
 
 
-    @FXML
-    private TableView<OptionDTO> lmsrOptionsTable;
+// ---------- LMSR OPTION 2 ----------
 
-    @FXML
-    private TableColumn<OptionDTO, String> lmsrOptionNameCol;
-
-    @FXML
-    private TableColumn<OptionDTO, String> lmsrCurrentValueCol;
-
-    @FXML
-    private TableColumn<OptionDTO, Number> lmsrTotalSharesCol;
+    @FXML private Label lmsrOption2Label;
+    @FXML private TableView<OptionDTO> lmsrOption2Table;
+    @FXML private TableColumn<OptionDTO, Double> lmsrOption2ValueCol;
+    @FXML private TableColumn<OptionDTO, Integer> lmsrOption2TotalSharesCol;
+    @FXML private VBox lmsrOption2Box;
 
 
-    @FXML
-    private TableView<TradeDTO> lmsrTradesTable;
+// ---------- LMSR PARTICIPATION ----------
 
-    @FXML
-    private TableColumn<TradeDTO, String> lmsrTradeOptionCol;
-
-    @FXML
-    private TableColumn<TradeDTO, Number> lmsrTradeSharesCol;
-
-    @FXML
-    private TableColumn<TradeDTO, String> lmsrTradePriceCol;
-
-//    ----------------------------------------------
-
+    @FXML private TableView<TradeDTO> lmsrParticipationTable;
+    @FXML private TableColumn<TradeDTO, String> lmsrParticipationOptionCol;
+    @FXML private TableColumn<TradeDTO, Integer> lmsrParticipationSharesCol;
+    @FXML private TableColumn<TradeDTO, String> lmsrParticipationPaidCol;
+    @FXML private TextField lmsrOption1BetField;
+    @FXML private Button    lmsrOption1BetBtn;
+    @FXML private TextField lmsrOption2BetField;
+    @FXML private Button    lmsrOption2BetBtn;
 
     @FXML
     void loadFile(ActionEvent event) {
@@ -296,20 +281,20 @@ public class MainController {
 
 
         task.setOnSucceeded(e -> {
-            progressBar.progressProperty().unbind();
-            progressBar.setProgress(1);
-            loadFileBtn.disableProperty().unbind();
+            resetProgressBar();
             filePath.setText(xmlFilePath);
             loadEvents();
             fileLoadedProperty.setValue(true);
             setFilterCommissionOptions();
             commissionFilter.getItems().addFirst(-1);
+
+            PauseTransition hold = new PauseTransition(Duration.millis(400));
+            hold.setOnFinished(done -> resetProgressBar());
+            hold.play();
         });
 
         task.setOnFailed(e -> {
-            progressBar.progressProperty().unbind();
-            progressBar.setProgress(0);
-            loadFileBtn.disableProperty().unbind();
+            resetProgressBar();
             DialogHelper.showErrorAlert("Load Failed" ,task.getException().getMessage());
         });
 
@@ -351,58 +336,207 @@ public class MainController {
         eventListCommissionTypeCol.setCellValueFactory(c ->
                 new ReadOnlyStringWrapper(c.getValue().comission().commissionType()));
 
-        eventsTable.getItems().clear();
-        eventsTable.setItems(events);
+        Platform.runLater(() -> {
+            eventsTable.getItems().setAll(events);
+        });
+    }
+
+    private void setupBetControls() {
+        restrictToPositiveInteger(lmsrOption1BetField);
+        restrictToPositiveInteger(lmsrOption2BetField);
+
+        BooleanBinding noOpenEventSelected = Bindings.createBooleanBinding(
+                () -> {
+                    EventSummaryDTO selected =
+                            eventsTable.getSelectionModel().getSelectedItem();
+
+                    return selected == null || !selected.isOpen();
+                },
+                eventsTable.getSelectionModel().selectedItemProperty()
+        );
+
+        BooleanBinding disableBetButtons =
+                fileLoadedProperty.not().or(noOpenEventSelected);
+
+        lmsrOption1BetBtn.disableProperty().bind(
+                disableBetButtons.or(
+                        lmsrOption1BetField.textProperty().isEmpty()
+                )
+        );
+
+        lmsrOption2BetBtn.disableProperty().bind(
+                disableBetButtons.or(
+                        lmsrOption2BetField.textProperty().isEmpty()
+                )
+        );
+    }
+
+    /**
+     * Rejects any keystroke that would leave the field holding something other than
+     * a positive integer. A TextFormatter filters the change BEFORE it is applied,
+     * so no invalid text ever reaches the field - this is why there is no listener
+     * here undoing bad input after the fact.
+     */
+    private void restrictToPositiveInteger(TextField field) {
+        field.setTextFormatter(new TextFormatter<>(change -> {
+            String next = change.getControlNewText();
+            if (next.isEmpty()) {
+                return change;                       // allow clearing the field
+            }
+            if (!next.matches("\\d+")) {
+                return null;                         // reject: not all digits
+            }
+
+            if (Integer.parseInt(next) < 1) {
+                return null;                         // reject: zero is not a bet
+            }
+            return change;
+        }));
     }
 
     @FXML
+    void placeBetOption1(ActionEvent event) {
+        placeBet(1, lmsrOption1BetField);
+    }
+
+    @FXML
+    void placeBetOption2(ActionEvent event) {
+        placeBet(2, lmsrOption2BetField);
+    }
+
+    private void placeBet(int optionNumber, TextField field) {
+        EventSummaryDTO event = eventsTable.getSelectionModel().getSelectedItem();
+        int shares;
+        try {
+            shares = Integer.parseInt(field.getText().trim());
+        } catch (NumberFormatException ex) {
+            showError("Enter the number of shares to buy.");
+            return;
+        }
+
+        try {
+            PurchaseDTO purchase = controller.participateInEvent(event.getId(), optionNumber, shares);
+
+            // the engine returns null when the event is already closed
+            if (purchase == null) {
+                showError("This event is closed - no further bets can be placed.");
+                return;
+            }
+
+            // refresh values, shares, balance, participations
+            field.clear();
+            showLmsrView(controller.getEventTradingStatus(event.getId()));
+
+        } catch (IllegalArgumentException ex) {
+            showError(ex.getMessage());
+        }
+    }
+
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Guess Market");
+        alert.setHeaderText("Could not place the bet");
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    @FXML
+    private void displayOrderBookEventDetails(EventTradingStatusDTO singleEvent) {
+        displayOrderBookOptionDetails(singleEvent.optionTradingStatus().getFirst(), option1VBox, option1Label,
+                singleEvent.tradingHistory().stream()
+                        .filter(trade ->
+                                Objects.equals(trade.optionName(), singleEvent.optionTradingStatus().getFirst().optionName()))
+                        .toList());
+        displayOrderBookOptionDetails(singleEvent.optionTradingStatus().get(1), option2VBox, option2Label,
+                singleEvent.tradingHistory().stream().
+                        filter(trade ->
+                                Objects.equals(trade.optionName(), singleEvent.optionTradingStatus().get(1).optionName()))
+                        .toList());
+    }
+
+    private void resetProgressBar() {
+        progressBar.progressProperty().unbind();
+        progressBar.setProgress(0);
+        loadFileBtn.disableProperty().unbind();
+        loadFileBtn.setDisable(false);
+    }
+
+    private void displayOrderBookOptionDetails(
+            OptionDTO option, VBox optionBox,
+            Label optionLabel, List<TradeDTO> trades)
+    {
+        optionLabel.setText(option.getOptionName());
+        HBox hBox = (HBox) optionBox.getChildren().getFirst();
+        ((Label) hBox.getChildren().get(1)).setText(String.valueOf(option.getCurrentValue()));
+        ((Label) hBox.getChildren().get(3)).setText(String.valueOf(option.getTotalSharesBought()));
+        option1PaidCol.setCellValueFactory(c->
+                new ReadOnlyObjectWrapper<>(c.getValue().pricePaid()));
+        option1SharesCol.setCellValueFactory(c ->
+                new ReadOnlyObjectWrapper<>(c.getValue().sharesBought()));
+        //TODO::enable when we have users
+//        option1UserCol.setCellValueFactory(c ->
+//                new ReadOnlyStringWrapper(c.getValue().getUserName()));
+    }
+
+    // ---------------------------------INITIALIZERS-----------------------------
+
     public void initialize() {
         initFilters();
         themeComboBox.getItems().add("Dark");
         themeComboBox.getItems().add("Light");
+        initializeLmsrTables();
+        setupBetControls();
+
+        //disable selection for participation and option tables
+        participationTable.setSelectionModel(null);
+        lmsrParticipationTable.setSelectionModel(null);
+        lmsrOption1Table.setSelectionModel(null);
+        lmsrOption2Table.setSelectionModel(null);
+
         eventsTable.getSelectionModel().selectedItemProperty().addListener((
                 obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 // Load event details into the UI
                 EventTradingStatusDTO singleEvent = controller.getEventTradingStatus(newSelection.getId());
-//                displayEventDetails(singleEvent);
+//                displayOrderBookEventDetails(singleEvent);
+
+                if (newSelection.getMethod() instanceof LMSRDTO) {
+                    showLmsrView(singleEvent);
+                } else {
+                    showOrderBookView(singleEvent);
+                }
             }
         });
     }
 
-//    private void displayEventDetails(EventTradingStatusDTO singleEvent) {
-//        displayOptionDetails(singleEvent.optionTradingStatus().getFirst(), option1VBox, option1Label,
-//                singleEvent.tradingHistory().stream()
-//                        .filter(trade ->
-//                                Objects.equals(trade.optionName(), singleEvent.optionTradingStatus().getFirst().optionName()))
-//                        .toList());
-//        displayOptionDetails(singleEvent.optionTradingStatus().get(1), option2VBox, option2Label,
-//                singleEvent.tradingHistory().stream().
-//                        filter(trade ->
-//                                Objects.equals(trade.optionName(), singleEvent.optionTradingStatus().get(1).optionName()))
-//                        .toList());
-//    }
+    private void initializeLmsrTables() {
 
-//    private void displayOptionDetails(
-//            OptionDTO option, VBox optionBox,
-//            Label optionLabel, List<TradeDTO> trades)
-//    {
-//        ObservableList<TradeDTO> tradesList =
-//                javafx.collections.FXCollections.observableArrayList(trades);
-//
-//
-//        optionLabel.setText(option.getOptionName());
-//        HBox hBox = (HBox) optionBox.getChildren().getFirst();
-//        ((Label) hBox.getChildren().get(1)).setText(String.valueOf(option.getCurrentValue()));
-//        ((Label) hBox.getChildren().get(3)).setText(String.valueOf(option.getTotalSharesBought()));
-//        option1PaidCol.setCellValueFactory(c->
-//                new ReadOnlyObjectWrapper<>(c.getValue().pricePaid()));
-//        option1SharesCol.setCellValueFactory(c ->
-//                new ReadOnlyObjectWrapper<>(c.getValue().sharesBought()));
-//        //TODO::enable when we have users
-////        option1UserCol.setCellValueFactory(c ->
-////                new ReadOnlyStringWrapper(c.getValue().getUserName()));
-//    }
+        lmsrOption1ValueCol.setCellValueFactory(cell ->
+                new ReadOnlyObjectWrapper<>(cell.getValue().currentValue()));
+
+        lmsrOption1TotalSharesCol.setCellValueFactory(cell ->
+                new ReadOnlyObjectWrapper<>(cell.getValue().totalSharesBought()));
+
+
+        lmsrOption2ValueCol.setCellValueFactory(cell ->
+                new ReadOnlyObjectWrapper<>(cell.getValue().currentValue()));
+
+        lmsrOption2TotalSharesCol.setCellValueFactory(cell ->
+                new ReadOnlyObjectWrapper<>(cell.getValue().totalSharesBought()));
+
+
+        lmsrParticipationOptionCol.setCellValueFactory(cell ->
+                new ReadOnlyStringWrapper(cell.getValue().optionName()));
+
+        lmsrParticipationSharesCol.setCellValueFactory(cell ->
+                new ReadOnlyObjectWrapper<>(cell.getValue().sharesBought()));
+
+        lmsrParticipationPaidCol.setCellValueFactory(cell ->
+                new ReadOnlyStringWrapper(
+                        String.format("%.2f", cell.getValue().pricePaid())
+                )
+        );
+    }
 
     private void initFilters() {
         fileLoadedProperty = new SimpleBooleanProperty(false);
@@ -420,6 +554,66 @@ public class MainController {
         statusFilter.getItems().add("All");
         statusFilter.getItems().add("Open");
         statusFilter.getItems().add("Closed");
+
+    }
+
+    //------------------------------------------------------
+    private void showLmsrView(EventTradingStatusDTO event) {
+
+        eventDetailsContent.getChildren().setAll(lmsrDetailsPane);
+        lmsrEventName.setText(event.eventName());
+        lmsrEventStatus.setText(event.isOpen() ? "Open" : "Closed");
+
+        lmsrAccountBalance.setText(String.format("%.2f",  event.accountBalance()));
+
+        lmsrTotalCommissionPaid.setText(String.format("%.2f", event.totalCommissionPaid()));
+
+        lmsrEventDescription.setText(eventsTable.getSelectionModel().getSelectedItem().getDescription());
+
+        var options = event.optionTradingStatus();
+
+        displayLmsrOptionDetails(options.getFirst(), lmsrOption1Box);
+        displayLmsrOptionDetails(options.get(1), lmsrOption2Box);
+
+        lmsrParticipationTable.setItems(
+                FXCollections.observableArrayList(
+                        event.tradingHistory()
+                )
+        );
+    }
+
+
+    private void displayLmsrOptionDetails(OptionDTO option, VBox optionBox) {
+        Label title = (Label) optionBox.getChildren().getFirst();
+        title.setText(String.valueOf(option.optionName()));
+
+        @SuppressWarnings("unchecked")
+        TableView<OptionDTO> table = (TableView<OptionDTO>) optionBox.getChildren().get(1);
+
+        @SuppressWarnings("unchecked")
+        TableColumn<OptionDTO, String> valueCol = (TableColumn<OptionDTO, String>) table.getColumns().get(0);
+        @SuppressWarnings("unchecked")
+        TableColumn<OptionDTO, String> sharesCol = (TableColumn<OptionDTO, String>) table.getColumns().get(1);
+
+        valueCol.setCellValueFactory(c ->
+                new ReadOnlyStringWrapper(
+                        String.format("%.2f", c.getValue().currentValue())
+                )
+        );
+
+        sharesCol.setCellValueFactory(c ->
+                new ReadOnlyStringWrapper(String.valueOf(c.getValue().totalSharesBought()))
+        );
+
+        ObservableList<OptionDTO> items = FXCollections.observableArrayList(option);
+        table.setItems(items);
+    }
+
+    private void showOrderBookView(EventTradingStatusDTO event) {
+
+        eventDetailsContent.getChildren().setAll(orderBookDetailsPane);
+
+        // Existing ORDER BOOK population logic goes here.
     }
 
     private void setAllOptionOnCommissionFilter() {
@@ -506,7 +700,6 @@ public class MainController {
 
     // add theme changing animation of 2 seconds
     @FXML
-
     void setTheme(ActionEvent event) {
         String selectedTheme = themeComboBox.getValue().toLowerCase();
 
@@ -515,7 +708,7 @@ public class MainController {
         fadeOut.setToValue(0.0);
 
         fadeOut.setOnFinished(e -> {
-            rootPane.getStylesheets().setAll(
+            rootPane.getScene().getStylesheets().setAll(
                     Objects.requireNonNull(
                             getClass().getResource("themes/" + selectedTheme + ".css")
                     ).toExternalForm()

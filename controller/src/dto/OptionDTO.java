@@ -4,7 +4,7 @@ import engine.Option;
 
 public record OptionDTO(
         String optionName,
-        float currentValue,
+        double currentValue,
         int totalSharesBought,
         boolean isWinner
     )
@@ -21,7 +21,7 @@ public record OptionDTO(
         return optionName;
 }
 
-    public float getCurrentValue() {
+    public double getCurrentValue() {
         return currentValue;
     }
 

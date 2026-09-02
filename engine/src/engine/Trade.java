@@ -7,9 +7,9 @@ public class Trade implements Serializable {
 
     private String optionName;
     private int sharesBought;
-    private float pricePaid;
+    private double pricePaid;
 
-    public Trade(String optionName, int sharesBought, float pricePaid) {
+    public Trade(String optionName, int sharesBought, double pricePaid) {
         this.optionName = optionName;
         this.sharesBought = sharesBought;
         this.pricePaid = pricePaid;
@@ -24,7 +24,7 @@ public class Trade implements Serializable {
         return sharesBought;
     }
 
-    public float getPricePaid() {
+    public double getPricePaid() {
         return pricePaid;
     }
 }

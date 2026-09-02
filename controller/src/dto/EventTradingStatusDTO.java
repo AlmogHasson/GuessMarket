@@ -8,8 +8,8 @@ public record EventTradingStatusDTO(
         boolean isOpen,
         String eventName,
         List<OptionDTO> optionTradingStatus,
-        float accountBalance, // for the user, not the event
-        float totalCommissionPaid,
+        double accountBalance, // for the user, not the event
+        double totalCommissionPaid,
         List<TradeDTO> tradingHistory //history of trades for this event, for all users
     )
 {

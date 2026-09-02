@@ -1,34 +1,81 @@
 /* ============================================================
-   GuessMarket - Visual Studio 2022 Dark theme (purple accent)
-   Mirrors every selector in light.css
+   GuessMarket - Dark (Visual Studio 2022) theme
+   Every colour is declared once in .root as a looked-up colour;
+   rules below reference the names, never raw hex.
+   This file and its counterpart define the SAME selector set.
    ============================================================ */
 
 .root {
     -fx-font-family: "Segoe UI";
-    -fx-background-color: #2d2d30;
 
-    /* Flip Modena's own defaults so anything not styled below
-       (dialogs, tooltips, context menus) comes out dark too. */
-    -fx-base: #252526;
-    -fx-background: #2d2d30;
-    -fx-control-inner-background: #252526;
-    -fx-text-background-color: #f1f1f1;
-    -fx-accent: #a252c8;
-    -fx-focus-color: #c586e0;
-    -fx-faint-focus-color: #c586e022;
-    -fx-selection-bar: #5c2d91;
-    -fx-selection-bar-non-focused: #3f2a52;
+    /* ---- palette (looked-up colours) ---- */
+    -gm-bg:             #2d2d30;
+    -gm-surface:        #252526;
+    -gm-surface-alt:    #333337;
+    -gm-editor:         #1e1e1e;
+    -gm-border:         #3f3f46;
+    -gm-border-strong:  #54545c;
+    -gm-divider:        #333337;
+    -gm-text:           #f1f1f1;
+    -gm-text-muted:     #9b9b9b;
+    -gm-text-strong:    #ffffff;
+    -gm-header-text:    #c586e0;
+    -gm-accent:         #a252c8;
+    -gm-accent-hover:   #b76fd8;
+    -gm-accent-press:   #8a3fae;
+    -gm-accent-soft:    #c586e0;
+    -gm-selection:      #5c2d91;
+    -gm-selection-text: #ffffff;
+    -gm-row-hover:      #3f3f46;
+    -gm-row-odd:        #2a2a2d;
+    -gm-on-accent:      #ffffff;
+    -gm-track:          #3f3f46;
+    -gm-thumb:          #54545c;
+    -gm-thumb-hover:    #6a6a75;
+    -gm-danger:         #f14c4c;
+    -gm-disabled-bg:    #3f3f46;
+    -gm-disabled-text:  #7a7a7a;
+
+    -fx-background-color: -gm-bg;
+
+    /* Modena defaults, so unstyled controls follow the theme too */
+    -fx-base: -gm-surface;
+    -fx-background: -gm-bg;
+    -fx-control-inner-background: -gm-surface;
+    -fx-text-background-color: -gm-text;
+    -fx-accent: -gm-accent;
+    -fx-focus-color: -gm-accent-soft;
+    -fx-selection-bar: -gm-selection;
 }
 
 /* ---------- TOP ---------- */
 
 .label {
-    -fx-text-fill: #f1f1f1;
+    -fx-text-fill: -gm-text;
+}
+
+.top-bar {
+    -fx-background-color: -gm-surface;
+    -fx-border-color: transparent transparent -gm-border transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 12 16 12 16;
+}
+
+/* App title. Sized and coloured explicitly in BOTH themes so the
+   contrast against -gm-surface is comparable. */
+.headline {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -gm-accent-soft;
+}
+
+.file-path {
+    -fx-text-fill: -gm-text-muted;
 }
 
 .button {
-    -fx-background-color: #a252c8;
-    -fx-text-fill: white;
+    -fx-background-color: -gm-accent;
+    -fx-text-fill: -gm-on-accent;
     -fx-background-radius: 8;
     -fx-border-radius: 8;
     -fx-padding: 8 16;
@@ -36,17 +83,22 @@
 }
 
 .button:hover {
-    -fx-background-color: #b76fd8;
+    -fx-background-color: -gm-accent-hover;
 }
 
 .button:pressed {
-    -fx-background-color: #8a3fae;
+    -fx-background-color: -gm-accent-press;
 }
 
 .button:disabled {
-    -fx-background-color: #3f3f46;
-    -fx-text-fill: #7a7a7a;
+    -fx-background-color: -gm-disabled-bg;
+    -fx-text-fill: -gm-disabled-text;
     -fx-opacity: 1;
+}
+
+.load-file-button {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
 }
 
 .progress-bar {
@@ -56,13 +108,13 @@
 }
 
 .progress-bar > .track {
-    -fx-background-color: #3f3f46;
+    -fx-background-color: -gm-track;
     -fx-background-insets: 0;
     -fx-background-radius: 10;
 }
 
 .progress-bar > .bar {
-    -fx-background-color: linear-gradient(to right, #68217a, #c586e0);
+    -fx-background-color: linear-gradient(to right, -gm-accent-press, -gm-accent-soft);
     -fx-background-insets: 0;
     -fx-background-radius: 10;
     -fx-padding: 0;
@@ -81,7 +133,7 @@
 }
 
 .tab-pane > .tab-header-area > .tab-header-background {
-    -fx-background-color: #2d2d30;
+    -fx-background-color: -gm-bg;
 }
 
 .tab {
@@ -94,148 +146,144 @@
 }
 
 .tab .tab-label {
-    -fx-text-fill: #9b9b9b;
+    -fx-text-fill: -gm-text-muted;
     -fx-font-weight: normal;
 }
 
 .tab:hover .tab-label {
-    -fx-text-fill: #f1f1f1;
+    -fx-text-fill: -gm-text;
 }
 
 .tab:selected {
-    -fx-background-color: #252526;
-
-    /* round only top corners */
+    -fx-background-color: -gm-surface;
     -fx-background-radius: 8 8 0 0;
-
-    /* accent strip along the top, VS Code style */
-    -fx-border-color: #c586e0 transparent transparent transparent;
+    -fx-border-color: -gm-accent-soft transparent transparent transparent;
     -fx-border-width: 2 0 0 0;
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
 }
 
 .tab:selected .tab-label {
-    -fx-text-fill: #c586e0;
+    -fx-text-fill: -gm-accent-soft;
     -fx-font-weight: bold;
 }
 
-/* Content attached directly to selected tab */
 .tab-pane > .tab-content-area {
-    -fx-background-color: #252526;
+    -fx-background-color: -gm-surface;
     -fx-background-radius: 8;
 }
 
 /* ---------- COMBO BOX ---------- */
 
 .combo-box {
-    -fx-background-color: #3f3f46;
-    -fx-border-color: #54545c;
+    -fx-background-color: -gm-surface;
+    -fx-border-color: -gm-border-strong;
     -fx-border-radius: 7;
     -fx-background-radius: 7;
     -fx-padding: 2 4;
 }
 
 .combo-box:hover {
-    -fx-border-color: #c586e0;
+    -fx-border-color: -gm-accent-soft;
 }
 
 .combo-box .list-cell {
-    -fx-text-fill: #f1f1f1;
+    -fx-text-fill: -gm-text;
     -fx-background-color: transparent;
 }
 
-.combo-box .arrow,
 .combo-box .arrow-button {
     -fx-background-color: transparent;
 }
 
 .combo-box .arrow {
-    -fx-background-color: #9b9b9b;
+    -fx-background-color: -gm-text-muted;
 }
 
-/* the drop-down popup is a separate scene graph - it needs its own rules */
+/* the popup is a separate scene graph and needs its own rules */
 .combo-box-popup .list-view {
-    -fx-background-color: #252526;
-    -fx-border-color: #54545c;
+    -fx-background-color: -gm-surface;
+    -fx-border-color: -gm-border-strong;
     -fx-background-radius: 7;
     -fx-border-radius: 7;
 }
 
 .combo-box-popup .list-view .list-cell {
-    -fx-background-color: #252526;
-    -fx-text-fill: #f1f1f1;
+    -fx-background-color: -gm-surface;
+    -fx-text-fill: -gm-text;
     -fx-padding: 6 10;
 }
 
 .combo-box-popup .list-view .list-cell:filled:hover {
-    -fx-background-color: #3f3f46;
-    -fx-text-fill: #ffffff;
+    -fx-background-color: -gm-row-hover;
+    -fx-text-fill: -gm-text-strong;
 }
 
 .combo-box-popup .list-view .list-cell:filled:selected {
-    -fx-background-color: #5c2d91;
-    -fx-text-fill: #ffffff;
+    -fx-background-color: -gm-selection;
+    -fx-text-fill: -gm-selection-text;
 }
 
 /* ---------- TABLE ---------- */
 
 .table-view {
-    -fx-background-color: #1e1e1e;
-    -fx-border-color: #3f3f46;
+    -fx-background-color: -gm-editor;
+    -fx-border-color: -gm-border;
     -fx-border-radius: 8;
     -fx-background-radius: 8;
     -fx-table-cell-border-color: transparent;
 }
 
 .table-view .column-header-background {
-    -fx-background-color: #333337;
+    -fx-background-color: -gm-surface-alt;
     -fx-background-radius: 8 8 0 0;
 }
 
-/* the empty strip right of the last column */
 .table-view .column-header-background .filler {
-    -fx-background-color: #333337;
+    -fx-background-color: -gm-surface-alt;
 }
 
 .table-view .column-header {
     -fx-background-color: transparent;
-    -fx-border-color: transparent transparent #3f3f46 transparent;
+    -fx-border-color: transparent transparent -gm-border transparent;
 }
 
 .table-view .column-header .label {
-    -fx-text-fill: #c586e0;
+    -fx-text-fill: -gm-header-text;
     -fx-font-weight: bold;
 }
 
 .table-row-cell {
-    -fx-background-color: #1e1e1e;
-    -fx-border-color: transparent transparent #333337 transparent;
+    -fx-background-color: -gm-editor;
+    -fx-border-color: transparent transparent -gm-divider transparent;
 }
 
 .table-row-cell:odd {
-    -fx-background-color: #2a2a2d;
-}
-
-.table-row-cell:selected {
-    -fx-background-color: #5c2d91;
-}
-
-/* Keep selected row purple even when hovered */
-.table-row-cell:selected:hover {
-    -fx-background-color: #5c2d91;
+    -fx-background-color: -gm-row-odd;
 }
 
 .table-row-cell:hover {
-    -fx-background-color: #3f3f46;
+    -fx-background-color: -gm-row-hover;
 }
 
+.table-row-cell:selected,
+.table-row-cell:selected:hover {
+    -fx-background-color: -gm-selection;
+}
+
+/* Explicit cell text colour for EVERY state - the default state was
+   previously left to Modena, which is what made rows hard to read. */
 .table-row-cell .table-cell {
-    -fx-text-fill: #f1f1f1;
+    -fx-text-fill: -gm-text;
 }
 
-.table-row-cell:selected .table-cell {
-    -fx-text-fill: #ffffff;
+.table-row-cell:hover .table-cell {
+    -fx-text-fill: -gm-text-strong;
+}
+
+.table-row-cell:selected .table-cell,
+.table-row-cell:selected:hover .table-cell {
+    -fx-text-fill: -gm-selection-text;
 }
 
 .table-cell {
@@ -243,9 +291,26 @@
     -fx-padding: 8;
 }
 
-/* "No content in table" text */
 .table-view .placeholder .label {
-    -fx-text-fill: #9b9b9b;
+    -fx-text-fill: -gm-text-muted;
+}
+
+/* ---------- TEXT AREA ---------- */
+
+.text-area {
+    -fx-background-color: -gm-surface;
+    -fx-background-radius: 8;
+    -fx-border-color: -gm-border;
+    -fx-border-radius: 8;
+    -fx-text-fill: -gm-text;
+}
+
+.text-area .content {
+    -fx-background-color: -gm-surface;
+}
+
+.text-area:focused {
+    -fx-border-color: -gm-accent-soft;
 }
 
 /* ---------- SPLIT PANE ---------- */
@@ -256,12 +321,12 @@
 }
 
 .split-pane-divider {
-    -fx-background-color: #3f3f46;
+    -fx-background-color: -gm-border;
     -fx-padding: 1;
 }
 
 .split-pane-divider:hover {
-    -fx-background-color: #c586e0;
+    -fx-background-color: -gm-accent-soft;
 }
 
 /* ---------- SCROLL BAR ---------- */
@@ -271,12 +336,12 @@
 }
 
 .scroll-bar .thumb {
-    -fx-background-color: #54545c;
+    -fx-background-color: -gm-thumb;
     -fx-background-radius: 10;
 }
 
 .scroll-bar .thumb:hover {
-    -fx-background-color: #6a6a75;
+    -fx-background-color: -gm-thumb-hover;
 }
 
 .scroll-bar .track {
@@ -298,70 +363,250 @@
 /* ---------- DIALOGS ---------- */
 
 .dialog-pane {
-    -fx-background-color: #252526;
+    -fx-background-color: -gm-surface;
 }
 
 .dialog-pane .label,
 .dialog-pane .content .label,
 .dialog-pane .header-panel .label {
-    -fx-text-fill: #f1f1f1;
+    -fx-text-fill: -gm-text;
 }
 
 .dialog-pane .header-panel {
-    -fx-background-color: #333337;
+    -fx-background-color: -gm-surface-alt;
 }
 
-/* ---------- COMPONENT CLASSES (moved out of main.fxml) ---------- */
+/* ---------- COMPONENT CLASSES USED BY mainmain.fxml ---------- */
 
 .card {
-    -fx-background-color: #252526;
+    -fx-background-color: -gm-surface;
     -fx-background-radius: 10;
-    -fx-border-color: #3f3f46;
+    -fx-border-color: -gm-border;
     -fx-border-radius: 10;
 }
 
-.transparent {
-    -fx-background-color: transparent;
+/* replaces style="-fx-padding: 4 6 4 6;" on the four info VBoxes */
+.info-cell {
+    -fx-padding: 4 6 4 6;
 }
 
-.rounded {
-    -fx-background-radius: 8;
-    -fx-border-radius: 8;
-}
-
-.brand-title {
-    -fx-font-size: 24px;
+/* replaces style="-fx-font-weight: bold;" on the Labels that carry it */
+.strong-label {
     -fx-font-weight: bold;
-    -fx-text-fill: #c586e0;
+    -fx-text-fill: -gm-text-strong;
+}
+
+.muted-label {
+    -fx-text-fill: -gm-text-muted;
 }
 
 .page-title {
     -fx-font-size: 24px;
     -fx-font-weight: bold;
-    -fx-text-fill: #f1f1f1;
+    -fx-text-fill: -gm-text-strong;
+}
+
+.users-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -gm-text-strong;
 }
 
 .section-title {
     -fx-font-size: 18px;
     -fx-font-weight: bold;
-    -fx-text-fill: #f1f1f1;
+    -fx-text-fill: -gm-text-strong;
 }
 
-.subsection-title {
-    -fx-font-size: 17px;
+/* Caption above each one-row option table. Smaller than .section-title
+   so the option block costs less vertical space in the LMSR pane. */
+.option-title {
+    -fx-font-size: 13px;
     -fx-font-weight: bold;
-    -fx-text-fill: #f1f1f1;
+    -fx-text-fill: -gm-text-muted;
 }
 
-.muted {
-    -fx-text-fill: #9b9b9b;
+.balance-card {
+    -fx-background-color: -gm-surface-alt;
+    -fx-background-radius: 10;
+    -fx-border-color: -gm-border;
+    -fx-border-radius: 10;
+    -fx-padding: 10 14 10 14;
 }
 
-.strong {
+.balance-value {
+    -fx-font-size: 20px;
     -fx-font-weight: bold;
-    -fx-text-fill: #f1f1f1;
+    -fx-text-fill: -gm-accent-soft;
 }
 
-.primary-button {
-    -fx-font-size: 15px;
+/* The two one-row LMSR option tables.
+   Vertical padding is cut so the row fits inside fixedCellSize=30,
+   horizontal padding is raised so wide values are not clipped sideways.
+   Declared after .card so it wins on the tables carrying both classes. */
+.option-table {
+    -fx-background-color: -gm-surface;
+}
+
+
+
+
+.option-table .table-row-cell,
+.option-table .table-row-cell:odd,
+.option-table .table-row-cell:hover,
+.option-table .table-row-cell:selected,
+.option-table .table-row-cell:selected:hover,
+.option-table .table-row-cell:focused {
+    -fx-background-color: -gm-surface;
+    -fx-border-color: transparent;
+    -fx-cursor: default;
+}
+
+.option-table .table-row-cell .table-cell,
+.option-table .table-row-cell:hover .table-cell,
+.option-table .table-row-cell:selected .table-cell,
+.option-table .table-row-cell:selected:hover .table-cell {
+    -fx-text-fill: -gm-text;
+}
+
+.option-table {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.option-table .column-header-background,
+.option-table .column-header-background .filler,
+.option-table .column-header,
+.option-table .column-header:hover {
+    -fx-background-color: -gm-surface-alt;
+}
+
+.option-table .column-header .label {
+    -fx-text-fill: -gm-header-text;
+    -fx-font-weight: bold;
+    -fx-padding: 0 6 0 6;
+}
+
+.option-table .column-header .arrow,
+.option-table .column-header .sort-order-dot,
+.option-table .column-header .sort-order {
+    -fx-opacity: 0;
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+}
+/* Prevents visual selection on standard scrollable tables */
+.unselectable-table .table-row-cell:selected,
+.unselectable-table .table-row-cell:selected:hover {
+    -fx-background-color: -gm-editor;
+}
+
+.unselectable-table .table-row-cell:odd:selected,
+.unselectable-table .table-row-cell:odd:selected:hover {
+    -fx-background-color: -gm-row-odd;
+}
+
+.unselectable-table .table-row-cell:selected .table-cell,
+.unselectable-table .table-row-cell:selected:hover .table-cell {
+    -fx-text-fill: -gm-text;
+}
+
+/* ---------- REQUESTED BEHAVIOUR ---------- */
+
+/* 1a. option tables: no scrollbars at all (one fixed row, nothing to scroll) */
+.option-table .scroll-bar:vertical,
+.option-table .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+    -fx-max-width: 0;
+    -fx-max-height: 0;
+    -fx-padding: 0;
+}
+
+.option-table > .virtual-flow > .corner {
+    -fx-opacity: 0;
+    -fx-background-color: transparent;
+}
+
+/* 1b. option table text centred, header captions centred to match */
+.option-table .table-cell {
+    -fx-alignment: CENTER;
+    -fx-padding: 3 10 3 10;
+}
+
+.option-table .column-header .label {
+    -fx-alignment: CENTER;
+}
+
+/* 2. eventsTable row text centred (headers too, so columns read straight) */
+.events-table .table-cell {
+    -fx-alignment: CENTER;
+}
+
+.events-table .column-header .label {
+    -fx-alignment: CENTER;
+}
+
+/* 3. the description keeps the plain .card wrapper; only the text inside is
+   lifted - slightly larger and using the strong text colour, so it reads as
+   emphasis rather than as a different kind of component. */
+.description-area {
+    -fx-font-size: 13.5px;
+    -fx-text-fill: -gm-text-strong;
+}
+
+/* flat read-only surface, never selectable */
+.description-area,
+.description-area .content,
+.description-area:focused,
+.description-area:focused .content {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-effect: null;
+    -fx-highlight-fill: transparent;
+    -fx-highlight-text-fill: -gm-text-strong;
+    -fx-text-fill: -gm-text-strong;
+    -fx-cursor: default;
+}
+
+.description-area .scroll-bar:vertical,
+.description-area .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+}
+
+/* ---------- BET CONTROLS ---------- */
+
+.text-field {
+    -fx-background-color: -gm-surface;
+    -fx-background-radius: 7;
+    -fx-border-color: -gm-border-strong;
+    -fx-border-radius: 7;
+    -fx-text-fill: -gm-text;
+    -fx-prompt-text-fill: -gm-text-muted;
+    -fx-padding: 4 8 4 8;
+}
+
+.text-field:focused {
+    -fx-border-color: -gm-accent-soft;
+}
+
+.bet-field {
+    -fx-alignment: CENTER;
+    -fx-pref-width: 90;
+}
+
+/* red edge while the typed value is not a usable positive number */
+.bet-field:invalid,
+.bet-field.invalid {
+    -fx-border-color: -gm-danger;
+}
+
+.bet-button {
+    -fx-font-size: 12px;
+    -fx-padding: 5 10 5 10;
+    -fx-background-radius: 7;
+    -fx-border-radius: 7;
 }

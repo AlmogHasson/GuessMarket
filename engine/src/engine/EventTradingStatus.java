@@ -10,16 +10,16 @@ public class EventTradingStatus implements Serializable {
         private String eventName;
         private boolean isOpen;
         private List<Option> options;
-        private float accountBalance; // for the user, not the event
-        private float totalCommissionPaid;
+        private double accountBalance; // for the user, not the event
+        private double totalCommissionPaid;
         private List<Trade> tradingHistory;
 
-    public EventTradingStatus(String eventName, List<Option> options, float accountBalance) {
+    public EventTradingStatus(String eventName, List<Option> options, double accountBalance) {
         this.eventName = eventName;
         this.isOpen = true;
         this.options = options;
         this.accountBalance = accountBalance;
-        this.totalCommissionPaid = 0.0f;
+        this.totalCommissionPaid = 0.0;
         this.tradingHistory = new ArrayList<Trade>();
     }
 
@@ -32,11 +32,11 @@ public class EventTradingStatus implements Serializable {
         return options;
     }
 
-    public float getAccountBalance() {
+    public double getAccountBalance() {
         return accountBalance;
     }
 
-    public float getTotalCommissionPaid() {
+    public double getTotalCommissionPaid() {
         return totalCommissionPaid;
     }
 
@@ -52,11 +52,11 @@ public class EventTradingStatus implements Serializable {
         return eventName;
     }
     
-    public void updateAccountBalance(float newBalance) {
+    public void updateAccountBalance(double newBalance) {
         this.accountBalance = newBalance;
     }
 
-    public void updateTotalCommissionPaid(float newTotal) {
+    public void updateTotalCommissionPaid(double newTotal) {
         this.totalCommissionPaid = newTotal;
     }
 

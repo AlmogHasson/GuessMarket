@@ -1,27 +1,27 @@
 package engine;
 
 public class Purchase {
-    private float totalPaid;
-    private float sharePaid;
-    private float commissionPaid;
+    private double totalPaid;
+    private double sharePaid;
+    private double commissionPaid;
 
-    public Purchase(float totalPaid, float sharePaid, float commissionPaid) {
+    public Purchase(double totalPaid, double sharePaid, double commissionPaid) {
         this.totalPaid = totalPaid;
         this.sharePaid = sharePaid;
         this.commissionPaid = commissionPaid;
     }
 
 
-    public float
+    public double
     getTotalPaid() { return totalPaid; }
 
-    public float
+    public double
     getSharePaid() {
         return sharePaid;
     }
 
 
-    public float getCommissionPaid() {
+    public double getCommissionPaid() {
         return commissionPaid;
     }
 }
