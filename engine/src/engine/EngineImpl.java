@@ -95,8 +95,6 @@ public class EngineImpl implements Engine {
         ETS.close();
         event.getOptions().get(winningOption-1).setWinner();
 
-
-
         double winningShares = event.getOptions().get(winningOption-1).getTotalSharesBought();
         String commissionType = event.getComission().getCommissionType();
         double commission = commissionType.equals("on-close")

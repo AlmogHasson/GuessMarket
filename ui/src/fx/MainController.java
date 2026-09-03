@@ -25,6 +25,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class MainController {
@@ -32,198 +33,125 @@ public class MainController {
 
     private BooleanProperty fileLoadedProperty;
 
-    @FXML
-    private ComboBox<String> themeComboBox;
+    @FXML private ComboBox<String> themeComboBox;
 
-    @FXML
-    private BorderPane rootPane;
+    @FXML private BorderPane rootPane;
 
-    @FXML
-    private Label balance;
+    @FXML private Label balance;
 
-    @FXML
-    private Label comissionPaid;
+    @FXML private Label comissionPaid;
 
-    @FXML
-    private ComboBox<Integer> commissionFilter;
+    @FXML private ComboBox<Integer> commissionFilter;
 
-    @FXML
-    private Label eventBalance;
+    @FXML private Label eventBalance;
 
-    @FXML
-    private TableColumn<EventSummaryDTO,String> eventListCommissionCol;
+    @FXML private TableColumn<EventSummaryDTO,String> eventListCommissionCol;
 
-    @FXML
-    private TableColumn<EventSummaryDTO, String> eventListEventCol;
+    @FXML private TableColumn<EventSummaryDTO, String> eventListEventCol;
 
-    @FXML
-    private TableColumn<EventSummaryDTO, Integer> eventListIdCol;
+    @FXML private TableColumn<EventSummaryDTO, Integer> eventListIdCol;
 
-    @FXML
-    private TableColumn<EventSummaryDTO, String> eventListMethodCol;
+    @FXML private TableColumn<EventSummaryDTO, String> eventListMethodCol;
 
-    @FXML
-    private TableColumn<EventSummaryDTO, String> eventListStatusCol;
+    @FXML private TableColumn<EventSummaryDTO, String> eventListStatusCol;
 
-    @FXML
-    private ComboBox<String> commissionTypeFilter;
+    @FXML private ComboBox<String> commissionTypeFilter;
 
-    @FXML
-    private TableColumn<EventSummaryDTO, String> eventListCommissionTypeCol;
+    @FXML private TableColumn<EventSummaryDTO, String> eventListCommissionTypeCol;
 
-    @FXML
-    private Tab eventsTab;
+    @FXML private Tab eventsTab;
 
-    @FXML
-    private TableView<EventSummaryDTO> eventsTable;
+    @FXML private TableView<EventSummaryDTO> eventsTable;
 
-    @FXML
-    private Label filePath;
+    @FXML private Label filePath;
 
-    @FXML
-    private Label headline;
+    @FXML private Label headline;
 
-    @FXML
-    private Button loadFileBtn;
+    @FXML private Button loadFileBtn;
 
-    @FXML
-    private ComboBox<String> methodFilter;
+    @FXML private ComboBox<String> methodFilter;
 
-    @FXML
-    private Label option1Label;
+    @FXML private Label option1Label;
 
-    @FXML
-    private TableColumn<TradeDTO, Double> option1PaidCol;
+    @FXML private TableColumn<TradeDTO, Double> option1PaidCol;
 
-    @FXML
-    private Label option1Shares;
+    @FXML private Label option1Shares;
 
-    @FXML
-    private TableColumn<TradeDTO, Integer> option1SharesCol;
+    @FXML private TableColumn<TradeDTO, Integer> option1SharesCol;
 
-    @FXML
-    private TableView<TradeDTO> option1Table;
+    @FXML private TableView<TradeDTO> option1Table;
 
-    @FXML
-    private TableColumn<?, ?> option1UserCol;
+    @FXML private TableColumn<?, ?> option1UserCol;
 
-    @FXML
-    private VBox option1VBox;
+    @FXML private VBox option1VBox;
 
-    @FXML
-    private Label option1Value;
+    @FXML private Label option1Value;
 
-    @FXML
-    private Label option2Label;
+    @FXML private Label option2Label;
 
-    @FXML
-    private TableColumn<?, ?> option2PaidCol;
+    @FXML private TableColumn<?, ?> option2PaidCol;
 
-    @FXML
-    private Label option2Shares;
+    @FXML private Label option2Shares;
 
-    @FXML
-    private TableColumn<?, ?> option2SharesCol;
+    @FXML private TableColumn<?, ?> option2SharesCol;
 
-    @FXML
-    private TableView<?> option2Table;
+    @FXML private TableView<?> option2Table;
 
-    @FXML
-    private TableColumn<?, ?> option2UserCol;
+    @FXML private TableColumn<?, ?> option2UserCol;
 
-    @FXML
-    private VBox option2VBox;
+    @FXML private VBox option2VBox;
 
-    @FXML
-    private Label option2Value;
+    @FXML private Label option2Value;
 
-    @FXML
-    private TableColumn<?, ?> participationCommissionCol;
+    @FXML private TableColumn<?, ?> participationCommissionCol;
 
-    @FXML
-    private TableColumn<?, ?> participationOptionCol;
+    @FXML private TableColumn<?, ?> participationOptionCol;
 
-    @FXML
-    private TableColumn<?, ?> participationPaidCol;
+    @FXML private TableColumn<?, ?> participationPaidCol;
 
-    @FXML
-    private TableColumn<?, ?> participationSharesCol;
+    @FXML private TableColumn<?, ?> participationSharesCol;
 
-    @FXML
-    private TableView<?> participationTable;
+    @FXML private TableView<?> participationTable;
 
-    @FXML
-    private TableColumn<?, ?> participationUserCol;
+    @FXML private TableColumn<?, ?> participationUserCol;
 
-    @FXML
-    private ProgressBar progressBar;
+    @FXML private ProgressBar progressBar;
 
-    @FXML
-    private TableColumn<?, ?> singleEventCommissionCol;
+    @FXML private TableColumn<?, ?> singleEventCommissionCol;
 
-    @FXML
-    private TableColumn<?, ?> singleEventOptionCol;
+    @FXML private TableColumn<?, ?> singleEventOptionCol;
 
-    @FXML
-    private TableColumn<?, ?> singleEventPaidCol;
+    @FXML private TableColumn<?, ?> singleEventPaidCol;
 
-    @FXML
-    private TableColumn<?, ?> singleEventSharesCol;
+    @FXML private TableColumn<?, ?> singleEventSharesCol;
 
-    @FXML
-    private TableView<?> singleEventTable;
+    @FXML private TableView<?> singleEventTable;
 
-    @FXML
-    private ComboBox<String> statusFilter;
+    @FXML private ComboBox<String> statusFilter;
 
-    @FXML
-    private TableColumn<?, ?> userEventCol;
+    @FXML private TableColumn<?, ?> userEventCol;
 
-    @FXML
-    private TableColumn<?, ?> userEventInvestmentCol;
+    @FXML private TableColumn<?, ?> userEventInvestmentCol;
 
-    @FXML
-    private TableColumn<?, ?> userEventRoleCol;
+    @FXML private TableColumn<?, ?> userEventRoleCol;
 
-    @FXML
-    private TableColumn<?, ?> userEventSharesCol;
+    @FXML private TableColumn<?, ?> userEventSharesCol;
 
-    @FXML
-    private TableView<?> userEventsTable;
+    @FXML private TableView<?> userEventsTable;
 
-    @FXML
-    private TableColumn<?, ?> userListIdCol;
+    @FXML private TableColumn<?, ?> userListIdCol;
 
-    @FXML
-    private TableColumn<?, ?> userListTypeCol;
+    @FXML private TableColumn<?, ?> userListTypeCol;
 
-    @FXML
-    private TableColumn<?, ?> userListUserCol;
+    @FXML private TableColumn<?, ?> userListUserCol;
 
-    @FXML
-    private Tab usersTab;
+    @FXML private Tab usersTab;
 
-    @FXML
-    private TableView<?> usersTable;
+    @FXML private TableView<?> usersTable;
 
-    private record LmsrPricingRow(
-            String option,
-            String price,
-            String probability,
-            String sharesBought
-    ) {
-    }
 
-    private record LmsrTradeRow(
-            String option,
-            String quantity,
-            String totalPaid
-    ) {
-    }
 
-    @FXML
-    private StackPane eventDetailsContent;
-
+    @FXML private StackPane eventDetailsContent;
     @FXML private GridPane orderBookDetailsPane;
     @FXML private VBox lmsrDetailsPane;
     @FXML private Label lmsrEventName;
@@ -262,6 +190,10 @@ public class MainController {
     @FXML private Button    lmsrOption1BetBtn;
     @FXML private TextField lmsrOption2BetField;
     @FXML private Button    lmsrOption2BetBtn;
+    @FXML private Button   closeEventBtn;
+    @FXML private CheckBox animationsCheckBox;
+
+    private boolean animationsEnabled = true;
 
     @FXML
     void loadFile(ActionEvent event) {
@@ -299,6 +231,67 @@ public class MainController {
         });
 
         new Thread(task).start();
+    }
+
+
+    // ---------- 1. close event ----------
+    @FXML
+    void closeEvent(ActionEvent event) {
+        EventSummaryDTO selected = eventsTable.getSelectionModel().getSelectedItem();
+
+        if (selected == null) {
+            return;
+        }
+
+        int eventId = selected.getId();
+
+        List<String> optionNames = selected.getOptions()
+                .stream()
+                .map(OptionDTO::optionName)
+                .toList();
+
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(optionNames.getFirst(), optionNames);
+
+        dialog.setTitle("Close Event");
+        dialog.setHeaderText("Closing \"" + selected.getName() + "\"");
+        dialog.setContentText("Winning option:");
+
+        Optional<String> chosen = dialog.showAndWait();
+
+        if (chosen.isEmpty()) {
+            return; // user canceled the dialog
+        }
+
+        int winningOption = optionNames.indexOf(chosen.get()) + 1;
+
+        try {
+            controller.closeEvent(eventId, winningOption);
+
+            // Reload updated DTOs
+            loadEvents();
+
+            Platform.runLater(() -> {
+                // Find the NEW DTO for the event
+                EventSummaryDTO updatedEvent = eventsTable.getItems()
+                        .stream()
+                        .filter(e -> e.getId() == eventId)
+                        .findFirst()
+                        .orElse(null);
+
+                // Reselect it
+                if (updatedEvent != null) {
+                    eventsTable.getSelectionModel().select(updatedEvent);
+                }
+            });
+            showLmsrView(controller.getEventTradingStatus(eventId));
+
+        } catch (IllegalArgumentException ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Guess Market");
+            alert.setHeaderText("Could not close the event");
+            alert.setContentText(ex.getMessage());
+            alert.showAndWait();
+        }
     }
 
     private void setFilterCommissionOptions() {
@@ -370,6 +363,14 @@ public class MainController {
                 )
         );
     }
+
+    private void setupHeaderControls() {
+        themeComboBox.getItems().setAll("Light", "Dark", "Japanese");
+        themeComboBox.setValue("Light");
+
+        animationsEnabled = animationsCheckBox.isSelected();
+    }
+
 
     /**
      * Rejects any keystroke that would leave the field holding something other than
@@ -478,14 +479,24 @@ public class MainController {
 //                new ReadOnlyStringWrapper(c.getValue().getUserName()));
     }
 
+
+
+
     // ---------------------------------INITIALIZERS-----------------------------
 
     public void initialize() {
         initFilters();
         themeComboBox.getItems().add("Dark");
         themeComboBox.getItems().add("Light");
+        themeComboBox.getItems().add("Japanese");
         initializeLmsrTables();
         setupBetControls();
+        setupHeaderControls();
+        closeEventBtn.setDisable(true);
+        eventsTable.getSelectionModel().selectedItemProperty()
+                .addListener((obs, oldSelection, newSelection) -> {
+                    updateCloseEventButton();
+                });
 
         //disable selection for participation and option tables
         participationTable.setSelectionModel(null);
@@ -506,6 +517,20 @@ public class MainController {
                     showOrderBookView(singleEvent);
                 }
             }
+        });
+    }
+
+    private void updateCloseEventButton() {
+        Platform.runLater(()-> {
+            EventSummaryDTO selected = eventsTable.getSelectionModel().getSelectedItem();
+
+            closeEventBtn.setDisable(selected == null || !selected.isOpen());
+
+            closeEventBtn.setText(
+                    selected != null && !selected.isOpen()
+                            ? "Event Closed"
+                            : "Close Event"
+            );
         });
     }
 
@@ -559,27 +584,30 @@ public class MainController {
 
     //------------------------------------------------------
     private void showLmsrView(EventTradingStatusDTO event) {
+        Platform.runLater(() -> {
+            eventDetailsContent.getChildren().setAll(lmsrDetailsPane);
+            lmsrEventName.setText(event.eventName());
+            lmsrEventStatus.setText(event.isOpen() ? "Open" : "Closed");
 
-        eventDetailsContent.getChildren().setAll(lmsrDetailsPane);
-        lmsrEventName.setText(event.eventName());
-        lmsrEventStatus.setText(event.isOpen() ? "Open" : "Closed");
+            lmsrAccountBalance.setText(String.format("%.2f",  event.accountBalance()));
 
-        lmsrAccountBalance.setText(String.format("%.2f",  event.accountBalance()));
+            lmsrTotalCommissionPaid.setText(String.format("%.2f", event.totalCommissionPaid()));
 
-        lmsrTotalCommissionPaid.setText(String.format("%.2f", event.totalCommissionPaid()));
+            lmsrEventDescription.setText(eventsTable.getSelectionModel().getSelectedItem().getDescription());
 
-        lmsrEventDescription.setText(eventsTable.getSelectionModel().getSelectedItem().getDescription());
+            var options = event.optionTradingStatus();
 
-        var options = event.optionTradingStatus();
+            displayLmsrOptionDetails(options.getFirst(), lmsrOption1Box);
+            displayLmsrOptionDetails(options.get(1), lmsrOption2Box);
 
-        displayLmsrOptionDetails(options.getFirst(), lmsrOption1Box);
-        displayLmsrOptionDetails(options.get(1), lmsrOption2Box);
+            lmsrParticipationTable.setItems(
+                    FXCollections.observableArrayList(
+                            event.tradingHistory()
+                    )
+            );
+        });
 
-        lmsrParticipationTable.setItems(
-                FXCollections.observableArrayList(
-                        event.tradingHistory()
-                )
-        );
+
     }
 
 
@@ -698,28 +726,45 @@ public class MainController {
         filterEvents();
     }
 
-    // add theme changing animation of 2 seconds
+
+    @FXML
+    void toggleAnimations(ActionEvent event) {
+        animationsEnabled = animationsCheckBox.isSelected();
+    }
+
+    /**
+     * Theme swap, honouring the toggle.
+     * The progress bar is deliberately untouched by this flag - its animation is
+     * feedback about work in progress, not decoration.
+     */
     @FXML
     void setTheme(ActionEvent event) {
         String selectedTheme = themeComboBox.getValue().toLowerCase();
+        String url = Objects.requireNonNull(
+                getClass().getResource("themes/" + selectedTheme + ".css")).toExternalForm();
+
+        if (!animationsEnabled) {
+            rootPane.getScene().getStylesheets().setAll(url);
+            rootPane.setOpacity(1.0);          // in case a fade was interrupted
+            return;
+        }
 
         FadeTransition fadeOut = new FadeTransition(Duration.millis(250), rootPane);
         fadeOut.setFromValue(1.0);
         fadeOut.setToValue(0.0);
-
         fadeOut.setOnFinished(e -> {
-            rootPane.getScene().getStylesheets().setAll(
-                    Objects.requireNonNull(
-                            getClass().getResource("themes/" + selectedTheme + ".css")
-                    ).toExternalForm()
-            );
-
-            FadeTransition fadeIn = new FadeTransition(Duration.millis(250), rootPane);
-            fadeIn.setFromValue(0.0);
-            fadeIn.setToValue(1.0);
-            fadeIn.play();
+            try {
+                rootPane.getScene().getStylesheets().setAll(url);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            } finally {
+                FadeTransition fadeIn = new FadeTransition(Duration.millis(250), rootPane);
+                fadeIn.setFromValue(0.0);
+                fadeIn.setToValue(1.0);
+                fadeIn.play();
+            }
         });
-
         fadeOut.play();
     }
+
 }

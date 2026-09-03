@@ -3,6 +3,7 @@ package fx;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.util.Objects;
@@ -14,6 +15,10 @@ public class GuessMarketApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         FXMLLoader loader = new FXMLLoader(GuessMarketApp.class.getResource("main.fxml"));
+
+        Font hiro = Font.loadFont(
+           GuessMarketApp.class.getResourceAsStream("fonts/aAsianHiro.ttf"), 12);
+        System.out.println("font family = " + (hiro == null ? "FAILED" : hiro.getFamily()));
 
         Scene scene = new Scene(loader.load(), 1200, 700);
 
