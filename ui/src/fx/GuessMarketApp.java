@@ -18,13 +18,12 @@ public class GuessMarketApp extends Application {
 
         Font hiro = Font.loadFont(
            GuessMarketApp.class.getResourceAsStream("fonts/aAsianHiro.ttf"), 12);
-        System.out.println("font family = " + (hiro == null ? "FAILED" : hiro.getFamily()));
 
         Scene scene = new Scene(loader.load(), 1200, 700);
 
         scene.getStylesheets().add(
                 Objects.requireNonNull(GuessMarketApp.class
-                                .getResource("themes/dark.css"))
+                                .getResource("themes/light.css"))
                         .toExternalForm()
         );
 
