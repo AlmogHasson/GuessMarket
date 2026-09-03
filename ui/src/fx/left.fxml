@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+   <VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fx.LeftSideController" spacing="12" styleClass="card">
+
+      <padding>
+         <Insets bottom="12" left="12" right="12" top="12" />
+      </padding>
+
+      <HBox spacing="8">
+
+         <ComboBox fx:id="methodFilter" maxWidth="1.7976931348623157E308" onAction="#onMethodFilterChanged" promptText="Method" HBox.hgrow="ALWAYS" />
+
+         <ComboBox fx:id="statusFilter" maxWidth="1.7976931348623157E308" onAction="#onStatusFilterChanged" promptText="Status" HBox.hgrow="ALWAYS" />
+
+         <ComboBox fx:id="commissionFilter" maxWidth="1.7976931348623157E308" onAction="#onCommissionTypeFilterChanged" promptText="Commission" HBox.hgrow="ALWAYS" />
+         <ComboBox fx:id="commissionTypeFilter" layoutX="365.0" layoutY="10.0" maxWidth="1.7976931348623157E308" onAction="#onCommissionFilterChanged" promptText="Commission Type" />
+
+      </HBox>
+
+
+      <TableView fx:id="eventsTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="0" prefHeight="968.0" prefWidth="606.0" styleClass="events-table" VBox.vgrow="ALWAYS">
+         <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN" />
+         </columnResizePolicy>
+
+
+         <columns>
+
+            <TableColumn fx:id="eventListIdCol" minWidth="31.0" prefWidth="35.0" text="#" />
+
+            <TableColumn fx:id="eventListEventCol" minWidth="40" prefWidth="148.0" text="Event" />
+
+            <TableColumn fx:id="eventListMethodCol" minWidth="40" prefWidth="94.0" text="Method" />
+
+            <TableColumn fx:id="eventListStatusCol" minWidth="40" prefWidth="82.0" text="Status" />
+
+            <TableColumn fx:id="eventListCommissionCol" minWidth="40" prefWidth="94.0" text="Commission" />
+            <TableColumn fx:id="eventListCommissionTypeCol" minWidth="40" prefWidth="126.0" text="Commission Type" />
+
+         </columns>
+
+      </TableView>
+
+   </VBox>

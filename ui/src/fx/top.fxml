@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+   <VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="10" styleClass="top-bar" fx:controller="fx.TopController">
+
+      <padding>
+         <Insets bottom="12" left="18" right="18" top="14" />
+      </padding>
+
+            <HBox alignment="CENTER" spacing="10">
+
+               <!-- mirrors the controls on the right so the title is truly centred -->
+               <Region maxWidth="250" minWidth="250" prefWidth="250" />
+
+               <Region HBox.hgrow="ALWAYS" />
+
+               <Label fx:id="headline" alignment="CENTER" styleClass="headline" text="Guess Market" />
+
+               <Region HBox.hgrow="ALWAYS" />
+
+               <CheckBox fx:id="animationsCheckBox" minWidth="110" onAction="#toggleAnimations" selected="true" styleClass="animations-check" text="Animations" />
+
+               <ComboBox fx:id="themeComboBox" minWidth="130" onAction="#setTheme" prefWidth="130" promptText="Theme" />
+
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="10">
+
+               <Button fx:id="loadFileBtn" maxHeight="1.7976931348623157E308" onAction="#loadFile" styleClass="load-file-button" text="Load File" />
+
+               <VBox maxWidth="1.7976931348623157E308" spacing="6" HBox.hgrow="ALWAYS">
+
+                  <Label fx:id="filePath" maxWidth="1.7976931348623157E308" styleClass="file-path" text="Currently Loaded File path: " />
+
+                  <ProgressBar fx:id="progressBar" maxWidth="1.7976931348623157E308" progress="0.0" />
+
+               </VBox>
+
+            </HBox>
+
+   </VBox>
