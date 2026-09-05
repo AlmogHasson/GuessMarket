@@ -18,7 +18,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-   <VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fx.RightSideController" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="360" spacing="10">
+   <VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fx.EventRightController" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="360" spacing="10">
 
    <fx:define>
       <GridPane fx:id="orderBookDetailsPane" hgap="12" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" vgap="12">
@@ -180,7 +180,7 @@
                </rowConstraints>
             </GridPane>
 
-            <!-- Two compact option tables. Each table contains one row: value and total shares. -->
+            <!-- Two compact option tables. Each table contains one row: value and total totalShares. -->
             <GridPane fx:id="lmsrOptionsGrid" hgap="12" maxHeight="132" maxWidth="1.7976931348623157E308" minHeight="118" prefHeight="126">
                <columnConstraints>
                   <ColumnConstraints hgrow="ALWAYS" minWidth="0" percentWidth="50" />

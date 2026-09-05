@@ -21,7 +21,7 @@ public record EventSummaryDTO( // record = immutable data class
             (event.getMethod() instanceof engine.LMSR
             ? new LMSRDTO((engine.LMSR) event.getMethod())
             : new OrderBookDTO((engine.OrderBook) event.getMethod())),
-            event.getName(),
+            event.getEventName(),
             event.getEventTradingStatus().isOpen()
         );
     }

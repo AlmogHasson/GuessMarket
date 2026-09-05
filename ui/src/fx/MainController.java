@@ -1,24 +1,24 @@
 package fx;
 
 import api.GMController;
-import dto.EventSummaryDTO;
+import dto.UserDTO;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 
 /**
- * Coordinator for the three included panes.
+ * Root coordinator for the composition tree.
  *
- * It owns the things the panes must agree on - the engine controller, whether a
- * file has been loaded, and whether animations are enabled - and forwards events
- * between them. The panes never talk to each other directly; everything goes
- * through here, so there is exactly one place to look when a change in one pane
- * has to be reflected in another.
+ * It owns the things every pane must agree on - the engine controller, whether a
+ * file has been loaded, who the active user is, and whether animations are
+ * enabled - and forwards events down to the two tab controllers. Anything that
+ * stays inside a single tab (a row selection, a bet, closing an event) is handled
+ * by that tab's own controller and never reaches this class.
  */
 public class MainController {
 
@@ -27,37 +27,36 @@ public class MainController {
 
     private final BooleanProperty fileLoadedProperty = new SimpleBooleanProperty(false);
 
+    /**
+     * The user the tester is currently "playing". Ex2 has no login - the tester
+     * impersonates each user in turn - so this is set from the users table. In
+     * ex3 it will be filled from the login page instead, and nothing downstream
+     * has to change.
+     *
+     * Held as the DTO rather than the name because almost every consumer needs
+     * more than a name: the balance for the top bar, the blocked flag to disable
+     * actions, and the identity itself to compare against an event's market
+     * maker. Passing the name around would mean looking the user up again on
+     * every read.
+     */
+    private final ObjectProperty<UserDTO> activeUser = new SimpleObjectProperty<>(null);
+
     private boolean animationsEnabled = true;
 
     @FXML private BorderPane rootPane;
 
     /*
      * FXMLLoader injects an included file's controller into a field named
-     * "<fx:id>Controller". These three names must match the fx:id values on the
-     * <fx:include> elements in main.fxml.
+     * "<fx:id>Controller". These names must match the fx:id values on the
+     * <fx:include> elements in main.fxml. The two tab controllers wire their own
+     * halves, so this class never touches a left/right pane directly.
      */
-    @FXML private TopController       topPaneController;
-    @FXML private LeftSideController  leftPaneController;
-    @FXML private RightSideController rightPaneController;
+    @FXML private TopController      topPaneController;
+    @FXML private EventTabController eventPaneController;
+    @FXML private UsersTabController usersPaneController;
 
-    // ---------- Users tab (still owned by this controller) ----------
     @FXML private Tab eventsTab;
     @FXML private Tab usersTab;
-    @FXML private TableView<?> usersTable;
-    @FXML private TableColumn<?, ?> userListIdCol;
-    @FXML private TableColumn<?, ?> userListUserCol;
-    @FXML private TableColumn<?, ?> userListTypeCol;
-    @FXML private Label balance;
-    @FXML private TableView<?> userEventsTable;
-    @FXML private TableColumn<?, ?> userEventCol;
-    @FXML private TableColumn<?, ?> userEventRoleCol;
-    @FXML private TableColumn<?, ?> userEventSharesCol;
-    @FXML private TableColumn<?, ?> userEventInvestmentCol;
-    @FXML private TableView<?> singleEventTable;
-    @FXML private TableColumn<?, ?> singleEventOptionCol;
-    @FXML private TableColumn<?, ?> singleEventSharesCol;
-    @FXML private TableColumn<?, ?> singleEventPaidCol;
-    @FXML private TableColumn<?, ?> singleEventCommissionCol;
 
     /**
      * Runs AFTER every included controller's own initialize(), which is why the
@@ -66,8 +65,16 @@ public class MainController {
     @FXML
     public void initialize() {
         topPaneController.init(this);
-        leftPaneController.init(this);
-        rightPaneController.init(this);
+        eventPaneController.init(this);
+        usersPaneController.init(this);
+
+    }
+
+    @FXML
+    void refreshUsersTab(Event event) {
+        if (usersTab.isSelected()) {
+            usersPaneController.refresh();
+        }
     }
 
     // ---------------- shared state, read by the panes ----------------
@@ -84,6 +91,24 @@ public class MainController {
         return rootPane;
     }
 
+    public ObjectProperty<UserDTO> activeUserProperty() {
+        return activeUser;
+    }
+
+    public UserDTO getActiveUser() {
+        return activeUser.get();
+    }
+
+    public void setActiveUser(UserDTO user) {
+        activeUser.set(user);
+    }
+
+    /** True when there is an active user who is still allowed to act. */
+    public boolean canActiveUserTrade() {
+        UserDTO user = activeUser.get();
+        return user != null && !user.isBlocked();
+    }
+
     public boolean isAnimationsEnabled() {
         return animationsEnabled;
     }
@@ -94,25 +119,11 @@ public class MainController {
 
     // ---------------- events forwarded between the panes ----------------
 
-    /** Top finished loading a file. */
+    /** Top finished loading a file - broadcast to both tabs. */
     public void onFileLoaded() {
         fileLoadedProperty.set(true);
-        leftPaneController.refreshCommissionFilterValues();
-        leftPaneController.reloadEvents();
-        rightPaneController.clear();
-    }
-
-    /** Left changed its table selection (selected may be null). */
-    public void onEventSelected(EventSummaryDTO selected) {
-        rightPaneController.showEvent(selected);
-    }
-
-    /**
-     * Right changed engine state (a bet was placed, an event was closed).
-     * The left table is rebuilt and the same row re-selected, so the details pane
-     * and the events table never disagree.
-     */
-    public void onEventChanged(int eventId) {
-        leftPaneController.reloadEventsAndSelect(eventId);
+        activeUser.set(null);          // the previous file's users no longer exist
+        eventPaneController.onFileLoaded();
+        usersPaneController.onFileLoaded();
     }
 }

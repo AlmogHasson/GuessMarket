@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.SplitPane?>
+
+<!--
+    Events tab. Owns nothing but the split; the two halves are their own files.
+    fx.EventTabController wires them together, so a selection on the left reaches
+    the right pane without going through fx.MainController.
+-->
+<SplitPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="fx.EventTabController" dividerPositions="0.48">
+
+   <items>
+
+      <fx:include fx:id="eventLeftPane" source="eventLeft.fxml" />
+
+      <fx:include fx:id="eventRightPane" source="eventRight.fxml" />
+
+   </items>
+
+</SplitPane>

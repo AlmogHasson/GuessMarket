@@ -22,6 +22,7 @@ public class TopController {
     private MainController main;
 
     @FXML private Label       headline;
+    @FXML private Label       activeUserLabel;
     @FXML private CheckBox    animationsCheckBox;
     @FXML private ComboBox<String> themeComboBox;
     @FXML private Button      loadFileBtn;
@@ -40,6 +41,20 @@ public class TopController {
     public void init(MainController main) {
         this.main = main;
         main.setAnimationsEnabled(animationsCheckBox.isSelected());
+
+        // the label follows whoever the tester is currently acting as
+        main.activeUserProperty()
+                .addListener((obs, old, newSelection)
+                        -> showActiveUser(newSelection.name()));
+    }
+
+    private void showActiveUser(String userName) {
+        boolean none = userName == null || userName.isBlank();
+        activeUserLabel.setText(none ? "No active user" : "Acting as: " + userName);
+        activeUserLabel.getStyleClass().removeAll("active-user-none");
+        if (none) {
+            activeUserLabel.getStyleClass().add("active-user-none");
+        }
     }
 
     // ---------------- file loading ----------------
@@ -64,7 +79,6 @@ public class TopController {
         task.setOnSucceeded(e -> {
             resetProgressBar();
             filePath.setText(xmlFilePath);
-
             main.onFileLoaded();
 
             PauseTransition hold = new PauseTransition(Duration.millis(400));

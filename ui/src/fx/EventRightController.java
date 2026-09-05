@@ -27,12 +27,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-/** Controller for right.fxml - event details, the two option panels, bets, close. */
-public class RightSideController {
+/** Controller for eventRight.fxml - event details, the two option panels, bets, close. */
+public class EventRightController {
 
     private static final String EMPTY = "\u2014";   // em dash
 
     private MainController main;
+    private EventTabController tab;
 
     /**
      * The event currently on screen, as a property so the bet buttons can bind to
@@ -92,7 +93,7 @@ public class RightSideController {
     @FXML private Label option1Value;
     @FXML private Label option1Shares;
     @FXML private TableView<TradeDTO> option1Table;
-    @FXML private TableColumn<?, ?> option1UserCol;
+    @FXML private TableColumn<TradeDTO, String> option1UserCol;
     @FXML private TableColumn<TradeDTO, Integer> option1SharesCol;
     @FXML private TableColumn<TradeDTO, Double>  option1PaidCol;
 
@@ -121,8 +122,9 @@ public class RightSideController {
         showPlaceholders();
     }
 
-    public void init(MainController main) {
+    public void init(MainController main, EventTabController tab) {
         this.main = main;
+        this.tab = tab;
         bindBetButtons();
     }
 
@@ -223,7 +225,7 @@ public class RightSideController {
             main.getEngine().closeEvent(eventId, winningOption);
             // Main rebuilds the left table and re-selects, which calls showEvent()
             // again with a DTO that actually has isOpen == false.
-            main.onEventChanged(eventId);
+            tab.onEventChanged(eventId);
         } catch (IllegalArgumentException ex) {
             DialogHelper.showErrorAlert("Could not close the event", ex.getMessage());
         }
@@ -232,7 +234,9 @@ public class RightSideController {
     private void updateCloseEventButton() {
         Platform.runLater(() -> {
             EventSummaryDTO event = currentEvent.get();
-            closeEventBtn.setDisable(event == null || !event.isOpen());
+            closeEventBtn.setDisable(
+                    event == null || !event.isOpen() || main.getActiveUser() == null
+                            || !main.getActiveUser().isEventMaker(event.getId()));
             closeEventBtn.setText(
                     event != null && !event.isOpen() ? "Event Closed" : "Close Event");
         });
@@ -252,14 +256,14 @@ public class RightSideController {
         try {
             shares = Integer.parseInt(field.getText().trim());
         } catch (NumberFormatException ex) {
-            DialogHelper.showErrorAlert("Could not place the bet", "Enter the number of shares to buy.");
+            DialogHelper.showErrorAlert("Could not place the bet", "Enter the number of totalShares to buy.");
             return;
         }
 
         int eventId = currentEvent.get().getId();
 
         try {
-            PurchaseDTO purchase = main.getEngine().participateInEvent(eventId, optionNumber, shares);
+            PurchaseDTO purchase = main.getEngine().participateInEvent(main.getActiveUser().getName(),eventId, optionNumber, shares);
 
             // the engine returns null when the event is already closed
             if (purchase == null) {
@@ -269,7 +273,8 @@ public class RightSideController {
             }
 
             field.clear();
-            main.onEventChanged(eventId);
+            tab.onEventChanged(eventId);
+
         } catch (IllegalArgumentException ex) {
             DialogHelper.showErrorAlert("Could not place the bet", ex.getMessage());
         }
@@ -281,8 +286,12 @@ public class RightSideController {
                 () -> currentEvent.get() == null || !currentEvent.get().isOpen(),
                 currentEvent);
 
+        BooleanBinding noActiveUser = Bindings.createBooleanBinding(
+                () -> main.getActiveUser() == null,
+                main.activeUserProperty());
+
         // no file loaded, nothing selected, or the event is closed -> no betting
-        BooleanBinding bettingUnavailable = main.fileLoadedProperty().not().or(noOpenEvent);
+        BooleanBinding bettingUnavailable = main.fileLoadedProperty().not().or(noOpenEvent).or(noActiveUser);
 
         // the fields go dead on the same condition as the buttons
         lmsrOption1BetField.disableProperty().bind(bettingUnavailable);
@@ -300,6 +309,7 @@ public class RightSideController {
      * than a positive integer. The TextFormatter filters the change BEFORE it is
      * applied, so no invalid text ever reaches the field.
      */
+
     private void restrictToPositiveInteger(TextField field) {
         field.setTextFormatter(new TextFormatter<>(change -> {
             String next = change.getControlNewText();
@@ -396,27 +406,36 @@ public class RightSideController {
 
         option1PaidCol.setCellValueFactory(c ->
                 new ReadOnlyObjectWrapper<>(c.getValue().pricePaid()));
+
         option1SharesCol.setCellValueFactory(c ->
                 new ReadOnlyObjectWrapper<>(c.getValue().sharesBought()));
-        // TODO enable when users exist:
-        // option1UserCol.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getUserName()));
+
+        option1UserCol.setCellValueFactory(c ->
+                new ReadOnlyStringWrapper(c.getValue().userName()));
     }
 
     private void initLmsrColumns() {
         lmsrOption1ValueCol.setCellValueFactory(c ->
                 new ReadOnlyObjectWrapper<>(c.getValue().currentValue()));
+
         lmsrOption1TotalSharesCol.setCellValueFactory(c ->
                 new ReadOnlyObjectWrapper<>(c.getValue().totalSharesBought()));
 
         lmsrOption2ValueCol.setCellValueFactory(c ->
                 new ReadOnlyObjectWrapper<>(c.getValue().currentValue()));
+
         lmsrOption2TotalSharesCol.setCellValueFactory(c ->
                 new ReadOnlyObjectWrapper<>(c.getValue().totalSharesBought()));
 
+        lmsrParticipationUserCol.setCellValueFactory(c->
+                new ReadOnlyStringWrapper(c.getValue().userName()));
+
         lmsrParticipationOptionCol.setCellValueFactory(c ->
                 new ReadOnlyStringWrapper(c.getValue().optionName()));
+
         lmsrParticipationSharesCol.setCellValueFactory(c ->
                 new ReadOnlyObjectWrapper<>(c.getValue().sharesBought()));
+
         lmsrParticipationPaidCol.setCellValueFactory(c ->
                 new ReadOnlyStringWrapper(String.format("%.2f", c.getValue().pricePaid())));
     }

@@ -16,9 +16,8 @@ public class Event implements Serializable {
     private Comission comission;
     private List<Option> options;
     private Method method;
-    private String name;
-    EventTradingStatus eventTradingStatus;
-
+    private String eventName;
+    private EventTradingStatus eventTradingStatus;
 
     //get the event from schema and load it
     public Event(GMEvent event) {
@@ -31,10 +30,11 @@ public class Event implements Serializable {
         );
         this.method = event.getGMMethod().getGMLMSR() != null
                 ? new LMSR(event.getGMMethod().getGMLMSR().getB())
-                : new OrderBook(event.getGMMethod().getGMOrderBook().getD());
-        this.name = String.join(" ", event.getName());
+                : new OrderBook(event.getGMMethod().getGMOrderBook());
+        this.eventName = String.join(" ", event.getName());
         this.eventTradingStatus = new EventTradingStatus(
-                this.name, this.options,
+                this.id,
+                this.eventName, this.options,
                 method.calculateBalance(
                         options.get(0).getTotalSharesBought(),
                         options.get(1).getTotalSharesBought())
@@ -63,8 +63,8 @@ public class Event implements Serializable {
         return method;
     }
 
-    public String getName() {
-        return name;
+    public String getEventName() {
+        return eventName;
     }
 
     public EventTradingStatus getEventTradingStatus() {
@@ -72,9 +72,9 @@ public class Event implements Serializable {
     }
 
 
-    public Purchase participate(int optionNumber, int shares) {
-        // assuming all parameters were validated beforehand
-
+    /** validation is done in EngineImpl,
+     so we can assume optionNumber and shares are valid and event is open for trading */
+    public Purchase participate(User user ,int optionNumber, int shares) {
         Option option = options.get(optionNumber - 1);
 
         double beforeBalance = getBalance();
@@ -110,7 +110,7 @@ public class Event implements Serializable {
 
         updateOptionsValues();
 
-        event.updateHistory(new Trade(option.getOptionName(), shares, totalCost));
+        event.updateHistory(new Trade(user.getName(), option.getOptionName(), shares, totalCost));
 
         return new Purchase(totalCost, sharesCost, commissionCost);
     }
@@ -135,5 +135,10 @@ public class Event implements Serializable {
 
     public boolean isOpen() {
         return getEventTradingStatus().isOpen();
+    }
+
+    public boolean isParticipating(String name) {
+        return getEventTradingStatus().getTradingHistory().stream()
+                .anyMatch(trade -> trade.getUserName().equals(name));
     }
 }

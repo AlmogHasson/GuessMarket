@@ -26,8 +26,8 @@
 
             <HBox alignment="CENTER" spacing="10">
 
-               <!-- mirrors the controls on the right so the title is truly centred -->
-               <Region maxWidth="250" minWidth="250" prefWidth="250" />
+               <!-- same width as the controls on the right, so the title stays centred -->
+               <Label fx:id="activeUserLabel" alignment="CENTER_LEFT" maxWidth="250" minWidth="250" prefWidth="250" styleClass="active-user, active-user-none" text="No active user" />
 
                <Region HBox.hgrow="ALWAYS" />
 

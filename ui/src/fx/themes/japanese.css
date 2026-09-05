@@ -254,6 +254,7 @@
 .table-view .column-header .label {
     -fx-text-fill: -gm-header-text;
     -fx-font-weight: bold;
+    -fx-alignment: CENTER;
 }
 
 .table-row-cell {
@@ -292,6 +293,7 @@
 .table-cell {
     -fx-border-color: transparent;
     -fx-padding: 8;
+    -fx-alignment: CENTER;
 }
 
 .table-view .placeholder .label {
@@ -410,6 +412,7 @@
 }
 
 .users-title {
+    -fx-alignment: CENTER;
     -fx-font-size: 22px;
     -fx-font-weight: bold;
     -fx-text-fill: -gm-text-strong;
@@ -544,15 +547,6 @@
     -fx-alignment: CENTER;
 }
 
-/* 2. eventsTable row text centred (headers too, so columns read straight) */
-.events-table .table-cell {
-    -fx-alignment: CENTER;
-}
-
-.events-table .column-header .label {
-    -fx-alignment: CENTER;
-}
-
 /* 3. the description keeps the plain .card wrapper; only the text inside is
    lifted - slightly larger and using the strong text colour, so it reads as
    emphasis rather than as a different kind of component. */
@@ -639,34 +633,6 @@
     -fx-text-fill: -gm-disabled-text;
 }
 
-.check-box {
-    -fx-text-fill: -gm-text;
-}
-
-.check-box > .box {
-    -fx-background-color: -gm-surface;
-    -fx-border-color: -gm-border-strong;
-    -fx-border-radius: 4;
-    -fx-background-radius: 4;
-    -fx-padding: 3;
-}
-
-.check-box:hover > .box {
-    -fx-border-color: -gm-accent-soft;
-}
-
-.check-box:selected > .box {
-    -fx-background-color: -gm-accent;
-    -fx-border-color: -gm-accent;
-}
-
-.check-box:selected > .box > .mark {
-    -fx-background-color: -gm-on-accent;
-}
-
-.animations-check {
-    -fx-font-size: 12px;
-}
 
 /* ---------- JAPANESE THEME ACCENTS ---------- */
 
@@ -693,4 +659,92 @@
 .bet-button {
     -fx-background-radius: 3;
     -fx-border-radius: 3;
+}
+
+/* ---------- ANIMATIONS CHECK BOX ---------- */
+
+.check-box {
+    -fx-text-fill: -gm-text;
+    -fx-cursor: hand;
+}
+
+.check-box > .box {
+    -fx-background-color: -gm-surface;
+    -fx-background-insets: 0;
+    -fx-background-radius: 5;
+    -fx-border-color: -gm-border-strong;
+    -fx-border-radius: 5;
+    -fx-border-width: 1.5;
+    -fx-padding: 3 3 3 3;
+    -fx-pref-width: 17;
+    -fx-pref-height: 17;
+}
+
+.check-box > .box > .mark {
+    -fx-background-color: transparent;
+    -fx-shape: "M 0 5 L 4 9 L 11 0 L 9 -1 L 4 6 L 1.5 3.5 Z";
+    -fx-min-width: 11;
+    -fx-min-height: 10;
+}
+
+.check-box:hover > .box {
+    -fx-border-color: -gm-accent-soft;
+}
+
+.check-box:selected > .box {
+    -fx-background-color: -gm-accent;
+    -fx-border-color: -gm-accent;
+}
+
+.check-box:selected > .box > .mark {
+    -fx-background-color: -gm-on-accent;
+}
+
+.check-box:selected:hover > .box {
+    -fx-background-color: -gm-accent-hover;
+    -fx-border-color: -gm-accent-hover;
+}
+
+.check-box:focused > .box {
+    -fx-border-color: -gm-accent-soft;
+}
+
+.check-box:disabled {
+    -fx-opacity: 1;
+    -fx-text-fill: -gm-disabled-text;
+}
+
+.check-box:disabled > .box {
+    -fx-background-color: -gm-disabled-bg;
+    -fx-border-color: -gm-disabled-bg;
+}
+
+/* the toggle in the top bar sits next to the theme picker */
+.animations-check {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 8 4 8;
+    -fx-background-radius: 8;
+}
+
+.animations-check:hover {
+    -fx-background-color: -gm-surface-alt;
+}
+
+/* ---------- ACTIVE USER ---------- */
+
+.active-user {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -gm-accent-soft;
+    -fx-padding: 4 10 4 10;
+    -fx-background-color: -gm-surface-alt;
+    -fx-background-radius: 8;
+    -fx-border-color: -gm-border;
+    -fx-border-radius: 8;
+}
+
+.active-user-none {
+    -fx-text-fill: -gm-text-muted;
+    -fx-font-weight: normal;
 }

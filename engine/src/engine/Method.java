@@ -1,5 +1,7 @@
 package engine;
 
+import generated.GMLMSR;
+
 import java.io.Serializable;
 
 public interface Method extends Serializable {

@@ -6,7 +6,7 @@ import java.io.Serializable;
 
 public class EventTradingStatus implements Serializable {
     private static final long serialVersionUID = 1L;
-
+        private int id;
         private String eventName;
         private boolean isOpen;
         private List<Option> options;
@@ -14,7 +14,8 @@ public class EventTradingStatus implements Serializable {
         private double totalCommissionPaid;
         private List<Trade> tradingHistory;
 
-    public EventTradingStatus(String eventName, List<Option> options, double accountBalance) {
+    public EventTradingStatus(int id, String eventName, List<Option> options, double accountBalance) {
+        this.id = id;
         this.eventName = eventName;
         this.isOpen = true;
         this.options = options;
@@ -24,6 +25,8 @@ public class EventTradingStatus implements Serializable {
     }
 
     // Getters
+    public int getId() { return id; }
+
     public boolean isOpen() {
         return isOpen;
     }

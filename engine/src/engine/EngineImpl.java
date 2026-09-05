@@ -2,6 +2,7 @@ package engine;
 import java.io.File;
 
 import generated.GMEvent;
+import generated.GMUser;
 import generated.GuessMarket;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
@@ -14,9 +15,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Map;
+import java.util.Optional;
 
 public class EngineImpl implements Engine {
     List<Event> events;
+    Map<String, User> users;
 
 
     @Override
@@ -31,9 +35,47 @@ public class EngineImpl implements Engine {
         // check if commission is between 0 and 90
         validateCommissions(guessMarket);
 
-        //when the file is valid, load the events into the events list
-        loadEvents(guessMarket);
+        validateUsers(guessMarket);
 
+        //when the file is valid, load the events and users
+        loadEvents(guessMarket);
+        loadUsers(guessMarket);
+
+    }
+
+    @Override
+    public Map<String, User> getUsers() {
+        return users;
+    }
+
+    private void validateUsers(GuessMarket guessMarket) {
+        // check if users have unique names
+        var invalidNames = guessMarket.getGMUsers().getGMUser().stream()
+                .map(GMUser::getName)
+                .filter(name -> guessMarket.getGMUsers().getGMUser().stream()
+                        .filter(u -> u.getName().equals(name))
+                        .count() > 1)
+                .distinct()
+                .toList();
+        if (!invalidNames.isEmpty()) {
+            throw new IllegalArgumentException("Users with duplicate names found: " + invalidNames);
+        }
+    }
+
+    private void loadUsers(GuessMarket guessMarket) {
+        users = new java.util.HashMap<>();
+        guessMarket.getGMUsers().getGMUser().forEach(gmUser -> {
+            User user = new User();
+            user.setName(gmUser.getName());
+            user.setAccountBalance(gmUser.getInitialCash());
+            user.setUserEvents(
+                    Optional.ofNullable(gmUser.getGMMarketMaker())
+                            .map(mm -> mm.getEvent().stream()
+                                    .map(generated.Event::getId)
+                                    .toList())
+                            .orElse(List.of()));
+            users.put(user.getName(), user);
+        });
     }
 
     private void loadEvents(GuessMarket guessMarket) {
@@ -58,15 +100,24 @@ public class EngineImpl implements Engine {
     }
 
     @Override
-    public Purchase participateInEvent(int eventId, int optionNumber, int shares) {
+    public Purchase participateInEvent(String userName ,int eventId, int optionNumber, int shares) {
         Event event = events.stream().filter(e -> e.getId() == eventId).findFirst().orElse(null);
+        User user = users.get(userName);
+
+        if (user == null) {
+            throw new IllegalArgumentException("User with name " + userName + " not found");
+        }
+
+        if (user.isEventMaker(eventId)) {
+            throw new IllegalArgumentException("User with name " + userName + " is the market maker for event ID " + eventId);
+        }
 
         if (event == null) {
             throw new IllegalArgumentException("Event with ID " + eventId + " not found");
         }
 
         if (!event.isOpen()){
-            return null;
+            throw new IllegalStateException("Event with ID " + eventId + " is closed for trading");
         }
 
         if (optionNumber < 1 || optionNumber > event.getOptions().size()) {
@@ -76,7 +127,13 @@ public class EngineImpl implements Engine {
             throw new IllegalArgumentException("Shares must be greater than 0");
         }
 
-        return event.participate(optionNumber, shares);
+        if (user.getAccountBalance() < 0) {
+            throw new IllegalArgumentException("User with name " + userName + " has insufficient funds");
+        }
+
+        Purchase purchase = event.participate(user, optionNumber, shares);
+        user.setAccountBalance(user.getAccountBalance() - purchase.getTotalPaid());
+        return purchase;
     }
 
 
@@ -179,6 +236,5 @@ public class EngineImpl implements Engine {
         }
 
         events = loadedEvents;
-
     }
 }

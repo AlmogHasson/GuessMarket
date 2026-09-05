@@ -18,13 +18,14 @@ import javafx.util.StringConverter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/** Controller for left.fxml - the four filters and the events table. */
-public class LeftSideController {
+/** Controller for eventLeft.fxml - the four filters and the events table. */
+public class EventLeftController {
 
     /** Sentinel for "no commission filter"; -1 can never collide with a real value. */
     private static final int ALL_COMMISSIONS = -1;
 
     private MainController main;
+    private EventTabController tab;
 
     @FXML private ComboBox<String>  methodFilter;
     @FXML private ComboBox<String>  statusFilter;
@@ -39,10 +40,12 @@ public class LeftSideController {
     @FXML private TableColumn<EventSummaryDTO, String>  eventListCommissionCol;
     @FXML private TableColumn<EventSummaryDTO, String>  eventListCommissionTypeCol;
 
+
     /**
      * Column factories and filter items are self-contained, so they belong here
      * rather than being redone on every load the way the old loadEvents() did.
      */
+
     @FXML
     public void initialize() {
         initColumns();
@@ -50,8 +53,9 @@ public class LeftSideController {
         initCommissionConverter();
     }
 
-    public void init(MainController main) {
+    public void init(MainController main, EventTabController tab) {
         this.main = main;
+        this.tab = tab;
 
         commissionFilter.disableProperty().bind(main.fileLoadedProperty().not());
         methodFilter.disableProperty().bind(main.fileLoadedProperty().not());
@@ -59,13 +63,15 @@ public class LeftSideController {
         commissionTypeFilter.disableProperty().bind(main.fileLoadedProperty().not());
 
         eventsTable.getSelectionModel().selectedItemProperty()
-                .addListener((obs, oldSelection, newSelection) -> main.onEventSelected(newSelection));
+                .addListener((
+                        obs, oldSelection, newSelection)
+                        -> tab.onEventSelected(newSelection));
     }
 
     // ---------------- public API used by MainController ----------------
 
     /** Rebuilds the table from the engine. The setAll is queued, as before. */
-    public void reloadEvents() {
+    public void loadEvents() {
         ObservableList<EventSummaryDTO> events =
                 FXCollections.observableArrayList(main.getEngine().getEvents());
 
@@ -84,7 +90,7 @@ public class LeftSideController {
      * in the new list rather than re-using the previously selected object.
      */
     public void reloadEventsAndSelect(int eventId) {
-        reloadEvents();
+        loadEvents();
 
         Platform.runLater(() -> {
             EventSummaryDTO updated = eventsTable.getItems().stream()
@@ -94,7 +100,7 @@ public class LeftSideController {
 
             if (updated != null) {
                 eventsTable.getSelectionModel().select(updated);
-                main.onEventSelected(updated);
+                tab.onEventSelected(updated);
             }
         });
     }
