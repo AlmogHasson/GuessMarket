@@ -3,7 +3,7 @@ package dto;
 public record OrderBookDTO(
         int d,
         int initial,
-        String allowMint
+        boolean allowMint
 ) implements MethodDTO {
 
     // Constructor to create OrderBookDTO from OrderBook
@@ -25,11 +25,4 @@ public record OrderBookDTO(
         return d;
     }
 
-    public int getInitial() {
-        return initial;
-    }
-
-    public String getAllowMint() {
-        return allowMint;
-    }
 }

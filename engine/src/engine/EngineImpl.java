@@ -100,16 +100,25 @@ public class EngineImpl implements Engine {
     }
 
     @Override
-    public Purchase participateInEvent(String userName ,int eventId, int optionNumber, int shares) {
+    public Purchase participateInEvent(String userName, int eventId, int optionNumber, int shares) {
         Event event = events.stream().filter(e -> e.getId() == eventId).findFirst().orElse(null);
         User user = users.get(userName);
 
+        validateParticipationParams(eventId, optionNumber, shares, user, event);
+
+        TradeResult result = event.participate(user, users, optionNumber, shares, Side.BUY, null);
+        return new Purchase(result.getNetCostToInitiator(),
+                result.getNetCostToInitiator() - result.getCommissionPaid(),
+                result.getCommissionPaid());
+    }
+
+    private static void validateParticipationParams(int eventId, int optionNumber, int shares, User user, Event event) {
         if (user == null) {
-            throw new IllegalArgumentException("User with name " + userName + " not found");
+            throw new IllegalArgumentException("User with name " + user.name + " not found");
         }
 
         if (user.isEventMaker(eventId)) {
-            throw new IllegalArgumentException("User with name " + userName + " is the market maker for event ID " + eventId);
+            throw new IllegalArgumentException("User with name " + user.name + " is the market maker for event ID " + eventId);
         }
 
         if (event == null) {
@@ -128,14 +137,9 @@ public class EngineImpl implements Engine {
         }
 
         if (user.getAccountBalance() < 0) {
-            throw new IllegalArgumentException("User with name " + userName + " has insufficient funds");
+            throw new IllegalArgumentException("User with name " + user.name + " has insufficient funds");
         }
-
-        Purchase purchase = event.participate(user, optionNumber, shares);
-        user.setAccountBalance(user.getAccountBalance() - purchase.getTotalPaid());
-        return purchase;
     }
-
 
 
     @Override
@@ -144,24 +148,46 @@ public class EngineImpl implements Engine {
         if (event == null) {
             throw new IllegalArgumentException("Event with ID " + eventId + " not found");
         }
-        if (winningOption < 0 || winningOption > event.getOptions().size()) {
-            throw new IllegalArgumentException("Invalid option number: " + winningOption);
+        event.getMethod().close(event, users, winningOption);
+
+//        Event event = events.stream().filter(e -> e.getId() == eventId).findFirst().orElse(null);
+//        if (event == null) {
+//            throw new IllegalArgumentException("Event with ID " + eventId + " not found");
+//        }
+//        if (winningOption < 0 || winningOption > event.getOptions().size()) {
+//            throw new IllegalArgumentException("Invalid option number: " + winningOption);
+//        }
+//
+//        EventTradingStatus ETS = event.getEventTradingStatus();
+//        ETS.close();
+//        event.getOptions().get(winningOption-1).setWinner();
+//
+//        double winningShares = event.getOptions().get(winningOption-1).getTotalSharesBought();
+//        String commissionType = event.getComission().getCommissionType();
+//        double commission = commissionType.equals("on-close")
+//                ? winningShares * event.getComission().getValue() / 100 : 0.0;
+//
+//        ETS.updateTotalCommissionPaid(ETS.getTotalCommissionPaid() + commission);
+//
+//        double payOut = winningShares - commission;
+//        ETS.updateAccountBalance(ETS.getAccountBalance() - payOut);
+
+    }
+
+    @Override
+    public void activateEvent(String name, int eventId) {
+        Event event = events.stream().filter(e -> e.getId() == eventId).findFirst().orElse(null);
+        if (event == null) {
+            throw new IllegalArgumentException("Event with ID " + eventId + " not found");
         }
-
-        EventTradingStatus ETS = event.getEventTradingStatus();
-        ETS.close();
-        event.getOptions().get(winningOption-1).setWinner();
-
-        double winningShares = event.getOptions().get(winningOption-1).getTotalSharesBought();
-        String commissionType = event.getComission().getCommissionType();
-        double commission = commissionType.equals("on-close")
-                ? winningShares * event.getComission().getValue() / 100 : 0.0;
-
-        ETS.updateTotalCommissionPaid(ETS.getTotalCommissionPaid() + commission);
-
-        double payOut = winningShares - commission;
-        ETS.updateAccountBalance(ETS.getAccountBalance() - payOut);
-
+        User user = users.get(name);
+        if (user == null) {
+            throw new IllegalArgumentException("User with name " + name + " not found");
+        }
+        if (!user.isEventMaker(eventId)) {
+            throw new IllegalArgumentException("User with name " + name + " is not the market maker for event ID " + eventId);
+        }
+        event.activate(user);
     }
 
 

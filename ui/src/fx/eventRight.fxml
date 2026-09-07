@@ -80,10 +80,18 @@
                      </columnResizePolicy>
                      <columns>
                         <TableColumn fx:id="option1UserCol" sortable="false" minWidth="40" prefWidth="100" text="User" />
+                        <TableColumn fx:id="option1SideCol"   sortable="false" minWidth="40" prefWidth="55"  text="Side" />
                         <TableColumn fx:id="option1SharesCol" sortable="false" minWidth="40" prefWidth="80" text="Shares" />
-                        <TableColumn fx:id="option1PaidCol" sortable="false" minWidth="40" prefWidth="90" text="Paid" />
+                        <TableColumn fx:id="option1PriceCol"  sortable="false" minWidth="40" prefWidth="110" text="Price (per share)" />
                      </columns>
                   </TableView>
+
+                  <HBox alignment="CENTER" spacing="6">
+                     <ComboBox fx:id="obOption1SideBox" minWidth="70" prefWidth="76" promptText="Side" styleClass="side-box" />
+                     <TextField fx:id="obOption1SharesField" minWidth="0" promptText="Shares" styleClass="bet-field" HBox.hgrow="ALWAYS" />
+                     <TextField fx:id="obOption1PriceField" minWidth="0" promptText="Price" styleClass="bet-field" HBox.hgrow="ALWAYS" />
+                     <Button fx:id="obOption1OrderBtn" minWidth="0" onAction="#placeOrderOption1" styleClass="bet-button" text="Place order" />
+                  </HBox>
                </VBox>
             </children>
          </VBox>
@@ -107,10 +115,18 @@
                      </columnResizePolicy>
                      <columns>
                         <TableColumn fx:id="option2UserCol" sortable="false" minWidth="40" prefWidth="100" text="User" />
+                        <TableColumn fx:id="option2SideCol"   sortable="false" minWidth="40" prefWidth="55"  text="Side" />
                         <TableColumn fx:id="option2SharesCol" sortable="false" minWidth="40" prefWidth="80" text="Shares" />
-                        <TableColumn fx:id="option2PaidCol" sortable="false" minWidth="40" prefWidth="90" text="Paid" />
+                        <TableColumn fx:id="option2PriceCol"  sortable="false" minWidth="40" prefWidth="110" text="Price (per share)" />
                      </columns>
                   </TableView>
+
+                  <HBox alignment="CENTER" spacing="6">
+                     <ComboBox fx:id="obOption2SideBox" minWidth="70" prefWidth="76" promptText="Side" styleClass="side-box" />
+                     <TextField fx:id="obOption2SharesField" minWidth="0" promptText="Shares" styleClass="bet-field" HBox.hgrow="ALWAYS" />
+                     <TextField fx:id="obOption2PriceField" minWidth="0" promptText="Price" styleClass="bet-field" HBox.hgrow="ALWAYS" />
+                     <Button fx:id="obOption2OrderBtn" minWidth="0" onAction="#placeOrderOption2" styleClass="bet-button" text="Place order" />
+                  </HBox>
                </VBox>
             </children>
          </VBox>
@@ -126,7 +142,7 @@
          <!-- mirrors the button so the title stays centred -->
          <Region maxWidth="120" minWidth="120" prefWidth="120" />
          <Label fx:id="eventDetailsTitle" alignment="CENTER" maxWidth="1.7976931348623157E308" styleClass="page-title" text="Event details and trade" HBox.hgrow="ALWAYS" />
-         <Button fx:id="closeEventBtn" minWidth="120" onAction="#closeEvent" prefWidth="120" styleClass="danger-button" text="Close Event" />
+         <Button fx:id="setEventStatusBtn" minWidth="120" onAction="#manageEvent" prefWidth="120" styleClass="danger-button" text="Close Event" />
       </HBox>
 
       <!--

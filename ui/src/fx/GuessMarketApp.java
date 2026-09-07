@@ -23,7 +23,7 @@ public class GuessMarketApp extends Application {
 
         scene.getStylesheets().add(
                 Objects.requireNonNull(GuessMarketApp.class
-                                .getResource("themes/light.css"))
+                                .getResource("themes/dark.css"))
                         .toExternalForm()
         );
 
@@ -43,4 +43,3 @@ public class GuessMarketApp extends Application {
 
 //TODO:: check if the icon on the window can be changed - if so put a graph or a coin icon
 //TODO:: check if the top of the window can also be styled
-//TODO:: make it possible to disable animations throughout the app

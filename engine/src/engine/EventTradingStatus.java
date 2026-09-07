@@ -5,10 +5,15 @@ import java.util.List;
 import java.io.Serializable;
 
 public class EventTradingStatus implements Serializable {
+    public enum Status {
+        NOT_STARTED,
+        OPEN,
+        CLOSED
+    }
     private static final long serialVersionUID = 1L;
         private int id;
         private String eventName;
-        private boolean isOpen;
+        private Status status;
         private List<Option> options;
         private double accountBalance; // for the user, not the event
         private double totalCommissionPaid;
@@ -17,7 +22,7 @@ public class EventTradingStatus implements Serializable {
     public EventTradingStatus(int id, String eventName, List<Option> options, double accountBalance) {
         this.id = id;
         this.eventName = eventName;
-        this.isOpen = true;
+        this.status = Status.NOT_STARTED;
         this.options = options;
         this.accountBalance = accountBalance;
         this.totalCommissionPaid = 0.0;
@@ -27,9 +32,6 @@ public class EventTradingStatus implements Serializable {
     // Getters
     public int getId() { return id; }
 
-    public boolean isOpen() {
-        return isOpen;
-    }
 
     public List<Option> getOptions() {
         return options;
@@ -67,8 +69,20 @@ public class EventTradingStatus implements Serializable {
         tradingHistory.add(trade);
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
+    public boolean isOpen() {
+        return status == Status.OPEN;
+    }
+
+    public void activate() {
+        status = Status.OPEN;
+    }
+
     public void close() {
-        isOpen = false;
+        status = Status.CLOSED;
     }
 }
 

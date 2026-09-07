@@ -45,7 +45,7 @@ public class TopController {
         // the label follows whoever the tester is currently acting as
         main.activeUserProperty()
                 .addListener((obs, old, newSelection)
-                        -> showActiveUser(newSelection.name()));
+                        -> showActiveUser(newSelection == null? null : newSelection.name()));
     }
 
     private void showActiveUser(String userName) {
@@ -80,10 +80,11 @@ public class TopController {
             resetProgressBar();
             filePath.setText(xmlFilePath);
             main.onFileLoaded();
-
+            main.activeUserProperty().set(null); // clear any previous active user
             PauseTransition hold = new PauseTransition(Duration.millis(400));
             hold.setOnFinished(done -> resetProgressBar());
             hold.play();
+            showActiveUser(null);
         });
 
         task.setOnFailed(e -> {

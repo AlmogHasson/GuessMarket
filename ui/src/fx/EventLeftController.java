@@ -1,6 +1,7 @@
 package fx;
 
 import dto.CommissionDTO;
+import dto.EventStatus;
 import dto.EventSummaryDTO;
 import dto.LMSRDTO;
 import javafx.application.Platform;
@@ -143,14 +144,18 @@ public class EventLeftController {
                 .filter(evnt -> selectedCommission == null
                         || selectedCommission == ALL_COMMISSIONS
                         || evnt.getCommission().value() == selectedCommission)
+
                 .filter(evnt -> selectedMethod == null
                         || "All".equals(selectedMethod)
                         || ("Lmsr".equals(selectedMethod) && evnt.getMethod() instanceof LMSRDTO)
                         || ("Order Book".equals(selectedMethod) && !(evnt.getMethod() instanceof LMSRDTO)))
+
                 .filter(evnt -> selectedStatus == null
                         || "All".equals(selectedStatus)
                         || ("Open".equals(selectedStatus) && evnt.isOpen())
-                        || ("Closed".equals(selectedStatus) && !evnt.isOpen()))
+                        || ("Closed".equals(selectedStatus) && evnt.status() == EventStatus.CLOSED)
+                        || ("Not Started".equals(selectedStatus) && evnt.status() == EventStatus.NOT_STARTED))
+
                 .filter(evnt -> selectedCommissionType == null
                         || "All".equals(selectedCommissionType)
                         || selectedCommissionType.equalsIgnoreCase(evnt.getCommission().commissionType()))
@@ -173,7 +178,7 @@ public class EventLeftController {
                         c.getValue().getMethod() instanceof LMSRDTO ? "Lmsr" : "Order Book"));
 
         eventListStatusCol.setCellValueFactory(c ->
-                new ReadOnlyStringWrapper(c.getValue().isOpen() ? "Open" : "Closed"));
+                new ReadOnlyStringWrapper(getStatusText(c.getValue())));
 
         eventListCommissionCol.setCellValueFactory(c ->
                 new ReadOnlyStringWrapper(String.valueOf(c.getValue().getCommission().value())));
@@ -182,9 +187,23 @@ public class EventLeftController {
                 new ReadOnlyStringWrapper(c.getValue().comission().commissionType()));
     }
 
+    private String getStatusText(EventSummaryDTO event) {
+        switch (event.getStatus()) {
+            case OPEN -> {
+                return "Open";
+            }
+            case CLOSED -> {
+                return "Closed";
+            }
+            default -> {
+                return "Not Started";
+            }
+        }
+    }
+
     private void initFilterItems() {
         methodFilter.getItems().setAll("All", "Lmsr", "Order Book");
-        statusFilter.getItems().setAll("All", "Open", "Closed");
+        statusFilter.getItems().setAll("All","Not Started" ,"Open", "Closed");
         commissionTypeFilter.getItems().setAll("All", "On-Close", "On-Purchase");
     }
 

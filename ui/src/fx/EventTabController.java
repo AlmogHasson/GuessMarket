@@ -45,4 +45,8 @@ public class EventTabController {
     public void onEventChanged(int eventId) {
         eventLeftPaneController.reloadEventsAndSelect(eventId);
     }
+
+    public void refresh() {
+        eventRightPaneController.refresh();
+    }
 }

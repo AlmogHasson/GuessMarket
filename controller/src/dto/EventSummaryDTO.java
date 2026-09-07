@@ -2,14 +2,14 @@ package dto;
 import java.util.List;
 import engine.Event;
 
-public record EventSummaryDTO( // record = immutable data class
+public record EventSummaryDTO(
        int id,
        String description,
        CommissionDTO comission,
        List<OptionDTO> options,
        MethodDTO method,
        String name,
-       boolean isOpen
+       EventStatus status
 ) {
     // Constructor to create dto.EventDTO from Event
     public EventSummaryDTO(Event event) {
@@ -17,12 +17,18 @@ public record EventSummaryDTO( // record = immutable data class
             event.getId(),
             event.getDescription(),
             new CommissionDTO(event.getComission()),
-            event.getOptions().stream().map(OptionDTO::new).toList(),
+//            event.getOptions().stream().map(OptionDTO::new).toList(),
+            event.getOptions().stream()
+                    .map(option -> (OptionDTO) (event.getMethod() instanceof engine.LMSR
+                            ? new LMSROptionDTO(option)
+                            : new OBOptionDTO(option, ((engine.OrderBook) event.getMethod())
+                            .getRestingOrders(option.getOptionNumber()))))
+                    .toList(),
             (event.getMethod() instanceof engine.LMSR
             ? new LMSRDTO((engine.LMSR) event.getMethod())
             : new OrderBookDTO((engine.OrderBook) event.getMethod())),
             event.getEventName(),
-            event.getEventTradingStatus().isOpen()
+            EventStatus.from(event.getEventTradingStatus().getStatus())
         );
     }
 
@@ -32,7 +38,11 @@ public record EventSummaryDTO( // record = immutable data class
     }
 
     public boolean isOpen(){
-        return isOpen;
+        return status == EventStatus.OPEN;
+    }
+
+    public EventStatus getStatus(){
+        return status;
     }
 
     public String getDescription() {

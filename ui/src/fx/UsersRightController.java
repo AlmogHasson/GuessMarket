@@ -1,5 +1,7 @@
 package fx;
 
+//TODO: display order book events selected differently
+
 import dto.*;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;

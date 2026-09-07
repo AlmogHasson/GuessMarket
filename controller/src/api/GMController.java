@@ -77,4 +77,8 @@ public class GMController {
 
         return userEvents;
     }
+
+    public void activateEvent(String name, int eventId) {
+        engine.activateEvent(name, eventId);
+    }
 }

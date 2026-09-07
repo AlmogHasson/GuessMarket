@@ -32,6 +32,9 @@
     -gm-track:          #3f3f46;
     -gm-thumb:          #54545c;
     -gm-thumb-hover:    #6a6a75;
+    -gm-success:        #3fae72;
+    -gm-success-hover:  #57c088;
+    -gm-success-press:  #329260;
     -gm-cherry:         #e0596d;
     -gm-cherry-hover:   #ec7183;
     -gm-cherry-press:   #c2455a;
@@ -715,4 +718,39 @@
 .active-user-none {
     -fx-text-fill: -gm-text-muted;
     -fx-font-weight: normal;
+}
+
+/* ---------- ACTIVATE (positive action) ---------- */
+
+/* the same button becomes green while it reads "Activate Event" and red
+   while it reads "Close Event"; EventRightController swaps the class. */
+.success-button {
+    -fx-background-color: -gm-success;
+    -fx-text-fill: -gm-on-accent;
+    -fx-font-weight: bold;
+}
+
+.success-button:hover {
+    -fx-background-color: -gm-success-hover;
+}
+
+.success-button:pressed {
+    -fx-background-color: -gm-success-press;
+}
+
+.success-button:disabled {
+    -fx-background-color: -gm-disabled-bg;
+    -fx-text-fill: -gm-disabled-text;
+}
+
+/* ---------- ORDER BOOK: side picker ---------- */
+
+.side-box {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-pref-width: 105;
+}
+
+.side-box .list-cell {
+    -fx-alignment: CENTER;
 }

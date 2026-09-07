@@ -77,6 +77,13 @@ public class MainController {
         }
     }
 
+    @FXML
+    void refreshEventsTab(Event event) {
+        if (eventsTab.isSelected()) {
+            eventPaneController.refresh();
+        }
+    }
+
     // ---------------- shared state, read by the panes ----------------
 
     public GMController getEngine() {
@@ -93,6 +100,10 @@ public class MainController {
 
     public ObjectProperty<UserDTO> activeUserProperty() {
         return activeUser;
+    }
+
+    public void clearActiveUser() {
+       activeUser.set(null);
     }
 
     public UserDTO getActiveUser() {
@@ -122,8 +133,8 @@ public class MainController {
     /** Top finished loading a file - broadcast to both tabs. */
     public void onFileLoaded() {
         fileLoadedProperty.set(true);
-        activeUser.set(null);          // the previous file's users no longer exist
         eventPaneController.onFileLoaded();
         usersPaneController.onFileLoaded();
+        clearActiveUser();
     }
 }
