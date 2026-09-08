@@ -19,7 +19,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 
@@ -76,36 +75,37 @@ public class EventRightController {
 
     // ---------- order-book view (kept in fx:define until needed) ----------
     //TODO: implement order-book view, with bid/ask tables and participation table
+    //TODO: add a statistics panel with: highest bid,lowest ask, last trade price, mid price , spread
+    //TODO: for paticipation display userHoldings
     @FXML private GridPane orderBookDetailsPane;
     @FXML private Label eventBalance;
     @FXML private Label comissionPaid;
-    @FXML private TableView<?> participationTable;
-    @FXML private TableColumn<?, ?> participationUserCol;
-    @FXML private TableColumn<?, ?> participationOptionCol;
-    @FXML private TableColumn<?, ?> participationSharesCol;
-    @FXML private TableColumn<?, ?> participationPaidCol;
-    @FXML private TableColumn<?, ?> participationCommissionCol;
+    @FXML private TableView<ParticipantHoldingDTO> OBparticipationTable;
+    @FXML private TableColumn<ParticipantHoldingDTO, String>  OBparticipationUserCol;
+    @FXML private TableColumn<ParticipantHoldingDTO, String>  OBparticipationOptionCol;
+    @FXML private TableColumn<ParticipantHoldingDTO, Integer> OBparticipationSharesCol;
+    @FXML private TableColumn<ParticipantHoldingDTO, String>  OBparticipationValueCol;
 
-    @FXML private VBox  option1VBox;
-    @FXML private Label option1Label;
-    @FXML private Label option1Value;
-    @FXML private Label option1Shares;
-    @FXML private TableView<TradeDTO> option1Table;
-    @FXML private TableColumn<TradeDTO, String>  option1UserCol;
-    @FXML private TableColumn<TradeDTO, String>  option1SideCol;
-    @FXML private TableColumn<TradeDTO, Integer> option1SharesCol;
-    @FXML private TableColumn<TradeDTO, Double>  option1PriceCol;
+    @FXML private VBox OBoption1VBox;
+    @FXML private Label OBoption1Label;
+    @FXML private Label OBoption1Value;
+    @FXML private Label OBoption1Shares;
+    @FXML private TableView<OrderDTO> OBoption1Table;
+    @FXML private TableColumn<OrderDTO, String> OBoption1UserCol;
+    @FXML private TableColumn<OrderDTO, String> OBoption1SideCol;
+    @FXML private TableColumn<OrderDTO, Integer> OBoption1SharesCol;
+    @FXML private TableColumn<OrderDTO, Double> OBoption1PriceCol;
 
-    @FXML private VBox  option2VBox;
-    @FXML private Label option2Label;
-    @FXML private Label option2Value;
-    @FXML private Label option2Shares;
+    @FXML private VBox OBoption2VBox;
+    @FXML private Label OBoption2Label;
+    @FXML private Label OBoption2Value;
+    @FXML private Label OBoption2Shares;
 
-    @FXML private TableView<TradeDTO> option2Table;
-    @FXML private TableColumn<TradeDTO, String>  option2UserCol;
-    @FXML private TableColumn<TradeDTO, String>  option2SideCol;
-    @FXML private TableColumn<TradeDTO, Integer> option2SharesCol;
-    @FXML private TableColumn<TradeDTO, Double>  option2PriceCol;
+    @FXML private TableView<OrderDTO> OBoption2Table;
+    @FXML private TableColumn<OrderDTO, String> OBoption2UserCol;
+    @FXML private TableColumn<OrderDTO, String> OBoption2SideCol;
+    @FXML private TableColumn<OrderDTO, Integer> option2SharesCol;
+    @FXML private TableColumn<OrderDTO, Double>  option2PriceCol;
 
     // order-book participation controls (bid / ask)
     @FXML private ComboBox<String> obOption1SideBox;
@@ -135,7 +135,7 @@ public class EventRightController {
         lmsrParticipationTable.setSelectionModel(null);
         lmsrOption1Table.setSelectionModel(null);
         lmsrOption2Table.setSelectionModel(null);
-        participationTable.setSelectionModel(null);
+        OBparticipationTable.setSelectionModel(null);
         //TODO add the order book tables
 
         setEventStatusBtn.setDisable(true);
@@ -146,32 +146,46 @@ public class EventRightController {
         this.main = main;
         this.tab = tab;
         bindBetButtons();
+        bindOrderBookButtons();
     }
 
     private void initOrderBookColumns() {
-        initOrderBookOptionColumns(option1UserCol, option1SideCol, option1SharesCol, option1PriceCol);
-        initOrderBookOptionColumns(option2UserCol, option2SideCol, option2SharesCol, option2PriceCol);
-        option1Table.setSelectionModel(null);
-        option2Table.setSelectionModel(null);
+        initOrderBookOptionColumns(OBoption1UserCol, OBoption1SideCol, OBoption1SharesCol, OBoption1PriceCol);
+        initOrderBookOptionColumns(OBoption2UserCol, OBoption2SideCol, option2SharesCol, option2PriceCol);
+        initOrderBookParticipationColumns();
+        OBoption1Table.setSelectionModel(null);
+        OBoption2Table.setSelectionModel(null);
     }
 
-    private void initOrderBookOptionColumns(TableColumn<TradeDTO,String> userCol,
-                                            TableColumn<TradeDTO,String> sideCol,
-                                            TableColumn<TradeDTO,Integer> sharesCol,
-                                            TableColumn<TradeDTO,Double> priceCol) {
+    private void initOrderBookParticipationColumns() {
+        OBparticipationUserCol.setCellValueFactory(c ->
+                new ReadOnlyStringWrapper(c.getValue().userName()));
+
+        OBparticipationOptionCol.setCellValueFactory(c ->
+                new ReadOnlyStringWrapper(c.getValue().optionName()));
+
+        OBparticipationSharesCol.setCellValueFactory(c ->
+                new ReadOnlyObjectWrapper<>(c.getValue().shares()));
+
+        OBparticipationValueCol.setCellValueFactory(c ->
+                new ReadOnlyStringWrapper(String.format("%.2f", c.getValue().value())));
+    }
+
+    private void initOrderBookOptionColumns(TableColumn<OrderDTO,String> userCol,
+                                            TableColumn<OrderDTO,String> sideCol,
+                                            TableColumn<OrderDTO,Integer> sharesCol,
+                                            TableColumn<OrderDTO,Double> priceCol) {
         userCol.setCellValueFactory(c ->
                 new ReadOnlyStringWrapper(c.getValue().userName()));
 
         sideCol.setCellValueFactory(c ->
-                new ReadOnlyStringWrapper(c.getValue().side() == Side.BUY ? "Buy" : "Sell"));
+                new ReadOnlyStringWrapper(c.getValue().side()== Side.BUY ? "Buy" : "Sell"));
 
         sharesCol.setCellValueFactory(c ->
-                new ReadOnlyObjectWrapper<>(c.getValue().sharesBought()));
+                new ReadOnlyObjectWrapper<>(c.getValue().quantity()));
 
         priceCol.setCellValueFactory(c ->
-                new ReadOnlyObjectWrapper<>(c.getValue().sharesBought() == 0
-                        ? 0.0
-                        : c.getValue().pricePaid() / c.getValue().sharesBought()));
+                new ReadOnlyObjectWrapper<>(c.getValue().price()));
     }
     // ---------------- called by MainController ----------------
 
@@ -227,6 +241,9 @@ public class EventRightController {
 
             lmsrParticipationTable.setItems(FXCollections.observableArrayList());
             lmsrParticipationTable.setPlaceholder(new Label("Select an event to see its participations"));
+
+//            OBparticipationTable.setItems(FXCollections.observableArrayList());
+//            OBparticipationTable.setPlaceholder(new Label("Select an event to see its participants"));
         });
     }
 
@@ -340,10 +357,10 @@ public class EventRightController {
 
     // ---------------- bets ----------------
 
-    @FXML void placeBetOption1(ActionEvent event) { placeBet(1, lmsrOption1BetField); }
-    @FXML void placeBetOption2(ActionEvent event) { placeBet(2, lmsrOption2BetField); }
+    @FXML void placeBetOption1(ActionEvent event) { placeLMSRBet(1, lmsrOption1BetField); }
+    @FXML void placeBetOption2(ActionEvent event) { placeLMSRBet(2, lmsrOption2BetField); }
 
-    private void placeBet(int optionNumber, TextField field) {
+    private void placeLMSRBet(int optionNumber, TextField field) {
         if (currentEvent.get() == null) {
             return;
         }
@@ -359,7 +376,13 @@ public class EventRightController {
         int eventId = currentEvent.get().getId();
 
         try {
-            PurchaseDTO purchase = main.getEngine().participateInEvent(main.getActiveUser().getName(),eventId, optionNumber, shares);
+            PurchaseDTO purchase = main.getEngine().participateInEvent(
+                    main.getActiveUser().getName(),
+                    eventId,
+                    optionNumber,
+                    shares,
+                    Side.BUY,
+                    null);
 
             // the engine returns null when the event is already closed
             if (purchase == null) {
@@ -374,6 +397,49 @@ public class EventRightController {
         } catch (IllegalArgumentException ex) {
             DialogHelper.showErrorAlert("Could not place the bet", ex.getMessage());
         }
+    }
+
+    private void bindOrderBookButtons() {
+
+        BooleanBinding noOpenEvent = Bindings.createBooleanBinding(
+                () -> currentEvent.get() == null
+                        || !currentEvent.get().isOpen(),
+                currentEvent
+        );
+
+        BooleanBinding noActiveUser = Bindings.createBooleanBinding(
+                () -> main.getActiveUser() == null,
+                main.activeUserProperty()
+        );
+
+        BooleanBinding orderUnavailable =
+                main.fileLoadedProperty().not()
+                        .or(noOpenEvent)
+                        .or(noActiveUser);
+
+        // disable inputs when trading isn't allowed
+        obOption1SideBox.disableProperty().bind(orderUnavailable);
+        obOption1SharesField.disableProperty().bind(orderUnavailable);
+        obOption1PriceField.disableProperty().bind(orderUnavailable);
+
+        obOption2SideBox.disableProperty().bind(orderUnavailable);
+        obOption2SharesField.disableProperty().bind(orderUnavailable);
+        obOption2PriceField.disableProperty().bind(orderUnavailable);
+
+        // disable button until all required fields contain values
+        obOption1OrderBtn.disableProperty().bind(
+                orderUnavailable
+                        .or(obOption1SharesField.textProperty().isEmpty())
+                        .or(obOption1PriceField.textProperty().isEmpty())
+                        .or(obOption1SideBox.valueProperty().isNull())
+        );
+
+        obOption2OrderBtn.disableProperty().bind(
+                orderUnavailable
+                        .or(obOption2SharesField.textProperty().isEmpty())
+                        .or(obOption2PriceField.textProperty().isEmpty())
+                        .or(obOption2SideBox.valueProperty().isNull())
+        );
     }
 
     private void bindBetButtons() {
@@ -438,7 +504,8 @@ public class EventRightController {
             EventSummaryDTO selected = currentEvent.get();
             lmsrEventDescription.setText(selected == null ? "" : selected.getDescription());
 
-            List<LMSROptionDTO> options = event.optionTradingStatus();
+            List<LMSROptionDTO> options = event.optionTradingStatus().stream()
+                    .map(o -> (LMSROptionDTO) o).toList();
             displayLmsrOptionDetails(options.getFirst(), lmsrOption1Box);
             displayLmsrOptionDetails(options.get(1), lmsrOption2Box);
 
@@ -483,27 +550,37 @@ public class EventRightController {
         Platform.runLater(() -> {
             eventDetailsContent.getChildren().setAll(orderBookDetailsPane);
             displayOrderBookEventDetails(event);
+            displayOrderBookParticipationTable();
+            eventBalance.setText(String.format("%.2f", event.accountBalance()));
+            comissionPaid.setText(String.format("%.2f", event.totalCommissionPaid()));
         });
     }
 
+    private void displayOrderBookParticipationTable() {
+        if (currentEvent.get() == null) {
+            OBparticipationTable.setItems(FXCollections.observableArrayList());
+            OBparticipationTable.setPlaceholder(new Label("Select an event to see its participants"));
+            return;
+        }
+        List<ParticipantHoldingDTO> participants =
+                main.getEngine().getEventParticipants(currentEvent.get().getId());
+        OBparticipationTable.setItems(FXCollections.observableArrayList(participants));
+    }
+
     private void displayOrderBookEventDetails(EventTradingStatusDTO singleEvent) {
-        LMSROptionDTO first  = singleEvent.optionTradingStatus().getFirst();
-        LMSROptionDTO second = singleEvent.optionTradingStatus().get(1);
+       OBOptionDTO first  = (OBOptionDTO) singleEvent.optionTradingStatus().getFirst();
+        OBOptionDTO second = (OBOptionDTO) singleEvent.optionTradingStatus().get(1);
 
-        displayOrderBookOptionDetails(first, option1VBox, option1Label, option1Table,
-                singleEvent.tradingHistory().stream()
-                        .filter(t -> Objects.equals(t.optionName(), first.optionName()))
-                        .toList());
+        displayOrderBookOptionDetails(first, OBoption1VBox, OBoption1Label, OBoption1Table,
+                ((OBOptionDTO) singleEvent.optionTradingStatus().getFirst()).restingOrders());
 
-        displayOrderBookOptionDetails(second, option2VBox, option2Label, option2Table,
-                singleEvent.tradingHistory().stream()
-                        .filter(t -> Objects.equals(t.optionName(), second.optionName()))
-                        .toList());
+        displayOrderBookOptionDetails(second, OBoption2VBox, OBoption2Label, OBoption2Table,
+                ((OBOptionDTO) singleEvent.optionTradingStatus().get(1)).restingOrders());
     }
 
     private void displayOrderBookOptionDetails(
-            LMSROptionDTO option, VBox optionBox, Label optionLabel,
-            TableView<TradeDTO> table, List<TradeDTO> trades)
+            OBOptionDTO option, VBox optionBox, Label optionLabel,
+            TableView<OrderDTO> table, List<OrderDTO> trades)
     {
         optionLabel.setText(option.getOptionName());
 
@@ -587,16 +664,21 @@ public class EventRightController {
 
         boolean isBid = BID.equals(sideBox.getValue());
 
-        // TODO wire once the engine exposes an order-book API, e.g.
-        //   main.getEngine().placeOrder(main.getActiveUser().getName(),
-        //           event.getId(), optionNumber, isBid, shares, price);
-        //   sharesField.clear();
-        //   priceField.clear();
-        //   tab.onEventChanged(event.getId());
-        DialogHelper.showErrorAlert("Not implemented yet",
-                String.format("%s %d shares of option %d at %.2f - "
-                                + "the order book engine is not wired up yet.",
-                        isBid ? "Buy" : "Sell", shares, optionNumber, price));
+        try {
+            main.getEngine().participateInEvent(
+                    main.getActiveUser().getName(),
+                    event.getId(),
+                    optionNumber,
+                    shares,
+                    isBid ? Side.BUY : Side.SELL,
+                    price);
+
+            sharesField.clear();
+            priceField.clear();
+            tab.onEventChanged(event.getId());
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            DialogHelper.showErrorAlert("Could not place the order", ex.getMessage());
+        }
     }
 
     /** Accepts a non-negative decimal with at most two digits after the point. */

@@ -9,6 +9,9 @@ public class Holding  {
     }
 
     public void applySell(int qty, double proceeds) {
+        if (shares < qty) {
+            throw new IllegalArgumentException("Not enough shares to sell");
+        }
         shares -= qty; totalPaid -= proceeds;
     }
 

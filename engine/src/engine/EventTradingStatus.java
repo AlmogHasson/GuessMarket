@@ -15,7 +15,7 @@ public class EventTradingStatus implements Serializable {
         private String eventName;
         private Status status;
         private List<Option> options;
-        private double accountBalance; // for the user, not the event
+        private double accountBalance;
         private double totalCommissionPaid;
         private List<Trade> tradingHistory;
 

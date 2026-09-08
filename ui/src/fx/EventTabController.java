@@ -43,6 +43,12 @@ public class EventTabController {
      * are records, so the old one can never reflect the change.
      */
     public void onEventChanged(int eventId) {
+        // Refresh the right pane immediately from the current engine state.
+        // Important for Order Book because quantities, minting and event balance
+        // can all change after a single order.
+        eventRightPaneController.refresh();
+
+        // Then refresh the event list on the left.
         eventLeftPaneController.reloadEventsAndSelect(eventId);
     }
 

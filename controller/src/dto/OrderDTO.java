@@ -1,7 +1,6 @@
 package dto;
 
 import engine.Order;
-import engine.Side;
 
 public record OrderDTO(
           long id,
@@ -17,7 +16,7 @@ public record OrderDTO(
         this(
                 order.getId(),
                 order.getUserName(),
-                order.getSide(),
+                Side.fromEngine(order.getSide()),
                 order.getQuantity(),
                 order.getPrice(),
                 order.getSeq());

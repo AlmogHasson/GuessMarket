@@ -16,17 +16,4 @@ public record LMSROptionDTO (
                 option.getIsWinner());
     }
 
-    //getters
-    public String getOptionName() {
-        return optionName;
-}
-
-    public double getCurrentValue() {
-        return currentValue;
-    }
-
-    public int getTotalSharesBought() {
-        return totalSharesBought;
-    }
-
 }

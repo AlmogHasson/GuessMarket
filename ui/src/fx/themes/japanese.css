@@ -525,8 +525,8 @@
 /* ---------- REQUESTED BEHAVIOUR ---------- */
 
 /* 1a. option tables: no scrollbars at all (one fixed row, nothing to scroll) */
-.option-table .scroll-bar:vertical,
-.option-table .scroll-bar:horizontal {
+.lmsr-option-table .scroll-bar:vertical,
+.lmsr-option-table .scroll-bar:horizontal {
     -fx-opacity: 0;
     -fx-pref-width: 0;
     -fx-pref-height: 0;
@@ -535,7 +535,7 @@
     -fx-padding: 0;
 }
 
-.option-table > .virtual-flow > .corner {
+.lmsr-option-table > .virtual-flow > .corner {
     -fx-opacity: 0;
     -fx-background-color: transparent;
 }

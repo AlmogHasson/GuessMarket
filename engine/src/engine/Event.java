@@ -84,75 +84,12 @@ public class Event implements Serializable {
     }
 
 
-
-    /** validation is done in EngineImpl,
-     so we can assume optionNumber and shares are valid and event is open for trading */
-//    public Purchase participate(User user ,int optionNumber, int shares) {
-//        Option option = options.get(optionNumber - 1);
-//
-//        double beforeBalance = getBalance();
-//
-//        // update shares
-//        option.buyShares(shares);
-//
-//        double afterBalance = getBalance();
-//
-//        // cost of the shares themselves
-//        double sharesCost = afterBalance - beforeBalance;
-//
-//        // commission is charged only for on-purchase commission type
-//        double commissionCost = 0.0f;
-//
-//        if (Objects.equals(comission.getCommissionType(), "on-purchase")) {
-//            commissionCost = sharesCost * comission.getValue() / 100;
-//        }
-//
-//        double totalCost = sharesCost + commissionCost;
-//
-//        EventTradingStatus event = getEventTradingStatus();
-//
-//        // money received by the event: shares cost + commission if applicable
-//        event.updateAccountBalance(
-//                event.getAccountBalance() + totalCost
-//        );
-//
-//        // update commission actually collected
-//        event.updateTotalCommissionPaid(
-//                event.getTotalCommissionPaid() + commissionCost
-//        );
-//
-//        updateOptionsValues();
-//
-//        event.updateHistory(new Trade(user.getName(), option.getOptionName(), shares, totalCost));
-//
-//        return new Purchase(totalCost, sharesCost, commissionCost);
-//    }
-
-//    private void updateOptionsValues() {
-//        double firstOptionValue = method.calculateOptionValue(
-//                options.get(0).getTotalSharesBought(),
-//                options.get(1).getTotalSharesBought()
-//        );
-//
-//        options.get(0).updateValue(firstOptionValue);
-//        options.get(1).updateValue(1 - firstOptionValue);
-//    }
-//
-//
-//    private double getBalance() {
-//        return method.calculateBalance(
-//                options.get(0).getTotalSharesBought(),
-//                options.get(1).getTotalSharesBought()
-//        );
-//    }
-
     public boolean isOpen() {
         return getEventTradingStatus().isOpen();
     }
 
     public boolean isParticipating(String name) {
-        return getEventTradingStatus().getTradingHistory().stream()
-                .anyMatch(trade -> trade.getUserName().equals(name));
+        return getParticipantNames().contains(name);
     }
 
 
@@ -161,13 +98,29 @@ public class Event implements Serializable {
      *  If the key doesn't exist → calls the function to compute a value, stores it, and returns it
      */
     public Holding getOrCreateHolding(String userName, int optionNumber) {
-
         return userHoldings.computeIfAbsent(userName, k -> new Holding[]{new Holding(), new Holding()})
                 [optionNumber - 1];
     }
 
-
     public Map<String, Holding[]> getUserHoldings() {
         return userHoldings;
+    }
+
+
+    public Set<String> getParticipantNames() {
+        Set<String> names = new TreeSet<>(userHoldings.keySet());
+        if (method instanceof OrderBook orderBook) {
+            for (int optionNumber = 1; optionNumber <= options.size(); optionNumber++) {
+                for (Order order : orderBook.getRestingOrders(optionNumber)) {
+                    names.add(order.getUserName());
+                }
+            }
+        }
+        else {
+            for (Trade trade : getEventTradingStatus().getTradingHistory()) {
+                names.add(trade.getUserName());
+            }
+        }
+        return names;
     }
 }

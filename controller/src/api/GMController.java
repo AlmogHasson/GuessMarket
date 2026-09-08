@@ -23,11 +23,11 @@ public class GMController {
     }
 
     public EventTradingStatusDTO getEventTradingStatus(int eventId) throws IllegalArgumentException {
-        return new EventTradingStatusDTO(engine.getEventTradingStatus(eventId));
+        return new EventTradingStatusDTO(engine.getEvents().stream().filter(e -> e.getId() == eventId).findFirst().orElseThrow(() -> new IllegalArgumentException("Event not found: " + eventId)));
     }
 
-    public PurchaseDTO participateInEvent(String userName, int eventId, int optionNumber, int shares) {
-        return new PurchaseDTO(engine.participateInEvent(userName,eventId, optionNumber, shares));
+    public PurchaseDTO participateInEvent(String userName, int eventId, int optionNumber, int shares, Side side, Double price) {
+        return new PurchaseDTO(engine.participateInEvent(userName, eventId, optionNumber, shares, side.toEngine(), price));
     }
 
     public void closeEvent(int eventID,int winningOption) {
@@ -80,5 +80,20 @@ public class GMController {
 
     public void activateEvent(String name, int eventId) {
         engine.activateEvent(name, eventId);
+    }
+
+    public List<ParticipantHoldingDTO> getEventParticipants(int eventId) {
+        List<OptionDTO> options = getEventTradingStatus(eventId).optionTradingStatus();
+        List<ParticipantHoldingDTO> rows = new ArrayList<>();
+        for (String userName : engine.getEventParticipants(eventId)) {
+            for (int i = 0; i < options.size(); i++) {
+                int optionNumber = i + 1;
+                OptionDTO option = options.get(i);
+                int shares = engine.getParticipantShares(eventId, userName, optionNumber);
+                double value = shares * option.currentValue();
+                rows.add(new ParticipantHoldingDTO(userName, option.optionName(), shares, value));
+            }
+        }
+        return rows;
     }
 }

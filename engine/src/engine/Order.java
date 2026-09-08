@@ -43,10 +43,6 @@ public class Order {
         return seq;
     }
 
-    public void decrementQuantity(int qty) {
-        quantity -= qty;
-    }
-
     public void reduce(int qty) {
         if (qty > quantity) {
             throw new IllegalArgumentException("Cannot reduce quantity below zero");

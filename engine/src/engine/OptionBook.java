@@ -34,6 +34,7 @@ public class OptionBook {
             book.remove(order.getPrice());
         }
     }
+
     public void updateLast(double p) { lastTradePrice = p; }
 
     public Double bestBid() { return bids.isEmpty() ? null : bids.firstKey(); }

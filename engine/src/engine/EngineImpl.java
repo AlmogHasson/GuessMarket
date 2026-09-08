@@ -99,26 +99,66 @@ public class EngineImpl implements Engine {
         return event.getEventTradingStatus();
     }
 
+
     @Override
-    public Purchase participateInEvent(String userName, int eventId, int optionNumber, int shares) {
+    public Purchase participateInEvent(String userName, int eventId, int optionNumber, int shares, Side side, Double price) {
         Event event = events.stream().filter(e -> e.getId() == eventId).findFirst().orElse(null);
         User user = users.get(userName);
 
-        validateParticipationParams(eventId, optionNumber, shares, user, event);
+        validateParticipationParams(userName, eventId, optionNumber, shares, user, event);
 
-        TradeResult result = event.participate(user, users, optionNumber, shares, Side.BUY, null);
+        if (event.getMethod() instanceof OrderBook) {
+            if (side == null) {
+                throw new IllegalArgumentException("Side (BUY/SELL) is required for order book trading");
+            }
+            if (price == null) {
+                throw new IllegalArgumentException("Price is required for order book trading");
+            }
+
+            validadateSharesQuantity(userName, optionNumber, shares, side, event, user);
+
+        } else {
+            // LMSR: always a buy against the curve; price has no meaning here
+            side = Side.BUY;
+            price = null;
+        }
+
+        TradeResult result = event.participate(user, users, optionNumber, shares, side, price);
         return new Purchase(result.getNetCostToInitiator(),
                 result.getNetCostToInitiator() - result.getCommissionPaid(),
                 result.getCommissionPaid());
     }
 
-    private static void validateParticipationParams(int eventId, int optionNumber, int shares, User user, Event event) {
-        if (user == null) {
-            throw new IllegalArgumentException("User with name " + user.name + " not found");
-        }
+    private static void validadateSharesQuantity(
+            String userName, int optionNumber, int shares,
+            Side side, Event event, User user)
+    {
+        OrderBook orderBook = (OrderBook) event.getMethod();
 
-        if (user.isEventMaker(eventId)) {
-            throw new IllegalArgumentException("User with name " + user.name + " is the market maker for event ID " + eventId);
+        if (side == Side.SELL) {
+            int ownedShares =
+                    event.getOrCreateHolding(userName, optionNumber).getShares();
+
+            int reservedShares =
+                    orderBook.getReservedSellShares(userName, optionNumber);
+
+            int availableShares = ownedShares - reservedShares;
+
+            if (shares > availableShares) {
+                throw new IllegalArgumentException(
+                        "Not enough available shares to sell. User "
+                                + userName
+                                + " owns " + ownedShares
+                                + " shares, has " + reservedShares
+                                + " shares already offered for sale, and only "
+                                + availableShares + " shares are available.");
+            }
+        }
+    }
+
+    private static void validateParticipationParams(String userName, int eventId, int optionNumber, int shares, User user, Event event) {
+        if (user == null) {
+            throw new IllegalArgumentException("User with name " + userName + " not found");
         }
 
         if (event == null) {
@@ -132,6 +172,7 @@ public class EngineImpl implements Engine {
         if (optionNumber < 1 || optionNumber > event.getOptions().size()) {
             throw new IllegalArgumentException("Invalid option number: " + optionNumber);
         }
+        
         if (shares <= 0) {
             throw new IllegalArgumentException("Shares must be greater than 0");
         }
@@ -141,7 +182,6 @@ public class EngineImpl implements Engine {
         }
     }
 
-
     @Override
     public void closeEvent(int eventId,int winningOption)throws  IllegalArgumentException{
         Event event = events.stream().filter(e -> e.getId() == eventId).findFirst().orElse(null);
@@ -149,28 +189,6 @@ public class EngineImpl implements Engine {
             throw new IllegalArgumentException("Event with ID " + eventId + " not found");
         }
         event.getMethod().close(event, users, winningOption);
-
-//        Event event = events.stream().filter(e -> e.getId() == eventId).findFirst().orElse(null);
-//        if (event == null) {
-//            throw new IllegalArgumentException("Event with ID " + eventId + " not found");
-//        }
-//        if (winningOption < 0 || winningOption > event.getOptions().size()) {
-//            throw new IllegalArgumentException("Invalid option number: " + winningOption);
-//        }
-//
-//        EventTradingStatus ETS = event.getEventTradingStatus();
-//        ETS.close();
-//        event.getOptions().get(winningOption-1).setWinner();
-//
-//        double winningShares = event.getOptions().get(winningOption-1).getTotalSharesBought();
-//        String commissionType = event.getComission().getCommissionType();
-//        double commission = commissionType.equals("on-close")
-//                ? winningShares * event.getComission().getValue() / 100 : 0.0;
-//
-//        ETS.updateTotalCommissionPaid(ETS.getTotalCommissionPaid() + commission);
-//
-//        double payOut = winningShares - commission;
-//        ETS.updateAccountBalance(ETS.getAccountBalance() - payOut);
 
     }
 
@@ -188,6 +206,27 @@ public class EngineImpl implements Engine {
             throw new IllegalArgumentException("User with name " + name + " is not the market maker for event ID " + eventId);
         }
         event.activate(user);
+    }
+
+    @Override
+    public List<String> getEventParticipants(int eventId) {
+        Event event = events.stream().filter(e -> e.getId() == eventId).findFirst().orElse(null);
+        if (event == null) {
+            throw new IllegalArgumentException("Event with ID " + eventId + " not found");
+        }
+        return new ArrayList<>(event.getParticipantNames());
+    }
+
+    @Override
+    public int getParticipantShares(int eventId, String userName, int optionNumber) {
+        Event event = events.stream().filter(e -> e.getId() == eventId).findFirst().orElse(null);
+        if (event == null) {
+            throw new IllegalArgumentException("Event with ID " + eventId + " not found");
+        }
+        Holding holding = event.getUserHoldings().get(userName) == null
+                ? null
+                : event.getUserHoldings().get(userName)[optionNumber - 1];
+        return holding == null ? 0 : holding.getShares();
     }
 
 

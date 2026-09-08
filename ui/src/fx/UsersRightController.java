@@ -77,8 +77,6 @@ public class UsersRightController {
 
         singleEventPaidCol.setCellValueFactory(cellData ->
                 new ReadOnlyStringWrapper(String.format("%.2f", cellData.getValue().pricePaid())));
-//        singleEventCommissionCol.setCellValueFactory(cellData ->
-//                new ReadOnlyStringWrapper(String.valueOf(cellData.getValue().commissionPaid())));
 
     }
 
@@ -102,7 +100,12 @@ public class UsersRightController {
                         main.getEngine().getUserEvents(user.name())
                 );
                 UserEventDTO previous = userEventsTable.getSelectionModel().getSelectedItem();
+                if (userEvents.isEmpty()) {
+                    userEventsTable.getItems().clear();
+                    userEventsTable.setPlaceholder(new Label("No events"));
+                }
                 userEventsTable.setItems(userEvents);
+
                 if (previous != null) {
                     userEvents.stream()
                             .filter(e -> e.eventName().equals(previous.eventName()))
@@ -121,7 +124,8 @@ public class UsersRightController {
             return;
         }
         singleEventTable.getItems().setAll(
-                main.getEngine().getEventTradingStatus(row.eventId()).tradingHistory().stream()
+                main.getEngine().getEventTradingStatus(row.eventId()).tradingHistory()
+                        .stream()
                         .filter(t -> t.userName().equals(main.getActiveUser().getName()))
                         .toList());
     }
