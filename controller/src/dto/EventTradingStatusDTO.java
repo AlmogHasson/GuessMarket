@@ -16,18 +16,18 @@ public record EventTradingStatusDTO(
         List<OptionDTO> optionTradingStatus,
         double accountBalance, // for the user, not the event
         double totalCommissionPaid,
-        List<TradeDTO> tradingHistory //history of trades for this event, for all users
+        List<TradeDTO> tradingHistory
     )
 {
     // Constructor to create EventTradingStatusDTO from Event
     public EventTradingStatusDTO(Event event) {
         this(
             from(event.getEventTradingStatus().getStatus()),
-            event.getEventTradingStatus().getName(),
-            getOptionsForCtor(event),
-            event.getEventTradingStatus().getAccountBalance(),
-            event.getEventTradingStatus().getTotalCommissionPaid(),
-            event.getEventTradingStatus().getTradingHistory().stream().map(TradeDTO::new).toList()
+                event.getEventTradingStatus().getName(),
+                getOptionsForCtor(event),
+                event.getEventTradingStatus().getAccountBalance(),
+                event.getEventTradingStatus().getTotalCommissionPaid(),
+                event.getEventTradingStatus().getTradingHistory().stream().map(TradeDTO::new).toList()
         );
     }
 

@@ -76,7 +76,7 @@ public class EventRightController {
 
     // ---------- order-book view (kept in fx:define until needed) ----------
     //TODO: add a statistics panel with: highest bid,lowest ask, last trade price, mid price , spread
-    @FXML private GridPane orderBookDetailsPane;
+    @FXML private ScrollPane orderBookDetailsPane;
     @FXML private Label eventBalance;
     @FXML private Label comissionPaid;
     @FXML private TableView<ParticipantHoldingDTO> OBparticipationTable;
@@ -119,6 +119,20 @@ public class EventRightController {
 
     private static final String BID = "Bid";
     private static final String ASK = "Ask";
+
+    // ---------------- order book stats ----------------
+    @FXML private Label OBoption1Last;
+    @FXML private Label OBoption1Bid;
+    @FXML private Label OBoption1Ask;
+    @FXML private Label OBoption1Mid;
+    @FXML private Label OBoption1Spread;
+    @FXML private Label OBoption2Last;
+    @FXML private Label OBoption2Bid;
+    @FXML private Label OBoption2Ask;
+    @FXML private Label OBoption2Mid;
+    @FXML private Label OBoption2Spread;
+
+
 
     @FXML
     public void initialize() {
@@ -243,7 +257,8 @@ public class EventRightController {
         if (selected.getMethod() instanceof LMSRDTO) {
             showLmsrView(status);
         } else {
-            showOrderBookView(status);
+            List<OrderBookStatsDTO> stats = main.getEngine().getOrderBookStats(selected.getId());
+            showOrderBookView(status, stats);
         }
     }
 
@@ -276,7 +291,7 @@ public class EventRightController {
             lmsrOption2BetField.clear();
 
             lmsrParticipationTable.setItems(FXCollections.observableArrayList());
-            lmsrParticipationTable.setPlaceholder(new Label("Select an event to see its participations"));
+            lmsrParticipationTable.setPlaceholder(new Label("No content in table"));
 
 //            OBparticipationTable.setItems(FXCollections.observableArrayList());
 //            OBparticipationTable.setPlaceholder(new Label("Select an event to see its participants"));
@@ -589,10 +604,10 @@ public class EventRightController {
         table.setItems(items);
     }
 
-    private void showOrderBookView(EventTradingStatusDTO event) {
+    private void showOrderBookView(EventTradingStatusDTO event, List<OrderBookStatsDTO> stats) {
         Platform.runLater(() -> {
             eventDetailsContent.getChildren().setAll(orderBookDetailsPane);
-            displayOrderBookEventDetails(event);
+            displayOrderBookEventDetails(event, stats);
             displayOrderBookParticipationTable();
             eventBalance.setText(String.format("%.2f", event.accountBalance()));
             comissionPaid.setText(String.format("%.2f", event.totalCommissionPaid()));
@@ -610,8 +625,8 @@ public class EventRightController {
         OBparticipationTable.setItems(FXCollections.observableArrayList(participants));
     }
 
-    private void displayOrderBookEventDetails(EventTradingStatusDTO singleEvent) {
-       OBOptionDTO first  = (OBOptionDTO) singleEvent.optionTradingStatus().getFirst();
+    private void displayOrderBookEventDetails(EventTradingStatusDTO singleEvent, List<OrderBookStatsDTO> stats) {
+        OBOptionDTO first  = (OBOptionDTO) singleEvent.optionTradingStatus().getFirst();
         OBOptionDTO second = (OBOptionDTO) singleEvent.optionTradingStatus().get(1);
 
         displayOrderBookOptionDetails(first, OBoption1VBox, OBoption1Label, OBoption1Table,
@@ -619,6 +634,25 @@ public class EventRightController {
 
         displayOrderBookOptionDetails(second, OBoption2VBox, OBoption2Label, OBoption2Table,
                 ((OBOptionDTO) singleEvent.optionTradingStatus().get(1)).restingOrders());
+
+        OrderBookStatsDTO stats1 = stats.get(0);
+        OrderBookStatsDTO stats2 = stats.get(1);
+
+        setStat(OBoption1Last, stats1.last());
+        setStat(OBoption1Bid, stats1.bestBid());
+        setStat(OBoption1Ask, stats1.bestAsk());
+        setStat(OBoption1Mid, stats1.mid());
+        setStat(OBoption1Spread, stats1.spread());
+
+        setStat(OBoption2Last, stats2.last());
+        setStat(OBoption2Bid, stats2.bestBid());
+        setStat(OBoption2Ask, stats2.bestAsk());
+        setStat(OBoption2Mid, stats2.mid());
+        setStat(OBoption2Spread, stats2.spread());
+    }
+
+    private void setStat(Label label, Double value) {
+        label.setText(value == null ? EMPTY : String.format("%.2f", value));
     }
 
     private void displayOrderBookOptionDetails(
@@ -749,7 +783,8 @@ public class EventRightController {
             showLmsrView(status);
         } else {
             EventTradingStatusDTO status = main.getEngine().getEventTradingStatus(currentEvent.get().getId());
-            showOrderBookView(status);
+            List<OrderBookStatsDTO> stats = main.getEngine().getOrderBookStats(currentEvent.get().getId());
+            showOrderBookView(status, stats);
         }
 
         updateEventManagementButton();

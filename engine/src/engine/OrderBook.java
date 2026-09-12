@@ -245,4 +245,20 @@ public class OrderBook implements Method{
                 .mapToInt(Order::getQuantity)
                 .sum();
     }
+
+    public Double getLast(int optionNumber)    {
+        return books[optionNumber - 1].last();
+    }
+    public Double getBestBid(int optionNumber) {
+        return books[optionNumber - 1].bestBid();
+    }
+    public Double getBestAsk(int optionNumber) {
+        return books[optionNumber - 1].bestAsk();
+    }
+    public Double getMid(int optionNumber)     {
+        return books[optionNumber - 1].mid();
+    }
+    public Double getSpread(int optionNumber)  {
+        return books[optionNumber - 1].spread();
+    }
 }

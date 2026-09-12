@@ -91,17 +91,17 @@ public class GMController {
     public List<ParticipantHoldingDTO> getEventParticipants(int eventId) {
         List<OptionDTO> options = getEventTradingStatus(eventId).optionTradingStatus();
         List<ParticipantHoldingDTO> rows = new ArrayList<>();
-            for (int i = 0; i < options.size(); i++) {
-        for (String userName : engine.getEventParticipants(eventId)) {
-                int optionNumber = i + 1;
-                OptionDTO option = options.get(i);
-                int shares = engine.getParticipantShares(eventId, userName, optionNumber);
-                double value = shares * option.currentValue();
-                Holding[] userHoldings = engine.getEvents().get(eventId - 1).getUserHoldings(userName);
-                Holding userHolding = userHoldings[i];
-                double totalPaid = userHolding.getTotalPaid();
-                rows.add(new ParticipantHoldingDTO(userName, option.optionName(), shares, value, totalPaid));
-        }
+            for (int i = 0; i < options.size(); i++)
+            {
+                for (String userName : engine.getEventParticipants(eventId)) {
+                    int optionNumber = i + 1;
+                    OptionDTO option = options.get(i);
+                    int shares = engine.getParticipantShares(eventId, userName, optionNumber);
+                    double value = shares * option.currentValue();
+                    Holding[] userHoldings = engine.getEvents().get(eventId - 1).getUserHoldings(userName);
+                    double totalPaid = (userHoldings == null) ? 0.0 : userHoldings[i].getTotalPaid();
+                    rows.add(new ParticipantHoldingDTO(userName, option.optionName(), shares, value, totalPaid));
+                }
             }
         return rows;
     }
@@ -117,5 +117,22 @@ public class GMController {
             throw new IllegalArgumentException("User not found: " + userName);
         }
         return new UserOrderBookPositionDTO(event, user);
+    }
+
+
+    public List<OrderBookStatsDTO> getOrderBookStats(int eventId) {
+        Event event = engine.getEvents()
+                .stream()
+                .filter(e -> e.getId() == eventId)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Event not found: " + eventId));
+
+        if (!(event.getMethod() instanceof engine.OrderBook ob)) {
+            return List.of(); // LMSR events have no order book stats
+        }
+        return event.getEventTradingStatus().getOptions()
+                .stream()
+                .map(opt -> new OrderBookStatsDTO(ob, opt.getOptionNumber()))
+                .toList();
     }
 }
