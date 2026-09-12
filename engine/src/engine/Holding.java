@@ -1,8 +1,18 @@
 package engine;
 
 public class Holding  {
+    String optionName;
     private int shares;
-    private double totalPaid; // net cash spent acquiring current position
+    private double totalPaid;
+    private double commissionPaid;
+    // net cash spent acquiring current position
+
+    public Holding(String optionName) {
+        this.optionName = optionName;
+        this.shares = 0;
+        this.totalPaid = 0.0;
+        this.commissionPaid = 0.0;
+    }
 
     public void applyBuy(int qty, double cost) {
         shares += qty; totalPaid += cost;
@@ -15,6 +25,10 @@ public class Holding  {
         shares -= qty; totalPaid -= proceeds;
     }
 
+    public void addCommissionPaid(double commission) {
+        commissionPaid += commission;
+    }
+
     // getters
     public int getShares() {
         return shares;
@@ -23,4 +37,13 @@ public class Holding  {
     public double getTotalPaid() {
         return totalPaid;
     }
+
+    public String getOptionName() {
+        return optionName;
+    }
+
+    public double getCommissionPaid() {
+        return commissionPaid;
+    }
+
 }

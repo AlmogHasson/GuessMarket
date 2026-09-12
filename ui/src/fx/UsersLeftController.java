@@ -6,6 +6,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
+import java.util.Map;
+
 /**
  * Controller for usersLeft.fxml - the list of users.
  *
@@ -45,5 +47,27 @@ public class UsersLeftController {
     /** Called when a file is loaded. */
     public void loadUsers() {
         usersTable.getItems().setAll(main.getEngine().getUsers().values());
+    }
+
+    public void refresh() {
+        reloadUsers();
+    }
+
+    public void reloadUsers() {
+        UserDTO previous = usersTable.getSelectionModel().getSelectedItem();
+        Map<String, UserDTO> users = main.getEngine().getUsers();
+
+        if (users.isEmpty()) {
+            usersTable.getItems().clear();
+            return;
+        }
+        
+        usersTable.getItems().setAll(users.values());
+        if (previous != null) {
+            usersTable.getItems().stream()
+                    .filter(u -> u.getName().equals(previous.getName()))
+                    .findFirst()
+                    .ifPresent(u -> usersTable.getSelectionModel().select(u));
+        }
     }
 }

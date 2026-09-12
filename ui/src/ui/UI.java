@@ -19,10 +19,10 @@
 //        EXIT(8);
 //
 //
-//        private final int value;
+//        private final int totalSharesValue;
 //
-//        MenuOption(int value) {
-//            this.value = value;
+//        MenuOption(int totalSharesValue) {
+//            this.totalSharesValue = totalSharesValue;
 //        }
 //    }
 //
@@ -47,7 +47,7 @@
 //            return false;
 //        }
 //        for (MenuOption op : MenuOption.values()) {
-//            if (op.value == choice) {
+//            if (op.totalSharesValue == choice) {
 //                return true;
 //            }
 //        }
@@ -352,7 +352,7 @@
 //            String name = event.getName() == null ? "" : event.getName().replace(", ", " ");
 //            System.out.printf("%-14s: %s%n", "Name", name);
 //            System.out.printf("%-14s: %s%n", "Description", event.getDescription() == null ? "" : event.getDescription());
-//            var c = event.getCommission();             if (c != null) System.out.printf("%-14s: %s%n", "Commission", String.format("%d%% (%s)", c.value(), c.commissionType()));
+//            var c = event.getCommission();             if (c != null) System.out.printf("%-14s: %s%n", "Commission", String.format("%d%% (%s)", c.totalSharesValue(), c.commissionType()));
 //            if (event.getMethod() != null && event.getMethod().getName() != null)
 //                System.out.printf("%-14s: %d%n", "LMSR b", event.getMethod().getValue());
 //            System.out.println();
@@ -373,7 +373,7 @@
 //
 //    private MenuOption intToMenuOption(int num) {
 //        for (MenuOption option : MenuOption.values()) {
-//            if (option.value == num) {
+//            if (option.totalSharesValue == num) {
 //                return option;
 //            }
 //        }
@@ -392,7 +392,7 @@
 //        while (true) {
 //            String option = input.next().trim();
 //
-//            if (option.equals(String.valueOf(MenuOption.EXIT.value)))
+//            if (option.equals(String.valueOf(MenuOption.EXIT.totalSharesValue)))
 //                break;
 //
 //            boolean validNumber;

@@ -13,6 +13,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -74,9 +75,7 @@ public class EventRightController {
     @FXML private TableColumn<TradeDTO, String>  lmsrParticipationPaidCol;
 
     // ---------- order-book view (kept in fx:define until needed) ----------
-    //TODO: implement order-book view, with bid/ask tables and participation table
     //TODO: add a statistics panel with: highest bid,lowest ask, last trade price, mid price , spread
-    //TODO: for paticipation display userHoldings
     @FXML private GridPane orderBookDetailsPane;
     @FXML private Label eventBalance;
     @FXML private Label comissionPaid;
@@ -127,16 +126,15 @@ public class EventRightController {
         initOrderBookColumns();
         restrictToPositiveInteger(lmsrOption1BetField);
         restrictToPositiveInteger(lmsrOption2BetField);
-
         setupOrderControls(obOption1SideBox, obOption1SharesField, obOption1PriceField);
         setupOrderControls(obOption2SideBox, obOption2SharesField, obOption2PriceField);
+        setupEnterBindings();
 
         // read-only tables
         lmsrParticipationTable.setSelectionModel(null);
         lmsrOption1Table.setSelectionModel(null);
         lmsrOption2Table.setSelectionModel(null);
         OBparticipationTable.setSelectionModel(null);
-        //TODO add the order book tables
 
         setEventStatusBtn.setDisable(true);
         showPlaceholders();
@@ -168,7 +166,7 @@ public class EventRightController {
                 new ReadOnlyObjectWrapper<>(c.getValue().shares()));
 
         OBparticipationValueCol.setCellValueFactory(c ->
-                new ReadOnlyStringWrapper(String.format("%.2f", c.getValue().value())));
+                new ReadOnlyStringWrapper(String.format("%.2f", c.getValue().totalSharesValue())));
     }
 
     private void initOrderBookOptionColumns(TableColumn<OrderDTO,String> userCol,
@@ -186,6 +184,44 @@ public class EventRightController {
 
         priceCol.setCellValueFactory(c ->
                 new ReadOnlyObjectWrapper<>(c.getValue().price()));
+    }
+
+    private void setupEnterBindings() {
+        lmsrOption1BetField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER && !lmsrOption1BetBtn.isDisabled()) {
+                lmsrOption1BetBtn.fire();
+            }
+        });
+
+        lmsrOption2BetField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER && !lmsrOption2BetBtn.isDisabled()) {
+                lmsrOption2BetBtn.fire();
+            }
+        });
+
+        obOption1SharesField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER && !obOption1OrderBtn.isDisabled()) {
+                obOption1OrderBtn.fire();
+            }
+        });
+
+        obOption1PriceField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER && !obOption1OrderBtn.isDisabled()) {
+                obOption1OrderBtn.fire();
+            }
+        });
+
+        obOption2SharesField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER && !obOption2OrderBtn.isDisabled()) {
+                obOption2OrderBtn.fire();
+            }
+        });
+
+        obOption2PriceField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER && !obOption2OrderBtn.isDisabled()) {
+                obOption2OrderBtn.fire();
+            }
+        });
     }
     // ---------------- called by MainController ----------------
 
@@ -339,19 +375,26 @@ public class EventRightController {
                 case OPEN -> {
                     if (isMaker) {
                         setEventStatusBtn.setText("Close Event");
+                        setButtonTone("danger-button");
                     } else {
-                        setEventStatusBtn.setText("Event Open");
+                        setEventStatusBtn.setText("Event is open");
+                        setButtonTone("status-open-button");
                     }
                     setEventStatusBtn.setDisable(!isMaker);
-                    setButtonTone("danger-button");
                 }
                 case CLOSED -> {
                     setEventStatusBtn.setText("Event Closed");
+                    setEventStatusBtn.getStyleClass().removeAll(
+                            "success-button",
+                            "danger-button",
+                            "status-open-button"
+                    );
                     setEventStatusBtn.setDisable(true);
-                    setButtonTone("danger-button");
                 }
             }
         });
+
+
 
     }
 
@@ -459,7 +502,7 @@ public class EventRightController {
         lmsrOption1BetField.disableProperty().bind(bettingUnavailable);
         lmsrOption2BetField.disableProperty().bind(bettingUnavailable);
 
-        // the buttons need the extra condition of actually having a value typed
+        // the buttons need the extra condition of actually having a totalSharesValue typed
         lmsrOption1BetBtn.disableProperty()
                 .bind(bettingUnavailable.or(lmsrOption1BetField.textProperty().isEmpty()));
         lmsrOption2BetBtn.disableProperty()
@@ -619,7 +662,7 @@ public class EventRightController {
 
     /** Green while the button activates, red while it closes. */
     private void setButtonTone(String toneClass) {
-        setEventStatusBtn.getStyleClass().removeAll("danger-button", "success-button");
+        setEventStatusBtn.getStyleClass().removeAll("danger-button", "success-button","status-open-button");
         setEventStatusBtn.getStyleClass().add(toneClass);
     }
 

@@ -7,15 +7,17 @@ public record TradeDTO(
         Side side,
         String optionName,
         int sharesBought,
-        double pricePaid
+        double pricePaid,
+        double commissionPaid
     )
 {
     public TradeDTO (Trade trade) {
         this(
-                trade.getUserName(),
-                Side.fromEngine(trade.getSide()),
-                trade.getOptionName(),
-                trade.getSharesBought(),
-                trade.getPricePaid());
+                trade.userName(),
+                Side.fromEngine(trade.side()),
+                trade.optionName(),
+                trade.sharesBought(),
+                trade.pricePaid(),
+                trade.commissionPaid());
     }
 }

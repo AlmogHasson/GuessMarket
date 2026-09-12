@@ -34,5 +34,6 @@ public class UsersTabController {
 
     public void refresh() {
         usersRightPaneController.refresh();
+        usersLeftPaneController.refresh();
     }
 }

@@ -49,26 +49,18 @@
             <columnResizePolicy>
                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN" />
             </columnResizePolicy>
-
-
             <columns>
-
                <TableColumn fx:id="userEventCol" minWidth="40" prefWidth="180" text="Event" />
-
                <TableColumn fx:id="userEventRoleCol" minWidth="40" prefWidth="100" text="Role" />
-
+               <TableColumn fx:id="userEventStatusCol" minWidth="80" prefWidth="110" text="Event Status" />
                <TableColumn fx:id="userEventSharesCol" minWidth="40" prefWidth="90" text="Shares" />
-
-               <TableColumn fx:id="userEventInvestmentCol" minWidth="40" prefWidth="110" text="Investment" />
-
             </columns>
-
          </TableView>
 
       </VBox>
 
 
-      <!-- USER EVENT DETAILS -->
+      <!-- USER SINGLE EVENT DETAILS -->
 
       <VBox spacing="8" styleClass="card" VBox.vgrow="ALWAYS">
 
@@ -78,26 +70,50 @@
 
          <Label alignment="CENTER" maxWidth="1.7976931348623157E308" styleClass="section-title" text="Single event details and trade" />
 
-
-         <TableView fx:id="singleEventTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="0" VBox.vgrow="ALWAYS">
+         <!-- LMSR view: trading history -->
+         <TableView fx:id="lmsrEventTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="0" VBox.vgrow="ALWAYS">
+            <columnResizePolicy>
+               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN" />
+            </columnResizePolicy>
+            <columns>
+               <TableColumn fx:id="lmsrEventOptionCol" minWidth="40" prefWidth="140" text="Option" />
+               <TableColumn fx:id="lmsrSharesCol" minWidth="40" prefWidth="90" text="Shares" />
+               <TableColumn fx:id="lmsrPaidCol" minWidth="40" prefWidth="100" text="Total Paid" />
+               <TableColumn fx:id="lmsrCommissionCol" minWidth="40" prefWidth="110" text="Total Commission Paid" />
+            </columns>
+         </TableView>
+         <!-- Order Book view: current position per option -->
+         <TableView fx:id="orderBookPositionTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="0" VBox.vgrow="ALWAYS" visible="false" managed="false">
             <columnResizePolicy>
                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN" />
             </columnResizePolicy>
 
-
             <columns>
-
-               <TableColumn fx:id="singleEventOptionCol" minWidth="40" prefWidth="140" text="Option" />
-
-               <TableColumn fx:id="singleEventSharesCol" minWidth="40" prefWidth="90" text="Shares" />
-
-               <TableColumn fx:id="singleEventPaidCol" minWidth="40" prefWidth="100" text="Paid" />
-
-               <TableColumn fx:id="singleEventCommissionCol" minWidth="40" prefWidth="110" text="Commission" />
-
+               <TableColumn fx:id="obOptionCol" minWidth="40" prefWidth="180" text="Option" />
+               <TableColumn fx:id="obSharesHeldCol" minWidth="40" prefWidth="120" text="Shares Held" />
+               <TableColumn fx:id="obPaidCol" minWidth="40" prefWidth="120" text="Total Paid" />
+               <TableColumn fx:id="obCommissionCol" minWidth="80" prefWidth="110" text="Commission Paid" />
             </columns>
-
          </TableView>
+
+         <!-- Shared summary lines: commissionPaid (order book only) + closed-event summary (both) -->
+         <VBox fx:id="participationSummary"
+               alignment="CENTER"
+               spacing="6"
+               maxWidth="1.7976931348623157E308"
+               styleClass="participation-summary">
+
+            <Label fx:id="commissionSummaryLabel"
+                   alignment="CENTER"
+                   maxWidth="1.7976931348623157E308"
+                   styleClass="participation-summary-main" />
+
+            <Label fx:id="closedSummaryLabel"
+                   alignment="CENTER"
+                   maxWidth="1.7976931348623157E308"
+                   styleClass="participation-summary-secondary" />
+
+         </VBox>
 
       </VBox>
 

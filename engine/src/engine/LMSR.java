@@ -68,7 +68,7 @@ public class LMSR implements Method,Serializable {
         double percentage = event.getComission().getValue() / 100.0;
         double totalPaidOut = 0, totalCommission = 0;
 
-        for (var entry : event.getUserHoldings().entrySet()) {
+        for (var entry : event.getUsersHoldings().entrySet()) {
             Holding holding = entry.getValue()[winningOptionNumber - 1];
             if (holding.getShares() <= 0) continue;
             double gross = holding.getShares(); // d=1 always for LMSR
@@ -82,11 +82,12 @@ public class LMSR implements Method,Serializable {
         double leftover = ets.getAccountBalance() - totalPaidOut - totalCommission; // subsidy remainder
         // commission goes to the MM's account, leftover subsidy also returns to MM — credit both to the MM
         User MM = users.values().stream()
-                .filter(user -> user.isEventMaker(event.getId()))
+                .filter(user -> user.isMarketMaker(event.getId()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("No market maker found for event " + event.getId()));
         MM.setAccountBalance(MM.getAccountBalance() + leftover + totalCommission);
         ets.updateAccountBalance(0);
+        event.getOptions().get(winningOptionNumber - 1).setWinner();
         ets.close();
     }
 

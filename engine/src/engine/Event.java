@@ -18,7 +18,7 @@ public class Event implements Serializable {
     private final String eventName;
     private EventTradingStatus eventTradingStatus;
     //store the holdings of each user for this event, with the option number as the index in the array
-    private final Map<String, Holding[]> userHoldings = new HashMap<>(); // [0]=option1, [1]=option2
+    private final Map<String, Holding[]> usersHoldings = new HashMap<>(); // [0]=option1, [1]=option2
 
     //get the event from schema and load it
     public Event(GMEvent event) {
@@ -98,17 +98,23 @@ public class Event implements Serializable {
      *  If the key doesn't exist → calls the function to compute a value, stores it, and returns it
      */
     public Holding getOrCreateHolding(String userName, int optionNumber) {
-        return userHoldings.computeIfAbsent(userName, k -> new Holding[]{new Holding(), new Holding()})
-                [optionNumber - 1];
+        return usersHoldings.computeIfAbsent(userName, k -> new Holding[] {
+                new Holding(getOptions().getFirst().getOptionName()),
+                new Holding(getOptions().get(1).getOptionName())
+        })[optionNumber - 1];
     }
 
-    public Map<String, Holding[]> getUserHoldings() {
-        return userHoldings;
+    public Map<String, Holding[]> getUsersHoldings() {
+        return usersHoldings;
+    }
+
+    public Holding[] getUserHoldings(String userName) {
+        return usersHoldings.get(userName);
     }
 
 
     public Set<String> getParticipantNames() {
-        Set<String> names = new TreeSet<>(userHoldings.keySet());
+        Set<String> names = new TreeSet<>(usersHoldings.keySet());
         if (method instanceof OrderBook orderBook) {
             for (int optionNumber = 1; optionNumber <= options.size(); optionNumber++) {
                 for (Order order : orderBook.getRestingOrders(optionNumber)) {
@@ -118,7 +124,7 @@ public class Event implements Serializable {
         }
         else {
             for (Trade trade : getEventTradingStatus().getTradingHistory()) {
-                names.add(trade.getUserName());
+                names.add(trade.userName());
             }
         }
         return names;

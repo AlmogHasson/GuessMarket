@@ -1,13 +1,10 @@
 package api;
 
 import dto.*;
-import engine.Engine;
-import engine.EngineImpl;
+import dto.Side;
+import engine.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
@@ -45,7 +42,16 @@ public class GMController {
     }
 
     public Map<String, UserDTO> getUsers() {
-        return engine.getUsers().entrySet().stream()
+        Map<String, User> users = engine.getUsers();
+
+        if (users == null) {
+            return Collections.emptyMap();
+        }
+
+        return users.entrySet().stream()
+                .filter(Objects::nonNull)
+                .filter(entry -> entry.getKey() != null)
+                .filter(entry -> entry.getValue() != null)
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         entry -> new UserDTO(entry.getValue())
@@ -63,7 +69,7 @@ public class GMController {
         engine.getEvents().stream()
                 .filter(event -> event.isParticipating(user.getName()))
                 .forEach(event -> {
-                userEvents.add(new UserEventDTO(user, event.getEventTradingStatus()));
+                userEvents.add(new UserEventDTO(user, event));
             });
 
         // filter the events the user is participating as market maker
@@ -71,7 +77,7 @@ public class GMController {
                 .forEach(event -> {
                     // check if the user is already added as trader
                     if (userEvents.stream().noneMatch(ue -> ue.eventName().equals(event.getEventName()))) {
-                        userEvents.add(new UserEventDTO(user, event.getEventTradingStatus()));
+                        userEvents.add(new UserEventDTO(user, event));
                     }
                 });
 
@@ -85,15 +91,31 @@ public class GMController {
     public List<ParticipantHoldingDTO> getEventParticipants(int eventId) {
         List<OptionDTO> options = getEventTradingStatus(eventId).optionTradingStatus();
         List<ParticipantHoldingDTO> rows = new ArrayList<>();
-        for (String userName : engine.getEventParticipants(eventId)) {
             for (int i = 0; i < options.size(); i++) {
+        for (String userName : engine.getEventParticipants(eventId)) {
                 int optionNumber = i + 1;
                 OptionDTO option = options.get(i);
                 int shares = engine.getParticipantShares(eventId, userName, optionNumber);
                 double value = shares * option.currentValue();
-                rows.add(new ParticipantHoldingDTO(userName, option.optionName(), shares, value));
-            }
+                Holding[] userHoldings = engine.getEvents().get(eventId - 1).getUserHoldings(userName);
+                Holding userHolding = userHoldings[i];
+                double totalPaid = userHolding.getTotalPaid();
+                rows.add(new ParticipantHoldingDTO(userName, option.optionName(), shares, value, totalPaid));
         }
+            }
         return rows;
+    }
+
+    public UserOrderBookPositionDTO getUserOrderBookPosition(String userName, int eventId) {
+        Event event = engine.getEvents().stream()
+                .filter(e -> e.getId() == eventId)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Event not found: " + eventId));
+
+        User user = engine.getUsers().get(userName);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found: " + userName);
+        }
+        return new UserOrderBookPositionDTO(event, user);
     }
 }

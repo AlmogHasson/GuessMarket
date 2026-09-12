@@ -598,7 +598,7 @@
     -fx-pref-width: 90;
 }
 
-/* red edge while the typed value is not a usable positive number */
+/* red edge while the typed totalSharesValue is not a usable positive number */
 .bet-field:invalid,
 .bet-field.invalid {
     -fx-border-color: -gm-danger;
@@ -741,6 +741,32 @@
 .success-button:disabled {
     -fx-background-color: -gm-disabled-bg;
     -fx-text-fill: -gm-disabled-text;
+}
+
+.status-open-button:disabled {
+    -fx-background-color: -gm-success;
+    -fx-text-fill: -gm-on-accent;
+    -fx-font-weight: bold;
+}
+
+.participation-summary {
+    -fx-padding: 10px 16px;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+
+    -fx-background-color: -fx-control-inner-background;
+    -fx-border-color: -fx-box-border;
+    -fx-border-width: 1px;
+}
+
+.participation-summary-main {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.participation-summary-secondary {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
 }
 
 /* ---------- ORDER BOOK: side picker ---------- */

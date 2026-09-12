@@ -202,7 +202,7 @@ public class EngineImpl implements Engine {
         if (user == null) {
             throw new IllegalArgumentException("User with name " + name + " not found");
         }
-        if (!user.isEventMaker(eventId)) {
+        if (!user.isMarketMaker(eventId)) {
             throw new IllegalArgumentException("User with name " + name + " is not the market maker for event ID " + eventId);
         }
         event.activate(user);
@@ -223,9 +223,9 @@ public class EngineImpl implements Engine {
         if (event == null) {
             throw new IllegalArgumentException("Event with ID " + eventId + " not found");
         }
-        Holding holding = event.getUserHoldings().get(userName) == null
+        Holding holding = event.getUsersHoldings().get(userName) == null
                 ? null
-                : event.getUserHoldings().get(userName)[optionNumber - 1];
+                : event.getUsersHoldings().get(userName)[optionNumber - 1];
         return holding == null ? 0 : holding.getShares();
     }
 

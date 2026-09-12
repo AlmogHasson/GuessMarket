@@ -64,11 +64,11 @@ public class OrderBook implements Method{
         if (incoming.getQuantity() > 0)
             books[req.getOptionNumber() - 1].rest(incoming);
 
-        double net = trades.stream().filter(t -> t.getUserName().equals(req.getUserName()))
-                .mapToDouble(t -> t.getSide() == Side.BUY ? t.getPricePaid() : -t.getPricePaid()).sum();
+        double net = trades.stream().filter(t -> t.userName().equals(req.getUserName()))
+                .mapToDouble(t -> t.side() == Side.BUY ? t.pricePaid() : -t.pricePaid()).sum();
 
-        double commission = trades.stream().filter(t -> t.getUserName().equals(req.getUserName()))
-                .mapToDouble(Trade::getCommission).sum();
+        double commission = trades.stream().filter(t -> t.userName().equals(req.getUserName()))
+                .mapToDouble(Trade::commissionPaid).sum();
 
         return new TradeResult(net, commission, trades, incoming.getQuantity());
     }
@@ -79,7 +79,7 @@ public class OrderBook implements Method{
         boolean onClose = "on-close".equals(event.getComission().getCommissionType());
         double percentage = event.getComission().getValue() / 100.0;
 
-        for (var entry : event.getUserHoldings().entrySet()) {
+        for (var entry : event.getUsersHoldings().entrySet()) {
             Holding holding = entry.getValue()[winningOptionNumber - 1];
 
             if (holding.getShares() <= 0) {
@@ -88,9 +88,11 @@ public class OrderBook implements Method{
 
             double gross = holding.getShares() * d;
             double commission = onClose ? gross * percentage : 0.0;
-            event.getEventTradingStatus().updateTotalCommissionPaid(
-                    event.getEventTradingStatus().getTotalCommissionPaid() + commission
-            );
+            holding.addCommissionPaid(commission);
+            event.getEventTradingStatus()
+                    .updateTotalCommissionPaid(
+                    event.getEventTradingStatus().getTotalCommissionPaid() + commission);
+
             double net = gross - commission;
 
             User user = users.get(entry.getKey());
@@ -105,16 +107,16 @@ public class OrderBook implements Method{
 
             // commission goes to MM
             if (commission > 0) {
-                User mm = users.values().stream().filter(u -> u.isEventMaker(event.getId()))
+                User mm = users.values().stream().filter(u -> u.isMarketMaker(event.getId()))
                         .findFirst()
                         .orElseThrow(() -> new IllegalStateException("Market maker not found"));
                 mm.setAccountBalance(mm.getAccountBalance() + commission);
             }
         }
 
+        event.getOptions().get(winningOptionNumber - 1).setWinner();
         event.getEventTradingStatus().close();
     }
-
 
 
     public int getInitial() {
@@ -125,33 +127,25 @@ public class OrderBook implements Method{
         return allowMint;
     }
 
-    public void setInitial(int value) {
-        this.initial = value;
-    }
-
-    public void setD(int value) {
-        this.d = value;
-    }
-
-    public void setAllowMint(boolean value) {
-        this.allowMint = value;
-    }
-
     private void matchSameOption(Event event, Map<String,User> users, Order incoming, int optNum, List<Trade> trades) {
         OptionBook book = books[optNum - 1];
 //        String optName = event.getOptions().get(optNum - 1).getOptionName();
         while (incoming.getQuantity() > 0) {
-            Order resting = book.bestOpposing(incoming.getSide()); // best ask if incoming is BUY, best bid if SELL
-            if (resting == null) break;
+            Order resting = book.bestOpposing(incoming.getSide(), incoming.getUserName()); // best ask if incoming is BUY, best bid if SELL
+            if (resting == null)
+                break;
             boolean crosses = incoming.getSide() == Side.BUY
                     ? incoming.getPrice() >= resting.getPrice()
                     : incoming.getPrice() <= resting.getPrice();
-            if (!crosses) break;
+            if (!crosses)
+                break;
 
             int qty = Math.min(incoming.getQuantity(), resting.getQuantity());
             double price = resting.getPrice(); // resting order sets the execution price
+
             String buyerName  = incoming.getSide() == Side.BUY ? incoming.getUserName() : resting.getUserName();
             String sellerName = incoming.getSide() == Side.BUY ? resting.getUserName() : incoming.getUserName();
+
             fill(event, users, buyerName, sellerName, optNum, qty, price, trades);
             incoming.reduce(qty);
             resting.reduce(qty);
@@ -161,7 +155,8 @@ public class OrderBook implements Method{
     }
 
     private void fill(Event event, Map<String, User> users, String buyerName, String sellerName,
-                      int optNum, int qty, double price, List<Trade> trades) {
+                      int optNum, int qty, double price, List<Trade> trades)
+    {
         String optName = event.getOptions().get(optNum - 1).getOptionName();
         double gross = qty * price;
         double commission = "on-purchase".equals(event.getComission().getCommissionType())
@@ -170,6 +165,7 @@ public class OrderBook implements Method{
         User buyer = users.get(buyerName);
         buyer.setAccountBalance(buyer.getAccountBalance() - (gross + commission));
         event.getOrCreateHolding(buyerName, optNum).applyBuy(qty, gross + commission);
+        event.getOrCreateHolding(buyerName, optNum).addCommissionPaid(commission);
 
         User seller = users.get(sellerName);
         seller.setAccountBalance(seller.getAccountBalance() + gross);
@@ -221,7 +217,9 @@ public class OrderBook implements Method{
 
         User buyer = users.get(buyerName);
         buyer.setAccountBalance(buyer.getAccountBalance() - (gross + commission));
-        event.getOrCreateHolding(buyerName, optNum).applyBuy(qty, gross + commission);
+        Holding holding = event.getOrCreateHolding(buyerName, optNum);
+        holding.applyBuy(qty, gross + commission);
+        holding.addCommissionPaid(commission);
 
         event.getOptions().get(optNum - 1).updateValue(price);
 

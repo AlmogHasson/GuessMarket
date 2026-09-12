@@ -1,23 +1,49 @@
 package dto;
 
-import engine.EventTradingStatus;
-import engine.Trade;
+import engine.Event;
+import engine.Holding;
 
 public record UserEventDTO(
         int eventId,
         String eventName,
         String role,
-        int totalShares
+        EventStatus eventStatus,
+        int totalShares,
+        double investment,
+        String methodType
 ) {
 
-    public UserEventDTO(UserDTO user, EventTradingStatus event) {
+    public UserEventDTO(UserDTO user, Event event) {
         this(
                 event.getId(),
-                event.getName(),
+                event.getEventName(),
                 user.isEventMaker(event.getId()) ? "MM" : "Trader",
-                event.getTradingHistory().stream()
-                .filter(trade -> trade.getUserName().equals(user.getName()))
-                .mapToInt(Trade::getSharesBought)
-                .sum());
+                EventStatus.from(event.getEventTradingStatus().getStatus()),
+                sumShares(event, user.getName()),
+                sumInvestment(event, user.getName()),
+                event.getMethod() instanceof engine.OrderBook ? "order book" : "lmsr"
+        );
     }
+
+    public boolean isOrderBook() {
+        return "order book".equals(methodType);
+    }
+
+    private static int sumShares(Event event, String userName) {
+        Holding[] holdings = event.getUserHoldings(userName);
+        if (holdings == null) return 0;
+        int total = 0;
+        for (Holding h : holdings) total += h.getShares();
+        return total;
+    }
+
+    private static double sumInvestment(Event event, String userName) {
+        Holding[] holdings = event.getUserHoldings(userName);
+        if (holdings == null) return 0.0;
+        double total = 0.0;
+        for (Holding holding : holdings) total += holding.getTotalPaid();
+        return total;
+    }
+
+
 }

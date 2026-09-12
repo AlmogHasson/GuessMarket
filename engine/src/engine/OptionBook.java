@@ -13,19 +13,48 @@ public class OptionBook {
                 .computeIfAbsent(o.getPrice(), _ -> new LinkedList<>()).add(o);
     }
 
-    public Order bestOpposing(Side incomingSide) {
-        /* first order in asks (if BUY) or bids (if SELL), FIFO within price */
-        return (incomingSide == Side.BUY) ? bestAskOrder() : bestBidOrder();
-    }
-    public Order bestBidOrder() {
-        /* head of best-priced bid queue, or null */
-        return bids.isEmpty() ? null : bids.firstEntry().getValue().peekFirst();
-    }
-    public Order bestAskOrder() {
-        /* head of best-priced ask queue, or null */
-        return asks.isEmpty() ? null : asks.firstEntry().getValue().peekFirst();
+    public Order bestOpposing(Side incomingSide, String excludedUser) {
+        return (incomingSide == Side.BUY)
+                ? bestAskOrder(excludedUser)
+                : bestBidOrder(excludedUser);
     }
 
+    /** excluding same user orders */
+    public Order bestBidOrder(String excludedUser) {
+        for (var entry : bids.entrySet()) {
+            for (Order order : entry.getValue()) {
+                if (!order.getUserName().equals(excludedUser)) {
+                    return order;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /** excluding same user orders */
+    public Order bestBidOrder() {
+        return bids.isEmpty() ? null : bids.firstEntry().getValue().peekFirst();
+    }
+
+
+    /** no exclusions - can create mint for same user orders of opposing options */
+    public Order bestAskOrder(String excludedUser) {
+        for (var entry : asks.entrySet()) {
+            for (Order order : entry.getValue()) {
+                if (!order.getUserName().equals(excludedUser)) {
+                    return order;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /** no exclusions - can create mint for same user orders of opposing options */
+    public Order bestAskOrder() {
+        return asks.isEmpty() ? null : asks.firstEntry().getValue().peekFirst();
+    }
     public void removeResting(Order order) {
         /* remove from the map/queue it lives in */
         TreeMap<Double, LinkedList<Order>> book = (order.getSide() == Side.BUY) ? bids : asks;

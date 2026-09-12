@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 /** Controller for eventLeft.fxml - the four filters and the events table. */
 public class EventLeftController {
 
-    /** Sentinel for "no commission filter"; -1 can never collide with a real value. */
+    /** Sentinel for "no commissionPaid filter"; -1 can never collide with a real totalSharesValue. */
     private static final int ALL_COMMISSIONS = -1;
 
     private MainController main;
@@ -106,7 +106,7 @@ public class EventLeftController {
         });
     }
 
-    /** Repopulates the commission dropdown from the values present in the file. */
+    /** Repopulates the commissionPaid dropdown from the values present in the file. */
     public void refreshCommissionFilterValues() {
         ObservableList<Integer> values = main.getEngine().getEvents().stream()
                 .map(EventSummaryDTO::getCommission)

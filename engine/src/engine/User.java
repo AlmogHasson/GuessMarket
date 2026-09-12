@@ -31,7 +31,7 @@ public class User {
         this.name = value;
     }
 
-    public boolean isEventMaker(int eventID) {
+    public boolean isMarketMaker(int eventID) {
         return eventsIDs.contains(eventID);
     }
 }

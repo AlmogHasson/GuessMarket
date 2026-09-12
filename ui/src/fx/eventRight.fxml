@@ -195,7 +195,7 @@
                </rowConstraints>
             </GridPane>
 
-            <!-- Two compact option tables. Each table contains one row: value and total totalShares. -->
+            <!-- Two compact option tables. Each table contains one row: totalSharesValue and total totalShares. -->
             <GridPane fx:id="lmsrOptionsGrid" hgap="12" maxHeight="132" maxWidth="1.7976931348623157E308" minHeight="118" prefHeight="126">
                <columnConstraints>
                   <ColumnConstraints hgrow="ALWAYS" minWidth="0" percentWidth="50" />
