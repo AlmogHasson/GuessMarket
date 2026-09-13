@@ -10,8 +10,6 @@ import java.util.Objects;
 
 public class GuessMarketApp extends Application {
 
-
-
     @Override
     public void start(Stage stage) throws Exception {
         FXMLLoader loader = new FXMLLoader(GuessMarketApp.class.getResource("main.fxml"));
@@ -39,7 +37,3 @@ public class GuessMarketApp extends Application {
     }
 
 }
-
-
-//TODO:: check if the icon on the window can be changed - if so put a graph or a coin icon
-//TODO:: check if the top of the window can also be styled

@@ -1,7 +1,6 @@
 package dto;
 
 import engine.User;
-
 import java.util.List;
 
 public record UserDTO(

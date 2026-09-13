@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public class OrderBook implements Method{
-    private int d;
+    private final int d;
     protected int initial; //money the MM puts in the event - splits evenly between the two options
     protected boolean allowMint;
     private final OptionBook[] books = { new OptionBook(), new OptionBook() };
@@ -49,25 +49,25 @@ public class OrderBook implements Method{
 
     @Override
     public TradeResult executeTrade(Event event, Map<String, User> users, TradeRequest req) {
-        if (req.getPrice() == null || req.getPrice() >= d )
-            throw new IllegalArgumentException("Invalid price for Order Book order: " + req.getPrice() + " (must be < d = " + d + ")");
+        if (req.price() == null || req.price() >= d )
+            throw new IllegalArgumentException("Invalid price for Order Book order: " + req.price() + " (must be < d = " + d + ")");
 
         Order incoming =
-                new Order(++orderSeq, req.getUserName(), req.getSide(), req.getShares(), req.getPrice(), orderSeq);
+                new Order(++orderSeq, req.userName(), req.side(), req.shares(), req.price(), orderSeq);
 
         List<Trade> trades = new ArrayList<>();
-        matchSameOption(event, users, incoming, req.getOptionNumber(), trades);
+        matchSameOption(event, users, incoming, req.optionNumber(), trades);
 
-        if (allowMint && incoming.getQuantity() > 0 && req.getSide() == Side.BUY)
-            matchMint(event, users, incoming, req.getOptionNumber(), trades);
+        if (allowMint && incoming.getQuantity() > 0 && req.side() == Side.BUY)
+            matchMint(event, users, incoming, req.optionNumber(), trades);
 
         if (incoming.getQuantity() > 0)
-            books[req.getOptionNumber() - 1].rest(incoming);
+            books[req.optionNumber() - 1].rest(incoming);
 
-        double net = trades.stream().filter(t -> t.userName().equals(req.getUserName()))
+        double net = trades.stream().filter(t -> t.userName().equals(req.userName()))
                 .mapToDouble(t -> t.side() == Side.BUY ? t.pricePaid() : -t.pricePaid()).sum();
 
-        double commission = trades.stream().filter(t -> t.userName().equals(req.getUserName()))
+        double commission = trades.stream().filter(t -> t.userName().equals(req.userName()))
                 .mapToDouble(Trade::commissionPaid).sum();
 
         return new TradeResult(net, commission, trades, incoming.getQuantity());
@@ -76,8 +76,8 @@ public class OrderBook implements Method{
 
     @Override
     public void close( Event event, Map<String, User> users, int winningOptionNumber) {
-        boolean onClose = "on-close".equals(event.getComission().getCommissionType());
-        double percentage = event.getComission().getValue() / 100.0;
+        boolean onClose = "on-close".equals(event.getCommission().getCommissionType());
+        double percentage = event.getCommission().getValue() / 100.0;
 
         for (var entry : event.getUsersHoldings().entrySet()) {
             Holding holding = entry.getValue()[winningOptionNumber - 1];
@@ -159,8 +159,8 @@ public class OrderBook implements Method{
     {
         String optName = event.getOptions().get(optNum - 1).getOptionName();
         double gross = qty * price;
-        double commission = "on-purchase".equals(event.getComission().getCommissionType())
-                ? gross * event.getComission().getValue() / 100.0 : 0.0;
+        double commission = "on-purchase".equals(event.getCommission().getCommissionType())
+                ? gross * event.getCommission().getValue() / 100.0 : 0.0;
 
         User buyer = users.get(buyerName);
         buyer.setAccountBalance(buyer.getAccountBalance() - (gross + commission));
@@ -212,8 +212,8 @@ public class OrderBook implements Method{
                           int optNum, int qty, double price, List<Trade> trades) {
         String optName = event.getOptions().get(optNum - 1).getOptionName();
         double gross = qty * price;
-        double commission = "on-purchase".equals(event.getComission().getCommissionType())
-                ? gross * event.getComission().getValue() / 100.0 : 0.0;
+        double commission = "on-purchase".equals(event.getCommission().getCommissionType())
+                ? gross * event.getCommission().getValue() / 100.0 : 0.0;
 
         User buyer = users.get(buyerName);
         buyer.setAccountBalance(buyer.getAccountBalance() - (gross + commission));

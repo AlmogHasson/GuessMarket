@@ -23,21 +23,21 @@ public class LMSR implements Method,Serializable {
 
     @Override
     public TradeResult executeTrade(Event event, Map<String, User> users, TradeRequest req) {
-        User user = users.get(req.getUserName());
+        User user = users.get(req.userName());
         if (user == null) {
             throw new IllegalArgumentException("User not found");
         }
         List<Option> opts = event.getOptions();
-        Option opt = opts.get(req.getOptionNumber() - 1);
+        Option opt = opts.get(req.optionNumber() - 1);
 
         double before = calculateBalance(opts.get(0).getTotalSharesBought(), opts.get(1).getTotalSharesBought());
-        opt.buyShares(req.getShares());
+        opt.buyShares(req.shares());
         double after = calculateBalance(opts.get(0).getTotalSharesBought(), opts.get(1).getTotalSharesBought());
         double sharesCost = after - before;
 
         // Calculate the commission based on the event's commission type
-        double commission = "on-purchase".equals(event.getComission().getCommissionType())
-                ? sharesCost * event.getComission().getValue() / 100 : 0.0;
+        double commission = "on-purchase".equals(event.getCommission().getCommissionType())
+                ? sharesCost * event.getCommission().getValue() / 100 : 0.0;
         double totalCost = sharesCost + commission;
 
         if (user.getAccountBalance() < totalCost)
@@ -52,9 +52,9 @@ public class LMSR implements Method,Serializable {
         opts.get(0).updateValue(v);
         opts.get(1).updateValue(1 - v);
 
-        event.getOrCreateHolding(user.getName(), req.getOptionNumber()).applyBuy(req.getShares(), totalCost);
+        event.getOrCreateHolding(user.getName(), req.optionNumber()).applyBuy(req.shares(), totalCost);
 
-        Trade trade = new Trade(user.getName(), opt.getOptionName(), req.getShares(), totalCost, Side.BUY, commission);
+        Trade trade = new Trade(user.getName(), opt.getOptionName(), req.shares(), totalCost, Side.BUY, commission);
         ets.updateHistory(trade);
 
         return new TradeResult(totalCost, commission, List.of(trade), 0);
@@ -64,8 +64,8 @@ public class LMSR implements Method,Serializable {
     @Override
     public void close(Event event, Map<String, User> users, int winningOptionNumber) {
         EventTradingStatus ets = event.getEventTradingStatus();
-        boolean onClose = "on-close".equals(event.getComission().getCommissionType());
-        double percentage = event.getComission().getValue() / 100.0;
+        boolean onClose = "on-close".equals(event.getCommission().getCommissionType());
+        double percentage = event.getCommission().getValue() / 100.0;
         double totalPaidOut = 0, totalCommission = 0;
 
         for (var entry : event.getUsersHoldings().entrySet()) {

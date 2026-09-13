@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import engine.Event;
-import engine.EventTradingStatus;
 import engine.LMSR;
 import engine.Option;
 

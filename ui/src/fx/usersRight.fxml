@@ -4,9 +4,8 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.StackPane?>
 
    <VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fx.UsersRightController" spacing="12">
 
@@ -15,23 +14,27 @@
       </padding>
 
 
-      <HBox alignment="CENTER">
+   <StackPane>
 
-         <Region HBox.hgrow="ALWAYS" />
+      <Label styleClass="page-title"
+             text="Single User Details"
+             StackPane.alignment="CENTER" />
 
-         <Label styleClass="page-title" text="Single User Details" />
+      <VBox alignment="CENTER"
+            maxWidth="-Infinity"
+            styleClass="balance-card"
+            StackPane.alignment="CENTER_RIGHT">
 
-         <Region HBox.hgrow="ALWAYS" />
+         <Label styleClass="muted-label"
+                text="Account Balance" />
 
-         <VBox alignment="CENTER" styleClass="balance-card">
+         <Label fx:id="balance"
+                styleClass="balance-value"
+                text="0.00" />
 
-            <Label styleClass="muted-label" text="Account Balance" />
+      </VBox>
 
-            <Label fx:id="balance" styleClass="balance-value" text="0.00" />
-
-         </VBox>
-
-      </HBox>
+   </StackPane>
 
 
       <!-- USER EVENTS -->
@@ -90,8 +93,9 @@
 
             <columns>
                <TableColumn fx:id="obOptionCol" minWidth="40" prefWidth="180" text="Option" />
-               <TableColumn fx:id="obSharesHeldCol" minWidth="40" prefWidth="120" text="Shares Held" />
-               <TableColumn fx:id="obPaidCol" minWidth="40" prefWidth="120" text="Total Paid" />
+               <TableColumn fx:id="obSideCol" minWidth="45" prefWidth="65" text="Side" />
+               <TableColumn fx:id="obSharesHeldCol" minWidth="40" prefWidth="120" text="Shares" />
+               <TableColumn fx:id="obPaidCol" minWidth="40" prefWidth="120" text="Total Paid / Received" />
                <TableColumn fx:id="obCommissionCol" minWidth="80" prefWidth="110" text="Commission Paid" />
             </columns>
          </TableView>

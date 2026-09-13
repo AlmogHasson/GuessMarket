@@ -1,16 +1,13 @@
 package engine;
 
-import generated.Commission;
-
 import java.io.Serializable;
 
-public class Comission implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class Commission implements Serializable {
 
-    private int value;
-    private String commissionType;
+    private final int value;
+    private final String commissionType;
 
-    public Comission(Commission commission) {
+    public Commission(generated.Commission commission) {
         this.value = commission.getValue();
         this.commissionType = commission.getType();
     }

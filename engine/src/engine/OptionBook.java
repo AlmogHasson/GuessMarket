@@ -51,10 +51,6 @@ public class OptionBook {
         return null;
     }
 
-    /** no exclusions - can create mint for same user orders of opposing options */
-    public Order bestAskOrder() {
-        return asks.isEmpty() ? null : asks.firstEntry().getValue().peekFirst();
-    }
     public void removeResting(Order order) {
         /* remove from the map/queue it lives in */
         TreeMap<Double, LinkedList<Order>> book = (order.getSide() == Side.BUY) ? bids : asks;

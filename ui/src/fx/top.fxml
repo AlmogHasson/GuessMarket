@@ -6,16 +6,8 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
    <VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="10" styleClass="top-bar" fx:controller="fx.TopController">
@@ -35,7 +27,7 @@
 
                <Region HBox.hgrow="ALWAYS" />
 
-               <CheckBox fx:id="animationsCheckBox" minWidth="110" onAction="#toggleAnimations" selected="true" styleClass="animations-check" text="Animations" />
+               <CheckBox fx:id="animationsCheckBox" minWidth="110" onAction="#toggleAnimations" styleClass="animations-check" text="Animations" />
 
                <ComboBox fx:id="themeComboBox" minWidth="130" onAction="#setTheme" prefWidth="130" promptText="Theme" />
 

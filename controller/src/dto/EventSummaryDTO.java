@@ -5,7 +5,7 @@ import engine.Event;
 public record EventSummaryDTO(
        int id,
        String description,
-       CommissionDTO comission,
+       CommissionDTO commission,
        List<OptionDTO> options,
        MethodDTO method,
        String name,
@@ -16,7 +16,7 @@ public record EventSummaryDTO(
         this(
             event.getId(),
             event.getDescription(),
-            new CommissionDTO(event.getComission()),
+            new CommissionDTO(event.getCommission()),
 //            event.getOptions().stream().map(OptionDTO::new).toList(),
             event.getOptions().stream()
                     .map(option -> (OptionDTO) (event.getMethod() instanceof engine.LMSR
@@ -50,7 +50,7 @@ public record EventSummaryDTO(
     }
 
     public CommissionDTO getCommission() {
-        return comission;
+        return commission;
     }
 
     public List<OptionDTO> getOptions() {

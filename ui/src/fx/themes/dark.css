@@ -599,7 +599,6 @@
 }
 
 /* red edge while the typed totalSharesValue is not a usable positive number */
-.bet-field:invalid,
 .bet-field.invalid {
     -fx-border-color: -gm-danger;
 }
@@ -779,4 +778,181 @@
 
 .side-box .list-cell {
     -fx-alignment: CENTER;
+}
+
+/* ---------- SLIDING TAB SELECTION ---------- */
+
+/* The moving indicator now draws the selected background and line. */
+.sliding-tabs > .tab-header-area > .headers-region > .tab,
+.sliding-tabs > .tab-header-area > .headers-region > .tab:selected {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+
+    /* Reserve the same line space in both states. */
+    -fx-border-width: 2 0 0 0;
+}
+
+.sliding-tab-indicator {
+    -fx-background-color: -gm-surface;
+    -fx-background-radius: 8 8 0 0;
+
+    /* Matches the existing purple line at the top of your tabs. */
+    -fx-border-color: -gm-accent-soft transparent transparent transparent;
+    -fx-border-width: 2 0 0 0;
+    -fx-border-radius: 8 8 0 0;
+}
+
+
+/* ---------- KEYBOARD-KEY BUTTONS ---------- */
+
+.button.keycap {
+    -key-face: -gm-accent;
+
+    -fx-background-color:
+            linear-gradient(
+                    to bottom,
+                    derive(-key-face, 12%),
+                    -key-face
+            );
+
+    -fx-background-insets: 0;
+    -fx-background-radius: 7;
+
+    /* A light top edge and darker bottom edge give the face a bevel. */
+    -fx-border-color:
+            rgba(255, 255, 255, 0.28)
+            rgba(0, 0, 0, 0.12)
+            rgba(0, 0, 0, 0.25)
+            rgba(255, 255, 255, 0.10);
+
+    -fx-border-width: 1;
+    -fx-border-radius: 7;
+
+    -fx-cursor: hand;
+}
+
+.button.keycap:hover {
+    -key-face: -gm-accent-hover;
+
+    -fx-border-color:
+            rgba(255, 255, 255, 0.65)
+            rgba(255, 255, 255, 0.25)
+            rgba(0, 0, 0, 0.20)
+            rgba(255, 255, 255, 0.25);
+}
+
+.button.keycap:armed {
+    -key-face: -gm-accent-press;
+}
+
+
+/* Preserve the existing red action-button palette. */
+
+.button.keycap.danger-button {
+    -key-face: -gm-cherry;
+}
+
+.button.keycap.danger-button:hover {
+    -key-face: -gm-cherry-hover;
+}
+
+.button.keycap.danger-button:armed {
+    -key-face: -gm-cherry-press;
+}
+
+
+/* Preserve the existing green activation-button palette. */
+
+.button.keycap.success-button {
+    -key-face: -gm-success;
+}
+
+.button.keycap.success-button:hover {
+    -key-face: -gm-success-hover;
+}
+
+.button.keycap.success-button:armed {
+    -key-face: -gm-success-press;
+}
+
+
+/* Disabled buttons retain their shape without hover feedback. */
+
+.button.keycap:disabled,
+.button.keycap.danger-button:disabled,
+.button.keycap.success-button:disabled {
+    -key-face: -gm-disabled-bg;
+    -fx-text-fill: -gm-disabled-text;
+
+    -fx-border-color:
+            rgba(255, 255, 255, 0.10)
+            rgba(0, 0, 0, 0.10)
+            rgba(0, 0, 0, 0.15)
+            rgba(255, 255, 255, 0.05);
+}
+
+
+/* Keep your disabled "Event is open" status green. */
+
+.button.keycap.status-open-button:disabled {
+    -key-face: -gm-success;
+    -fx-text-fill: -gm-on-accent;
+
+    -fx-border-color:
+            rgba(255, 255, 255, 0.10)
+            rgba(0, 0, 0, 0.10)
+            rgba(0, 0, 0, 0.15)
+            rgba(255, 255, 255, 0.05);
+}
+/* ---------- SLIDING ROW SELECTION ---------- */
+
+/* Preserve normal row backgrounds underneath the moving band. */
+
+.sliding-row-selection .table-row-cell {
+    -slide-row-base: -gm-editor;
+}
+
+.sliding-row-selection .table-row-cell:odd {
+    -slide-row-base: -gm-row-odd;
+}
+
+.sliding-row-selection .table-row-cell:hover {
+    -slide-row-base: -gm-row-hover;
+}
+
+/* Replace the immediate selected background with the moving band. */
+
+.sliding-row-selection .table-row-cell,
+.sliding-row-selection .table-row-cell:selected,
+.sliding-row-selection .table-row-cell:selected:hover {
+    -fx-background-color: -slide-row-base;
+}
+
+/* Text follows the moving highlight rather than changing early. */
+
+.sliding-row-selection .table-row-cell:selected .table-cell {
+    -fx-text-fill: -gm-text;
+}
+
+.sliding-row-selection .table-row-cell:selected:hover .table-cell {
+    -fx-text-fill: -gm-text-strong;
+}
+
+.sliding-row-selection .table-row-cell:selection-band .table-cell,
+.sliding-row-selection .table-row-cell:selection-band:hover .table-cell {
+    -fx-text-fill: -gm-selection-text;
+}
+
+.sliding-row-selection .table-row-cell {
+    -slide-base-paint: -slide-row-base;
+    -slide-band-paint: -gm-selection;
+
+    /* Keep divider lines from slicing the moving highlight. */
+    -fx-border-color: transparent;
+
+
+}
+
+.sliding-row-selection .table-row-cell {
+    -slide-midpoint-paint: #703da8;
 }

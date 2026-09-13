@@ -6,8 +6,8 @@ import java.io.Serializable;
 public class Option implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-    private int optionNumber; // 1 or 2
-    private String optionName;
+    private final int optionNumber; // 1 or 2
+    private final String optionName;
     private double currentValue;   // 0..1
     private int totalSharesBought;
     boolean isWinner;

@@ -38,10 +38,6 @@ public class Holding  {
         return totalPaid;
     }
 
-    public String getOptionName() {
-        return optionName;
-    }
-
     public double getCommissionPaid() {
         return commissionPaid;
     }

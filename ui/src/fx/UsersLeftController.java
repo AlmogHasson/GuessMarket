@@ -2,6 +2,7 @@ package fx;
 
 import dto.UserDTO;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -22,14 +23,16 @@ public class UsersLeftController {
 
     @FXML private TableView<UserDTO> usersTable;
     @FXML private TableColumn<UserDTO, String> userListNameCol;
-    @FXML private TableColumn<UserDTO, Double> userListAccountBalanceCol;
+    @FXML private TableColumn<UserDTO, String> userListAccountBalanceCol;
 
     @FXML
     public void initialize() {
         userListNameCol.setCellValueFactory(c ->
                 new ReadOnlyObjectWrapper<>(c.getValue().getName()));
         userListAccountBalanceCol.setCellValueFactory(c ->
-                new ReadOnlyObjectWrapper<>(c.getValue().getAccountBalance()));
+                new ReadOnlyStringWrapper(
+                        String.format("%.2f", c.getValue().getAccountBalance())
+                ));
     }
 
     public void init(MainController main, UsersTabController tab) {
@@ -46,7 +49,8 @@ public class UsersLeftController {
 
     /** Called when a file is loaded. */
     public void loadUsers() {
-        usersTable.getItems().setAll(main.getEngine().getUsers().values());
+
+        main.rows().update(usersTable, "users", main.getEngine().getUsers().values(), UserDTO::name);
     }
 
     public void refresh() {
@@ -61,8 +65,10 @@ public class UsersLeftController {
             usersTable.getItems().clear();
             return;
         }
+
         
-        usersTable.getItems().setAll(users.values());
+        main.rows().update(usersTable, "users", users.values(), UserDTO::name);
+
         if (previous != null) {
             usersTable.getItems().stream()
                     .filter(u -> u.getName().equals(previous.getName()))

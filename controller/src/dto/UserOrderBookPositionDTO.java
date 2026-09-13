@@ -81,9 +81,9 @@ public record UserOrderBookPositionDTO(
         // Winning shares payout
         double gross = holdings[winnerIdx].getShares() * ob.getValue();
 
-        boolean onClose = "on-close".equals(event.getComission().getCommissionType());
+        boolean onClose = "on-close".equals(event.getCommission().getCommissionType());
 
-        double percentage = event.getComission().getValue() / 100.0;
+        double percentage = event.getCommission().getValue() / 100.0;
 
         // Commission this user pays when redeeming winning shares
         double closingCommission = onClose ? gross * percentage : 0.0;

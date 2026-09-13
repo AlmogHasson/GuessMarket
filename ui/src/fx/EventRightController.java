@@ -75,7 +75,7 @@ public class EventRightController {
     @FXML private TableColumn<TradeDTO, String>  lmsrParticipationPaidCol;
 
     // ---------- order-book view (kept in fx:define until needed) ----------
-    //TODO: add a statistics panel with: highest bid,lowest ask, last trade price, mid price , spread
+
     @FXML private ScrollPane orderBookDetailsPane;
     @FXML private Label eventBalance;
     @FXML private Label comissionPaid;
@@ -159,6 +159,14 @@ public class EventRightController {
         this.tab = tab;
         bindBetButtons();
         bindOrderBookButtons();
+
+        main.installKeycap(setEventStatusBtn);
+
+        main.installKeycap(lmsrOption1BetBtn);
+        main.installKeycap(lmsrOption2BetBtn);
+
+        main.installKeycap(obOption1OrderBtn);
+        main.installKeycap(obOption2OrderBtn);
     }
 
     private void initOrderBookColumns() {
@@ -240,7 +248,12 @@ public class EventRightController {
     // ---------------- called by MainController ----------------
 
     /** A row was selected in the left table (or the selection was cleared). */
+
     public void showEvent(EventSummaryDTO selected) {
+        showEvent(selected, true);
+    }
+
+    public void showEvent(EventSummaryDTO selected, boolean animate) {
         currentEvent.set(selected);
         updateEventManagementButton();
 
@@ -252,13 +265,16 @@ public class EventRightController {
         lmsrOption1BetField.clear();
         lmsrOption2BetField.clear();
 
-        EventTradingStatusDTO status = main.getEngine().getEventTradingStatus(selected.getId());
+        EventTradingStatusDTO status =
+                main.getEngine().getEventTradingStatus(selected.getId());
 
         if (selected.getMethod() instanceof LMSRDTO) {
-            showLmsrView(status);
+            showLmsrView(status, animate);
         } else {
-            List<OrderBookStatsDTO> stats = main.getEngine().getOrderBookStats(selected.getId());
-            showOrderBookView(status, stats);
+            List<OrderBookStatsDTO> stats =
+                    main.getEngine().getOrderBookStats(selected.getId());
+
+            showOrderBookView(status, stats, animate);
         }
     }
 
@@ -275,6 +291,10 @@ public class EventRightController {
 
     private void showPlaceholders() {
         Platform.runLater(() -> {
+            if (currentEvent.get() != null) {
+                return;
+            }
+
             eventDetailsContent.getChildren().setAll(lmsrDetailsPane);
 
             eventDetailsTitle.setText("Event details and trade");
@@ -293,8 +313,7 @@ public class EventRightController {
             lmsrParticipationTable.setItems(FXCollections.observableArrayList());
             lmsrParticipationTable.setPlaceholder(new Label("No content in table"));
 
-//            OBparticipationTable.setItems(FXCollections.observableArrayList());
-//            OBparticipationTable.setPlaceholder(new Label("Select an event to see its participants"));
+
         });
     }
 
@@ -305,6 +324,8 @@ public class EventRightController {
         @SuppressWarnings("unchecked")
         TableView<LMSROptionDTO> table = (TableView<LMSROptionDTO>) optionBox.getChildren().get(1);
         table.setItems(FXCollections.observableArrayList());
+        table.setPlaceholder(new Label(EMPTY));
+
         table.setPlaceholder(new Label(EMPTY));
     }
 
@@ -450,7 +471,7 @@ public class EventRightController {
             }
 
             field.clear();
-            tab.onEventChanged(eventId);
+            tab.onParticipationChanged(eventId);
 
         } catch (IllegalArgumentException ex) {
             DialogHelper.showErrorAlert("Could not place the bet", ex.getMessage());
@@ -551,8 +572,23 @@ public class EventRightController {
 
     // ---------------- views ----------------
 
-    private void showLmsrView(EventTradingStatusDTO event) {
+    private void showLmsrView(EventTradingStatusDTO event,boolean animate) {
+        EventSummaryDTO requestedEvent = currentEvent.get();
+
+        if (requestedEvent == null) {
+            return;
+        }
+
+        int requestedEventId = requestedEvent.getId();
+
         Platform.runLater(() -> {
+            EventSummaryDTO selectedNow = currentEvent.get();
+
+            if (selectedNow == null
+                    || selectedNow.getId() != requestedEventId) {
+                return;
+            }
+
             eventDetailsContent.getChildren().setAll(lmsrDetailsPane);
 
             lmsrEventName.setText(event.eventName());
@@ -564,11 +600,19 @@ public class EventRightController {
 
             List<LMSROptionDTO> options = event.optionTradingStatus().stream()
                     .map(o -> (LMSROptionDTO) o).toList();
-            displayLmsrOptionDetails(options.getFirst(), lmsrOption1Box);
-            displayLmsrOptionDetails(options.get(1), lmsrOption2Box);
 
-            lmsrParticipationTable.setItems(
-                    FXCollections.observableArrayList(event.tradingHistory()));
+            displayLmsrOptionDetails(options.getFirst(), lmsrOption1Box, animate);
+
+            displayLmsrOptionDetails(options.get(1), lmsrOption2Box, animate);
+
+            main.rows().update(
+                    lmsrParticipationTable,
+                    displayedEventId(),
+                    event.tradingHistory(),
+                    TradeDTO::id,
+                    animate
+            );
+
         });
     }
 
@@ -580,7 +624,7 @@ public class EventRightController {
         };
     }
 
-    private void displayLmsrOptionDetails(LMSROptionDTO option, VBox optionBox) {
+    private void displayLmsrOptionDetails(LMSROptionDTO option, VBox optionBox, boolean animate) {
         Label title = (Label) optionBox.getChildren().getFirst();
         title.setText(String.valueOf(option.optionName()));
 
@@ -600,21 +644,38 @@ public class EventRightController {
         sharesCol.setCellValueFactory(c ->
                 new ReadOnlyStringWrapper(String.valueOf(c.getValue().totalSharesBought())));
 
-        ObservableList<LMSROptionDTO> items = FXCollections.observableArrayList(option);
-        table.setItems(items);
+
+        main.rows().update(table, displayedEventId(), List.of(option), LMSROptionDTO::optionName, animate
+        );
     }
 
-    private void showOrderBookView(EventTradingStatusDTO event, List<OrderBookStatsDTO> stats) {
+    private void showOrderBookView(EventTradingStatusDTO event, List<OrderBookStatsDTO> stats, boolean animate) {
+        EventSummaryDTO requestedEvent = currentEvent.get();
+
+        if (requestedEvent == null) {
+            return;
+        }
+
+        int requestedEventId = requestedEvent.getId();
+
         Platform.runLater(() -> {
+            EventSummaryDTO selectedNow = currentEvent.get();
+
+            if (selectedNow == null
+                    || selectedNow.getId() != requestedEventId) {
+                return;
+            }
+
             eventDetailsContent.getChildren().setAll(orderBookDetailsPane);
-            displayOrderBookEventDetails(event, stats);
-            displayOrderBookParticipationTable();
+
+            displayOrderBookEventDetails(event, stats, animate);
+            displayOrderBookParticipationTable(animate);
             eventBalance.setText(String.format("%.2f", event.accountBalance()));
             comissionPaid.setText(String.format("%.2f", event.totalCommissionPaid()));
         });
     }
 
-    private void displayOrderBookParticipationTable() {
+    private void displayOrderBookParticipationTable(boolean animate) {
         if (currentEvent.get() == null) {
             OBparticipationTable.setItems(FXCollections.observableArrayList());
             OBparticipationTable.setPlaceholder(new Label("Select an event to see its participants"));
@@ -622,18 +683,32 @@ public class EventRightController {
         }
         List<ParticipantHoldingDTO> participants =
                 main.getEngine().getEventParticipants(currentEvent.get().getId());
-        OBparticipationTable.setItems(FXCollections.observableArrayList(participants));
+
+
+        main.rows().update(
+                OBparticipationTable,
+                displayedEventId(),
+                participants,
+                participant -> List.of(
+                        participant.userName(),
+                        participant.optionName()
+                ),
+                animate
+        );
     }
 
-    private void displayOrderBookEventDetails(EventTradingStatusDTO singleEvent, List<OrderBookStatsDTO> stats) {
+    private void displayOrderBookEventDetails(EventTradingStatusDTO singleEvent, List<OrderBookStatsDTO> stats, boolean animate) {
         OBOptionDTO first  = (OBOptionDTO) singleEvent.optionTradingStatus().getFirst();
         OBOptionDTO second = (OBOptionDTO) singleEvent.optionTradingStatus().get(1);
 
-        displayOrderBookOptionDetails(first, OBoption1VBox, OBoption1Label, OBoption1Table,
-                ((OBOptionDTO) singleEvent.optionTradingStatus().getFirst()).restingOrders());
+        displayOrderBookOptionDetails(first, OBoption1VBox, OBoption1Label,
+                OBoption1Table, first.restingOrders(), animate
+        );
 
-        displayOrderBookOptionDetails(second, OBoption2VBox, OBoption2Label, OBoption2Table,
-                ((OBOptionDTO) singleEvent.optionTradingStatus().get(1)).restingOrders());
+        displayOrderBookOptionDetails(
+                second, OBoption2VBox, OBoption2Label,
+                OBoption2Table, second.restingOrders(), animate
+        );
 
         OrderBookStatsDTO stats1 = stats.get(0);
         OrderBookStatsDTO stats2 = stats.get(1);
@@ -657,7 +732,7 @@ public class EventRightController {
 
     private void displayOrderBookOptionDetails(
             OBOptionDTO option, VBox optionBox, Label optionLabel,
-            TableView<OrderDTO> table, List<OrderDTO> trades)
+            TableView<OrderDTO> table, List<OrderDTO> trades, boolean animate)
     {
         optionLabel.setText(option.getOptionName());
 
@@ -665,7 +740,14 @@ public class EventRightController {
         ((Label) hBox.getChildren().get(1)).setText(String.valueOf(option.getCurrentValue()));
         ((Label) hBox.getChildren().get(3)).setText(String.valueOf(option.getTotalSharesBought()));
 
-        table.setItems(FXCollections.observableArrayList(trades));
+
+        main.rows().update(
+                table,
+                displayedEventId(),
+                trades,
+                OrderDTO::id,
+                animate
+        );
     }
 
     private void initLmsrColumns() {
@@ -752,7 +834,7 @@ public class EventRightController {
 
             sharesField.clear();
             priceField.clear();
-            tab.onEventChanged(event.getId());
+            tab.onParticipationChanged(event.getId());
         } catch (IllegalArgumentException | IllegalStateException ex) {
             DialogHelper.showErrorAlert("Could not place the order", ex.getMessage());
         }
@@ -780,13 +862,24 @@ public class EventRightController {
         }
         if (currentEvent.get().getMethod() instanceof LMSRDTO) {
             EventTradingStatusDTO status = main.getEngine().getEventTradingStatus(currentEvent.get().getId());
-            showLmsrView(status);
+            showLmsrView(status, true);
         } else {
             EventTradingStatusDTO status = main.getEngine().getEventTradingStatus(currentEvent.get().getId());
             List<OrderBookStatsDTO> stats = main.getEngine().getOrderBookStats(currentEvent.get().getId());
-            showOrderBookView(status, stats);
+            showOrderBookView(status, stats, true);
         }
 
         updateEventManagementButton();
+    }
+
+
+    private int displayedEventId() {
+        EventSummaryDTO selected = currentEvent.get();
+
+        if (selected == null) {
+            throw new IllegalStateException("No event selected.");
+        }
+
+        return selected.getId();
     }
 }

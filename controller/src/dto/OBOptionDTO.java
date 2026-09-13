@@ -2,7 +2,6 @@ package dto;
 
 import engine.Option;
 import engine.Order;
-
 import java.util.List;
 
 public record OBOptionDTO(
@@ -35,7 +34,4 @@ public record OBOptionDTO(
         return totalSharesBought;
     }
 
-    public boolean getIsWinner() {
-        return isWinner;
-    }
 }

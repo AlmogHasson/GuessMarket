@@ -9,6 +9,6 @@ public record PurchaseDTO(
         )
 {
         public PurchaseDTO(Purchase p) {
-            this(p.getTotalPaid(), p.getSharePaid(), p.getCommissionPaid());
+            this(p.totalPaid(), p.sharePaid(), p.commissionPaid());
         }
 }

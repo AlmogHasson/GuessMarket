@@ -41,6 +41,7 @@ public class EventLeftController {
     @FXML private TableColumn<EventSummaryDTO, String>  eventListCommissionCol;
     @FXML private TableColumn<EventSummaryDTO, String>  eventListCommissionTypeCol;
 
+    private boolean restoringSelection;
 
     /**
      * Column factories and filter items are self-contained, so they belong here
@@ -64,9 +65,11 @@ public class EventLeftController {
         commissionTypeFilter.disableProperty().bind(main.fileLoadedProperty().not());
 
         eventsTable.getSelectionModel().selectedItemProperty()
-                .addListener((
-                        obs, oldSelection, newSelection)
-                        -> tab.onEventSelected(newSelection));
+                .addListener((obs, oldSelection, newSelection) -> {
+                    if (!restoringSelection) {
+                        tab.onEventSelected(newSelection);
+                    }
+                });
     }
 
     // ---------------- public API used by MainController ----------------
@@ -76,7 +79,7 @@ public class EventLeftController {
         ObservableList<EventSummaryDTO> events =
                 FXCollections.observableArrayList(main.getEngine().getEvents());
 
-        Platform.runLater(() -> eventsTable.getItems().setAll(events));
+        Platform.runLater(() -> main.rows().update(eventsTable, "events", events, EventSummaryDTO::getId));
     }
 
     /**
@@ -161,7 +164,7 @@ public class EventLeftController {
                         || selectedCommissionType.equalsIgnoreCase(evnt.getCommission().commissionType()))
                 .toList();
 
-        Platform.runLater(() -> eventsTable.getItems().setAll(filtered));
+        Platform.runLater(() -> main.rows().update(eventsTable, "events", filtered, EventSummaryDTO::getId));
     }
 
     // ---------------- one-time setup ----------------
@@ -184,7 +187,7 @@ public class EventLeftController {
                 new ReadOnlyStringWrapper(String.valueOf(c.getValue().getCommission().value())));
 
         eventListCommissionTypeCol.setCellValueFactory(c ->
-                new ReadOnlyStringWrapper(c.getValue().comission().commissionType()));
+                new ReadOnlyStringWrapper(c.getValue().commission().commissionType()));
     }
 
     private String getStatusText(EventSummaryDTO event) {
@@ -219,6 +222,35 @@ public class EventLeftController {
                 return (text == null || text.equals("All"))
                         ? ALL_COMMISSIONS
                         : Integer.parseInt(text);
+            }
+        });
+    }
+
+
+    public void reloadEventsWithoutAnimation(int eventId) {
+        var events = main.getEngine().getEvents();
+
+        Platform.runLater(() -> {
+            restoringSelection = true;
+
+            try {
+                main.rows().update(
+                        eventsTable,
+                        "events",
+                        events,
+                        EventSummaryDTO::getId,
+                        false
+                );
+
+                EventSummaryDTO updated = eventsTable.getItems().stream()
+                        .filter(e -> e.getId() == eventId)
+                        .findFirst()
+                        .orElse(null);
+
+                eventsTable.getSelectionModel().select(updated);
+                tab.onEventSelected(updated, false);
+            } finally {
+                restoringSelection = false;
             }
         });
     }

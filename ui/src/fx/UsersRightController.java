@@ -1,7 +1,5 @@
 package fx;
 
-//TODO: display order book events selected differently
-
 import dto.*;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -43,11 +41,14 @@ public class UsersRightController {
     @FXML private TableColumn<TradeDTO, String> lmsrCommissionCol;
 
     //-----------ORDER BOOK VIEW----------------
-    @FXML private TableView<HoldingDTO> orderBookPositionTable;
-    @FXML private TableColumn<HoldingDTO, String> obOptionCol;
-    @FXML private TableColumn<HoldingDTO, String> obSharesHeldCol;
-    @FXML private TableColumn<HoldingDTO, String> obPaidCol;
-    @FXML private TableColumn<HoldingDTO, String> obCommissionCol;
+
+    @FXML private TableView<TradeDTO> orderBookPositionTable;
+    @FXML private TableColumn<TradeDTO, String> obOptionCol;
+    @FXML private TableColumn<TradeDTO, String> obSideCol;
+    @FXML private TableColumn<TradeDTO, String> obSharesHeldCol;
+    @FXML private TableColumn<TradeDTO, String> obPaidCol;
+    @FXML private TableColumn<TradeDTO, String> obCommissionCol;
+
 
     //-----------SHARED SUMMARY----------------
     @FXML private VBox participationSummary;
@@ -78,17 +79,21 @@ public class UsersRightController {
     }
 
     private void initOrderBookParticipationTableColumns() {
-        obOptionCol.setCellValueFactory(cellData ->
-                new ReadOnlyStringWrapper(cellData.getValue().optionName()));
 
-        obSharesHeldCol.setCellValueFactory(cellData ->
-                new ReadOnlyStringWrapper(String.valueOf(cellData.getValue().shares())));
+        obOptionCol.setCellValueFactory(c ->
+                new ReadOnlyStringWrapper(c.getValue().optionName()));
 
-        obPaidCol.setCellValueFactory(cellData ->
-                new ReadOnlyStringWrapper(String.format("%.2f", cellData.getValue().totalPaid())));
+        obSideCol.setCellValueFactory(c ->
+                new ReadOnlyStringWrapper(c.getValue().side().name()));
 
-        obCommissionCol.setCellValueFactory(cellData ->
-                new ReadOnlyStringWrapper(String.format("%.2f", cellData.getValue().commissionPaid())));
+        obSharesHeldCol.setCellValueFactory(c ->
+                new ReadOnlyStringWrapper(String.valueOf(c.getValue().sharesBought())));
+
+        obPaidCol.setCellValueFactory(c ->
+                new ReadOnlyStringWrapper(String.format("%.2f", c.getValue().pricePaid())));
+
+        obCommissionCol.setCellValueFactory(c ->
+                new ReadOnlyStringWrapper(String.format("%.2f", c.getValue().commissionPaid())));
     }
 
     private void initLmsrParticipationTableColumns() {
@@ -154,11 +159,13 @@ public class UsersRightController {
                     userEventsTable.getItems().clear();
                     userEventsTable.setPlaceholder(new Label("No events"));
                 }
-                userEventsTable.setItems(userEvents);
+
+                main.rows().update(userEventsTable, user.name(), userEvents, UserEventDTO::eventId);
 
                 if (previous != null) {
                     userEvents.stream()
-                            .filter(e -> e.eventName().equals(previous.eventName()))
+//                            .filter(e -> e.eventName().equals(previous.eventName()))
+                            .filter(e -> e.eventId() == previous.eventId())
                             .findFirst()
                             .ifPresent(e ->
                                     {
@@ -205,7 +212,8 @@ public class UsersRightController {
                 .filter(t -> t.userName().equals(userName))
                 .toList();
 
-        lmsrEventTable.getItems().setAll(userTrades);
+
+        main.rows().update(lmsrEventTable, List.of(userName, row.eventId()), userTrades, TradeDTO::id);
 
         setOrderBookParticipationTablePlaceHolder(userTrades, status);
 
@@ -252,7 +260,26 @@ public class UsersRightController {
         showTable(false);
 
         UserOrderBookPositionDTO position = main.getEngine().getUserOrderBookPosition(userName, row.eventId());
-        orderBookPositionTable.getItems().setAll(position.holdings());
+
+        EventTradingStatusDTO status =
+                main.getEngine().getEventTradingStatus(row.eventId());
+
+        List<TradeDTO> history = status.tradingHistory().stream()
+                .filter(trade -> trade.userName().equals(userName))
+                .toList();
+
+        main.rows().update(
+                orderBookPositionTable,
+                List.of(userName, row.eventId()),
+                history,
+                TradeDTO::id
+        );
+
+        orderBookPositionTable.setPlaceholder(
+                new Label("No transactions in this event")
+        );
+
+
 
         String commissionText = String.format("Total commission Paid: %.2f", position.commissionPaid());
 

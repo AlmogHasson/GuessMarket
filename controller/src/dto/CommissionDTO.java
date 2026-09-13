@@ -1,13 +1,13 @@
 package dto;
 
-import engine.Comission;
+import engine.Commission;
 
 public record CommissionDTO(
         int value,
         String commissionType
 )
 {
-    public CommissionDTO(Comission comission) {
+    public CommissionDTO(Commission comission) {
         this(comission.getValue(), comission.getCommissionType());
 
     }

@@ -12,7 +12,7 @@ public class Event implements Serializable {
     private static final long serialVersionUID = 1L;
     private final int id;
     private final String description;
-    private final Comission comission;
+    private final Commission comission;
     private final List<Option> options;
     private final Method method;
     private final String eventName;
@@ -24,7 +24,7 @@ public class Event implements Serializable {
     public Event(GMEvent event) {
         this.id = event.getId();
         this.description = event.getDescription();
-        this.comission = new Comission(event.getCommission());
+        this.comission = new Commission(event.getCommission());
         this.options = new ArrayList<>();
         event.getGMOptions().getGMOption().forEach(option ->
                 this.options.add(new Option(option, event.getGMOptions().getGMOption().indexOf(option) + 1))
@@ -51,7 +51,7 @@ public class Event implements Serializable {
         return description;
     }
 
-    public Comission getComission() {
+    public Commission getCommission() {
         return comission;
     }
 

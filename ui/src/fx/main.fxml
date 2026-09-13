@@ -4,19 +4,6 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<!--
-    Composition tree:
-
-      main.fxml              fx.MainController       owns the engine + shared state
-       |- top.fxml           fx.TopController        title, theme, animations, load
-       |- event.fxml         fx.EventTabController   Events tab
-       |   |- eventLeft.fxml   fx.EventLeftController   filters + events table
-       |   +- eventRight.fxml  fx.EventRightController  details, options, bets
-       +- users.fxml         fx.UsersTabController   Users tab
-           |- usersLeft.fxml   fx.UsersLeftController   users list
-           +- usersRight.fxml  fx.UsersRightController  balance, events, trades
--->
-
 <BorderPane fx:id="rootPane" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fx.MainController">
 
    <top>
@@ -25,7 +12,7 @@
 
    <center>
 
-      <TabPane tabClosingPolicy="UNAVAILABLE">
+      <TabPane fx:id="mainTabs" tabClosingPolicy="UNAVAILABLE">
 
          <tabs>
 

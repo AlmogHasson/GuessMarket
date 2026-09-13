@@ -115,7 +115,7 @@ public class EngineImpl implements Engine {
                 throw new IllegalArgumentException("Price is required for order book trading");
             }
 
-            validadateSharesQuantity(userName, optionNumber, shares, side, event, user);
+            validateSharesQuantity(userName, optionNumber, shares, side, event);
 
         } else {
             // LMSR: always a buy against the curve; price has no meaning here
@@ -124,14 +124,14 @@ public class EngineImpl implements Engine {
         }
 
         TradeResult result = event.participate(user, users, optionNumber, shares, side, price);
-        return new Purchase(result.getNetCostToInitiator(),
-                result.getNetCostToInitiator() - result.getCommissionPaid(),
-                result.getCommissionPaid());
+        return new Purchase(result.netCostToInitiator(),
+                result.netCostToInitiator() - result.commissionPaid(),
+                result.commissionPaid());
     }
 
-    private static void validadateSharesQuantity(
+    private static void validateSharesQuantity(
             String userName, int optionNumber, int shares,
-            Side side, Event event, User user)
+            Side side, Event event)
     {
         OrderBook orderBook = (OrderBook) event.getMethod();
 

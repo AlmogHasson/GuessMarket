@@ -53,6 +53,29 @@ public class EventTabController {
     }
 
     public void refresh() {
-        eventRightPaneController.refresh();
+//        eventRightPaneController.refresh();
+
+        if (main == null || !main.fileLoadedProperty().get()) {
+            return;
+        }
+
+        EventSummaryDTO selected =
+                eventLeftPaneController.getSelectedEvent();
+
+        if (selected != null) {
+            eventLeftPaneController.reloadEventsAndSelect(selected.getId());
+        } else {
+            eventLeftPaneController.loadEvents();
+            eventRightPaneController.refresh();
+        }
+
+    }
+
+    public void onEventSelected(EventSummaryDTO selected, boolean animate) {
+        eventRightPaneController.showEvent(selected, animate);
+    }
+
+    public void onParticipationChanged(int eventId) {
+        eventLeftPaneController.reloadEventsWithoutAnimation(eventId);
     }
 }

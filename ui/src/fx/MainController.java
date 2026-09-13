@@ -9,11 +9,14 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.control.Button;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Root coordinator for the composition tree.
- *
  * It owns the things every pane must agree on - the engine controller, whether a
  * file has been loaded, who the active user is, and whether animations are
  * enabled - and forwards events down to the two tab controllers. Anything that
@@ -24,33 +27,24 @@ public class MainController {
 
     /** The single engine instance for the whole application. */
     private final GMController controller = new GMController();
+    private SlidingTabs slidingTabs;
+    private final List<KeycapButton> keycapButtons = new ArrayList<>();
 
     private final BooleanProperty fileLoadedProperty = new SimpleBooleanProperty(false);
 
-    /**
-     * The user the tester is currently "playing". Ex2 has no login - the tester
-     * impersonates each user in turn - so this is set from the users table. In
-     * ex3 it will be filled from the login page instead, and nothing downstream
-     * has to change.
-     *
-     * Held as the DTO rather than the name because almost every consumer needs
-     * more than a name: the balance for the top bar, the blocked flag to disable
-     * actions, and the identity itself to compare against an event's market
-     * maker. Passing the name around would mean looking the user up again on
-     * every read.
-     */
     private final ObjectProperty<UserDTO> activeUser = new SimpleObjectProperty<>(null);
 
-    private boolean animationsEnabled = true;
+    private boolean animationsEnabled = false;
 
+    private final RowAnimations rowAnimations =
+            new RowAnimations(this::isAnimationsEnabled);
+
+    public RowAnimations rows() {
+        return rowAnimations;
+    }
+
+    @FXML private TabPane mainTabs;
     @FXML private BorderPane rootPane;
-
-    /*
-     * FXMLLoader injects an included file's controller into a field named
-     * "<fx:id>Controller". These names must match the fx:id values on the
-     * <fx:include> elements in main.fxml. The two tab controllers wire their own
-     * halves, so this class never touches a left/right pane directly.
-     */
     @FXML private TopController      topPaneController;
     @FXML private EventTabController eventPaneController;
     @FXML private UsersTabController usersPaneController;
@@ -68,6 +62,10 @@ public class MainController {
         eventPaneController.init(this);
         usersPaneController.init(this);
 
+        slidingTabs = new SlidingTabs(
+                mainTabs,
+                this::isAnimationsEnabled
+        );
     }
 
     @FXML
@@ -114,27 +112,36 @@ public class MainController {
         activeUser.set(user);
     }
 
-    /** True when there is an active user who is still allowed to act. */
-    public boolean canActiveUserTrade() {
-        UserDTO user = activeUser.get();
-        return user != null && !user.isBlocked();
-    }
-
     public boolean isAnimationsEnabled() {
         return animationsEnabled;
     }
 
     public void setAnimationsEnabled(boolean enabled) {
         this.animationsEnabled = enabled;
+
+        if (slidingTabs != null) {
+            slidingTabs.refreshMotion();
+        }
+
+        keycapButtons.forEach(KeycapButton::refresh);
+
     }
 
     // ---------------- events forwarded between the panes ----------------
 
     /** Top finished loading a file - broadcast to both tabs. */
     public void onFileLoaded() {
+        rowAnimations.reset();
+
         fileLoadedProperty.set(true);
         eventPaneController.onFileLoaded();
         usersPaneController.onFileLoaded();
         clearActiveUser();
+    }
+
+    public void installKeycap(Button button) {
+        keycapButtons.add(
+                new KeycapButton(button, this::isAnimationsEnabled)
+        );
     }
 }

@@ -46,6 +46,8 @@ public class TopController {
         main.activeUserProperty()
                 .addListener((obs, old, newSelection)
                         -> showActiveUser(newSelection == null? null : newSelection.name()));
+
+        main.installKeycap(loadFileBtn);
     }
 
     private void showActiveUser(String userName) {

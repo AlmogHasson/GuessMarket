@@ -10,11 +10,10 @@ public class EventTradingStatus implements Serializable {
         OPEN,
         CLOSED
     }
-    private static final long serialVersionUID = 1L;
-        private int id;
-        private String eventName;
+        private final int id;
+        private final String eventName;
         private Status status;
-        private List<Option> options;
+        private final List<Option> options;
         private double accountBalance;
         private double totalCommissionPaid;
         private List<Trade> tradingHistory;
@@ -47,10 +46,6 @@ public class EventTradingStatus implements Serializable {
 
     public List<Trade> getTradingHistory() {
         return tradingHistory;
-    }
-
-    public List<Option> getOptionTradingStatuses() {
-        return options;
     }
 
     public String getName() {
