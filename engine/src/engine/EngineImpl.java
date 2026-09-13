@@ -36,6 +36,7 @@ public class EngineImpl implements Engine {
         validateCommissions(guessMarket);
 
         validateUsers(guessMarket);
+
         validateMarketMakers(guessMarket);
 
         //when the file is valid, load the events and users
@@ -50,16 +51,23 @@ public class EngineImpl implements Engine {
     }
 
     private void validateUsers(GuessMarket guessMarket) {
-        // check if users have unique names
-        var invalidNames = guessMarket.getGMUsers().getGMUser().stream()
-                .map(GMUser::getName)
-                .filter(name -> guessMarket.getGMUsers().getGMUser().stream()
-                        .filter(u -> u.getName().equals(name))
-                        .count() > 1)
-                .distinct()
-                .toList();
-        if (!invalidNames.isEmpty()) {
-            throw new IllegalArgumentException("Users with duplicate names found: " + invalidNames);
+        java.util.Set<String> names = new java.util.HashSet<>();
+
+        for (var user : guessMarket.getGMUsers().getGMUser()) {
+            if (!names.add(user.getName())) {
+                throw new IllegalArgumentException(
+                        "Duplicate user name: \"" + user.getName() + "\"."
+                );
+            }
+
+            if (user.getInitialCash() <= 0) {
+                throw new IllegalArgumentException(
+                        "User \"" + user.getName()
+                                + "\" has invalid initial cash: "
+                                + user.getInitialCash()
+                                + ". Initial cash must be greater than 0."
+                );
+            }
         }
     }
 
