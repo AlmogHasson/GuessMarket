@@ -36,6 +36,7 @@ public class EngineImpl implements Engine {
         validateCommissions(guessMarket);
 
         validateUsers(guessMarket);
+        validateMarketMakers(guessMarket);
 
         //when the file is valid, load the events and users
         loadEvents(guessMarket);
@@ -127,6 +128,54 @@ public class EngineImpl implements Engine {
         return new Purchase(result.netCostToInitiator(),
                 result.netCostToInitiator() - result.commissionPaid(),
                 result.commissionPaid());
+    }
+
+    private void validateMarketMakers(GuessMarket guessMarket) {
+        java.util.Set<Integer> eventIds = new java.util.HashSet<>();
+        java.util.Map<Integer, Integer> makerCounts = new java.util.HashMap<>();
+
+        for (var event : guessMarket.getGMEvents().getGMEvent()) {
+            eventIds.add(event.getId());
+        }
+
+        for (var user : guessMarket.getGMUsers().getGMUser()) {
+            var assignments = user.getGMMarketMaker();
+
+            if (assignments == null) {
+                continue;
+            }
+
+            // Count each user only once per event.
+            java.util.Set<Integer> assignedIds = new java.util.HashSet<>();
+
+            for (var assignment : assignments.getEvent()) {
+                int eventId = assignment.getId();
+
+                if (!eventIds.contains(eventId)) {
+                    throw new IllegalArgumentException(
+                            "User \"" + user.getName()
+                                    + "\" is assigned as market maker for event "
+                                    + eventId + ", but that event does not exist."
+                    );
+                }
+
+                if (assignedIds.add(eventId)) {
+                    makerCounts.merge(eventId, 1, Integer::sum);
+                }
+            }
+        }
+
+        for (var event : guessMarket.getGMEvents().getGMEvent()) {
+            int count = makerCounts.getOrDefault(event.getId(), 0);
+
+            if (count != 1) {
+                throw new IllegalArgumentException(
+                        "Event " + event.getId()
+                                + " must have exactly one market maker, but has "
+                                + count + "."
+                );
+            }
+        }
     }
 
     private static void validateSharesQuantity(
