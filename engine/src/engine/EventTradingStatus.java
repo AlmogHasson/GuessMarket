@@ -10,13 +10,13 @@ public class EventTradingStatus implements Serializable {
         OPEN,
         CLOSED
     }
-        private final int id;
-        private final String eventName;
-        private Status status;
-        private final List<Option> options;
-        private double accountBalance;
-        private double totalCommissionPaid;
-        private List<Trade> tradingHistory;
+    private final int id;
+    private final String eventName;
+    private Status status;
+    private final List<Option> options;
+    private double accountBalance;
+    private double totalCommissionPaid;
+    private List<Trade> tradingHistory;
 
     public EventTradingStatus(int id, String eventName, List<Option> options, double accountBalance) {
         this.id = id;
@@ -51,7 +51,7 @@ public class EventTradingStatus implements Serializable {
     public String getName() {
         return eventName;
     }
-    
+
     public void updateAccountBalance(double newBalance) {
         this.accountBalance = newBalance;
     }
@@ -80,6 +80,3 @@ public class EventTradingStatus implements Serializable {
         status = Status.CLOSED;
     }
 }
-
-
-

@@ -107,7 +107,7 @@ public class TopController {
                     updateProgress(i, 100);
                     Thread.sleep(15);
                 }
-                main.getEngine().loadFile(xmlFilePath);
+                main.getEngine().loadFile(xmlFilePath,main.getActiveUser().getName());
                 return null;
             }
         };

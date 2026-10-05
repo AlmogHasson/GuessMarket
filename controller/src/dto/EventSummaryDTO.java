@@ -3,32 +3,32 @@ import java.util.List;
 import engine.Event;
 
 public record EventSummaryDTO(
-       int id,
-       String description,
-       CommissionDTO commission,
-       List<OptionDTO> options,
-       MethodDTO method,
-       String name,
-       EventStatus status
+        int id,
+        String description,
+        CommissionDTO commission,
+        List<OptionDTO> options,
+        MethodDTO method,
+        String name,
+        EventStatus status
 ) {
     // Constructor to create dto.EventDTO from Event
     public EventSummaryDTO(Event event) {
         this(
-            event.getId(),
-            event.getDescription(),
-            new CommissionDTO(event.getCommission()),
+                event.getId(),
+                event.getDescription(),
+                new CommissionDTO(event.getCommission()),
 //            event.getOptions().stream().map(OptionDTO::new).toList(),
-            event.getOptions().stream()
-                    .map(option -> (OptionDTO) (event.getMethod() instanceof engine.LMSR
-                            ? new LMSROptionDTO(option)
-                            : new OBOptionDTO(option, ((engine.OrderBook) event.getMethod())
-                            .getRestingOrders(option.getOptionNumber()))))
-                    .toList(),
-            (event.getMethod() instanceof engine.LMSR
-            ? new LMSRDTO((engine.LMSR) event.getMethod())
-            : new OrderBookDTO((engine.OrderBook) event.getMethod())),
-            event.getEventName(),
-            EventStatus.from(event.getEventTradingStatus().getStatus())
+                event.getOptions().stream()
+                        .map(option -> (OptionDTO) (event.getMethod() instanceof engine.LMSR
+                                ? new LMSROptionDTO(option)
+                                : new OBOptionDTO(option, ((engine.OrderBook) event.getMethod())
+                                .getRestingOrders(option.getOptionNumber()))))
+                        .toList(),
+                (event.getMethod() instanceof engine.LMSR
+                        ? new LMSRDTO((engine.LMSR) event.getMethod())
+                        : new OrderBookDTO((engine.OrderBook) event.getMethod())),
+                event.getEventName(),
+                EventStatus.from(event.getEventTradingStatus().getStatus())
         );
     }
 

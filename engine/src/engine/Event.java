@@ -21,8 +21,8 @@ public class Event implements Serializable {
     private final Map<String, Holding[]> usersHoldings = new HashMap<>(); // [0]=option1, [1]=option2
 
     //get the event from schema and load it
-    public Event(GMEvent event) {
-        this.id = event.getId();
+    public Event(GMEvent event,int id) {
+        this.id = id;
         this.description = event.getDescription();
         this.comission = new Commission(event.getCommission());
         this.options = new ArrayList<>();

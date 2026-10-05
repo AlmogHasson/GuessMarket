@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Load-file row of the Users tab. Reuses .top-bar for the surface colour, padding and bottom border. -->
+<HBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.FileLoadController" alignment="CENTER_LEFT" spacing="10" styleClass="top-bar">
+
+   <Button fx:id="loadFileBtn" maxHeight="1.7976931348623157E308" onAction="#loadFile" styleClass="load-file-button" text="Load File" />
+
+   <VBox maxWidth="1.7976931348623157E308" spacing="6" HBox.hgrow="ALWAYS">
+
+      <Label fx:id="filePath" maxWidth="1.7976931348623157E308" styleClass="file-path" text="Currently Loaded File path: " />
+
+      <ProgressBar fx:id="progressBar" maxWidth="1.7976931348623157E308" progress="0.0" />
+
+   </VBox>
+
+</HBox>

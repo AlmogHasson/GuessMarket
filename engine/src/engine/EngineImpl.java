@@ -1,26 +1,18 @@
 package engine;
 import java.io.File;
-
 import generated.GMEvent;
-import generated.GMUser;
 import generated.GuessMarket;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Map;
-import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class EngineImpl implements Engine {
-    List<Event> events;
-    Map<String, User> users;
+    private final List<Event> events = new ArrayList<>();
+    Map<String, User> users =  new ConcurrentHashMap<>();
+    EventIdGenerator eventIdGenerator = new EventIdGenerator();
 
 
     @Override
@@ -31,18 +23,37 @@ public class EngineImpl implements Engine {
         JAXBContext jaxbContext = JAXBContext.newInstance(GuessMarket.class);
         GuessMarket guessMarket = (GuessMarket) jaxbContext.createUnmarshaller().unmarshal(new File(path));
 
-        validateIds(guessMarket);
-        // check if commission is between 0 and 90
-        validateCommissions(guessMarket);
+        validateEventNames(guessMarket);
+        validateCommissions(guessMarket); // check if commission is between 0 and 90
 
-        validateUsers(guessMarket);
-
-        validateMarketMakers(guessMarket);
-
-        //when the file is valid, load the events and users
+        //when the file is valid, load the events
         loadEvents(guessMarket);
-        loadUsers(guessMarket);
+    }
 
+    private void validateEventNames(GuessMarket guessMarket) {
+        List<String> eventNames = guessMarket.getGMEvents().getGMEvent()
+                .stream()
+                .map(GMEvent::getName)
+                .toList();
+
+        List<String> duplicateEventNames = eventNames.stream()
+                .filter(name -> eventNames.stream().filter(n -> n.equals(name)).count() > 1)
+                .toList();
+
+        if (!duplicateEventNames.isEmpty()) {
+            throw new IllegalArgumentException("Duplicate event names found: " + duplicateEventNames);
+        }
+
+    }
+
+    @Override
+    public User getOrCreateUser(String userName) {
+        return users.computeIfAbsent(userName, name -> {
+            User user = new User();
+            user.setName(name);
+            user.setAccountBalance(0);
+            return user;
+        });
     }
 
     @Override
@@ -50,47 +61,9 @@ public class EngineImpl implements Engine {
         return users;
     }
 
-    private void validateUsers(GuessMarket guessMarket) {
-        java.util.Set<String> names = new java.util.HashSet<>();
-
-        for (var user : guessMarket.getGMUsers().getGMUser()) {
-            if (!names.add(user.getName())) {
-                throw new IllegalArgumentException(
-                        "Duplicate user name: \"" + user.getName() + "\"."
-                );
-            }
-
-            if (user.getInitialCash() <= 0) {
-                throw new IllegalArgumentException(
-                        "User \"" + user.getName()
-                                + "\" has invalid initial cash: "
-                                + user.getInitialCash()
-                                + ". Initial cash must be greater than 0."
-                );
-            }
-        }
-    }
-
-    private void loadUsers(GuessMarket guessMarket) {
-        users = new java.util.HashMap<>();
-        guessMarket.getGMUsers().getGMUser().forEach(gmUser -> {
-            User user = new User();
-            user.setName(gmUser.getName());
-            user.setAccountBalance(gmUser.getInitialCash());
-            user.setUserEvents(
-                    Optional.ofNullable(gmUser.getGMMarketMaker())
-                            .map(mm -> mm.getEvent().stream()
-                                    .map(generated.Event::getId)
-                                    .toList())
-                            .orElse(List.of()));
-            users.put(user.getName(), user);
-        });
-    }
-
     private void loadEvents(GuessMarket guessMarket) {
-        events.clear();
         guessMarket.getGMEvents().getGMEvent().forEach(gmEvent -> {
-            events.add(new Event(gmEvent));
+            events.add(new Event(gmEvent,eventIdGenerator.getIdAndIncrement()));
         });
     }
 
@@ -138,54 +111,6 @@ public class EngineImpl implements Engine {
                 result.commissionPaid());
     }
 
-    private void validateMarketMakers(GuessMarket guessMarket) {
-        java.util.Set<Integer> eventIds = new java.util.HashSet<>();
-        java.util.Map<Integer, Integer> makerCounts = new java.util.HashMap<>();
-
-        for (var event : guessMarket.getGMEvents().getGMEvent()) {
-            eventIds.add(event.getId());
-        }
-
-        for (var user : guessMarket.getGMUsers().getGMUser()) {
-            var assignments = user.getGMMarketMaker();
-
-            if (assignments == null) {
-                continue;
-            }
-
-            // Count each user only once per event.
-            java.util.Set<Integer> assignedIds = new java.util.HashSet<>();
-
-            for (var assignment : assignments.getEvent()) {
-                int eventId = assignment.getId();
-
-                if (!eventIds.contains(eventId)) {
-                    throw new IllegalArgumentException(
-                            "User \"" + user.getName()
-                                    + "\" is assigned as market maker for event "
-                                    + eventId + ", but that event does not exist."
-                    );
-                }
-
-                if (assignedIds.add(eventId)) {
-                    makerCounts.merge(eventId, 1, Integer::sum);
-                }
-            }
-        }
-
-        for (var event : guessMarket.getGMEvents().getGMEvent()) {
-            int count = makerCounts.getOrDefault(event.getId(), 0);
-
-            if (count != 1) {
-                throw new IllegalArgumentException(
-                        "Event " + event.getId()
-                                + " must have exactly one market maker, but has "
-                                + count + "."
-                );
-            }
-        }
-    }
-
     private static void validateSharesQuantity(
             String userName, int optionNumber, int shares,
             Side side, Event event)
@@ -229,7 +154,7 @@ public class EngineImpl implements Engine {
         if (optionNumber < 1 || optionNumber > event.getOptions().size()) {
             throw new IllegalArgumentException("Invalid option number: " + optionNumber);
         }
-        
+
         if (shares <= 0) {
             throw new IllegalArgumentException("Shares must be greater than 0");
         }
@@ -288,24 +213,20 @@ public class EngineImpl implements Engine {
 
 
     private void validateCommissions(GuessMarket guessMarket) {
-        var invalidIds = guessMarket.getGMEvents().getGMEvent().stream()
+        var invalidNames = guessMarket.getGMEvents().getGMEvent()
+                .stream()
                 .filter(e -> {
                     int commission = e.getCommission().getValue();
                     return commission < 0 || commission > 90;
                 })
-                .map(GMEvent::getId)
+                .map(GMEvent::getName)
                 .toList();
 
-        if (!invalidIds.isEmpty()) {
-            throw new IllegalArgumentException("Invalid commission (must be 0-90) for event IDs: " + invalidIds);
+        if (!invalidNames.isEmpty()) {
+            throw new IllegalArgumentException("Invalid commission (must be 0-90) for event names: " + invalidNames);
         }
     }
 
-    private void validateIds(GuessMarket guessMarket) {
-        if (!hasUniqueIds(guessMarket.getGMEvents().getGMEvent())) {
-            throw new IllegalArgumentException("Events must have unique IDs");
-        }
-    }
 
     private static void validateFilePath(String path) {
         if (path == null || path.trim().isEmpty()) {
@@ -322,41 +243,5 @@ public class EngineImpl implements Engine {
         if (!file.canRead()) {
             throw new IllegalArgumentException("File is not readable");
         }
-    }
-
-
-    public EngineImpl() {
-        this.events = new ArrayList<>();
-    }
-
-
-    private boolean hasUniqueIds(List<GMEvent> gmEvent) {
-        return gmEvent.stream().map(GMEvent::getId).distinct().count() == gmEvent.size();
-    }
-
-    @Override
-    public void saveState(String path) throws IOException {
-        try (ObjectOutputStream out =
-                     new ObjectOutputStream(
-                             new FileOutputStream(path + ".gm"))) {
-
-            out.writeObject(events);
-        }
-    }
-
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public void loadState(String path) throws IOException, ClassNotFoundException {
-        List<Event> loadedEvents;
-
-        try (ObjectInputStream in =
-                     new ObjectInputStream(
-                             new FileInputStream(path + ".gm"))) {
-
-            loadedEvents = (List<Event>) in.readObject();
-        }
-
-        events = loadedEvents;
     }
 }
