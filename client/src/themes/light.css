@@ -1,0 +1,1021 @@
+/* ============================================================
+   GuessMarket - Light theme
+   Every colour is declared once in .root as a looked-up colour;
+   rules below reference the names, never raw hex.
+   This file and its counterpart define the SAME selector set.
+   ============================================================ */
+
+.root,
+.combo-box-popup {
+    -fx-font-family: "Segoe UI";
+
+    /* ---- palette (looked-up colours) ---- */
+    -gm-bg:             #f6f7f9;
+    -gm-surface:        #ffffff;
+    -gm-surface-alt:    #f9fafb;
+    -gm-editor:         #ffffff;
+    -gm-border:         #e5e7eb;
+    -gm-border-strong:  #d1d5db;
+    -gm-divider:        #f3f4f6;
+    -gm-text:           #1f2937;
+    -gm-text-muted:     #6b7280;
+    -gm-text-strong:    #111827;
+    -gm-header-text:    #374151;
+    -gm-accent:         #2563eb;
+    -gm-accent-hover:   #1d4ed8;
+    -gm-accent-press:   #1e40af;
+    -gm-accent-soft:    #2563eb;
+    -gm-selection:      #2563eb;
+    -gm-selection-text: #ffffff;
+    -gm-row-hover:      #c3dafc;
+    -gm-row-odd:        #ffffff;
+    -gm-on-accent:      #ffffff;
+    -gm-track:          #e5e7eb;
+    -gm-thumb:          #d1d5db;
+    -gm-thumb-hover:    #9ca3af;
+    -gm-success:        #22a05b;
+    -gm-success-hover:  #1c8b4e;
+    -gm-success-press:  #177040;
+    -gm-cherry:         #e5566b;
+    -gm-cherry-hover:   #d24358;
+    -gm-cherry-press:   #b93a4c;
+    -gm-danger:         #dc2626;
+    -gm-disabled-bg:    #e5e7eb;
+    -gm-disabled-text:  #9ca3af;
+
+    -fx-background-color: -gm-bg;
+
+    /* Modena defaults, so unstyled controls follow the theme too */
+    -fx-base: -gm-surface;
+    -fx-background: -gm-bg;
+    -fx-control-inner-background: -gm-surface;
+    -fx-text-background-color: -gm-text;
+    -fx-accent: -gm-accent;
+    -fx-focus-color: -gm-accent-soft;
+    -fx-selection-bar: -gm-selection;
+}
+
+/* ---------- TOP ---------- */
+
+.label {
+    -fx-text-fill: -gm-text;
+}
+
+.top-bar {
+    -fx-background-color: -gm-surface;
+    -fx-border-color: transparent transparent -gm-border transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 12 16 12 16;
+}
+
+/* App title. Sized and coloured explicitly in BOTH themes so the
+   contrast against -gm-surface is comparable. */
+.headline {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -gm-accent-soft;
+}
+
+.file-path {
+    -fx-text-fill: -gm-text-muted;
+}
+
+.button {
+    -fx-background-color: -gm-accent;
+    -fx-text-fill: -gm-on-accent;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: -gm-accent-hover;
+}
+
+.button:pressed {
+    -fx-background-color: -gm-accent-press;
+}
+
+.button:disabled {
+    -fx-background-color: -gm-disabled-bg;
+    -fx-text-fill: -gm-disabled-text;
+    -fx-opacity: 1;
+}
+
+.load-file-button {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.progress-bar {
+    -fx-min-height: 10;
+    -fx-pref-height: 10;
+    -fx-max-height: 10;
+}
+
+.progress-bar > .track {
+    -fx-background-color: -gm-track;
+    -fx-background-insets: 0;
+    -fx-background-radius: 10;
+}
+
+.progress-bar > .bar {
+    -fx-background-color: -gm-accent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 10;
+    -fx-padding: 0;
+}
+
+/* ---------- TABS ---------- */
+
+.tab-pane {
+    -fx-background-color: transparent;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.tab-pane > .tab-header-area {
+    -fx-padding: 0 0 -1 8;
+}
+
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: -gm-bg;
+}
+
+.tab {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-padding: 8 16;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.tab .tab-label {
+    -fx-text-fill: -gm-text-muted;
+    -fx-font-weight: normal;
+}
+
+.tab:hover .tab-label {
+    -fx-text-fill: -gm-text;
+}
+
+.tab:selected {
+    -fx-background-color: -gm-surface;
+    -fx-background-radius: 8 8 0 0;
+    -fx-border-color: -gm-accent-soft transparent transparent transparent;
+    -fx-border-width: 2 0 0 0;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.tab:selected .tab-label {
+    -fx-text-fill: -gm-accent-soft;
+    -fx-font-weight: bold;
+}
+
+.tab-pane > .tab-content-area {
+    -fx-background-color: -gm-surface;
+    -fx-background-radius: 8;
+}
+
+/* ---------- COMBO BOX ---------- */
+
+.combo-box {
+    -fx-background-color: -gm-surface;
+    -fx-border-color: -gm-border-strong;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-padding: 2 4;
+}
+
+.combo-box:hover {
+    -fx-border-color: -gm-accent-soft;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: -gm-text;
+    -fx-background-color: transparent;
+}
+
+.combo-box .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.combo-box .arrow {
+    -fx-background-color: -gm-text-muted;
+}
+
+/* the popup is a separate scene graph and needs its own rules */
+.combo-box-popup .list-view {
+    -fx-background-color: -gm-surface;
+    -fx-border-color: -gm-border-strong;
+    -fx-background-radius: 7;
+    -fx-border-radius: 7;
+}
+
+.combo-box-popup .list-view .list-cell {
+    -fx-background-color: -gm-surface;
+    -fx-text-fill: -gm-text;
+    -fx-padding: 6 10;
+}
+
+.combo-box-popup .list-view .list-cell:filled:hover {
+    -fx-background-color: -gm-row-hover;
+    -fx-text-fill: -gm-text-strong;
+}
+
+.combo-box-popup .list-view .list-cell:filled:selected {
+    -fx-background-color: -gm-selection;
+    -fx-text-fill: -gm-selection-text;
+}
+
+/* ---------- TABLE ---------- */
+
+.table-view {
+    -fx-background-color: -gm-editor;
+    -fx-border-color: -gm-border;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-table-cell-border-color: transparent;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: -gm-surface-alt;
+    -fx-background-radius: 8 8 0 0;
+}
+
+.table-view .column-header-background .filler {
+    -fx-background-color: -gm-surface-alt;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -gm-border transparent;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: -gm-header-text;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER;
+}
+
+.table-row-cell {
+    -fx-background-color: -gm-editor;
+    -fx-border-color: transparent transparent -gm-divider transparent;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: -gm-row-odd;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: -gm-row-hover;
+}
+
+.table-row-cell:selected,
+.table-row-cell:selected:hover {
+    -fx-background-color: -gm-selection;
+}
+
+/* Explicit cell text colour for EVERY state - the default state was
+   previously left to Modena, which is what made rows hard to read. */
+.table-row-cell .table-cell {
+    -fx-text-fill: -gm-text;
+}
+
+.table-row-cell:hover .table-cell {
+    -fx-text-fill: -gm-text-strong;
+}
+
+.table-row-cell:selected .table-cell,
+.table-row-cell:selected:hover .table-cell {
+    -fx-text-fill: -gm-selection-text;
+}
+
+.table-cell {
+    -fx-border-color: transparent;
+    -fx-padding: 8;
+    -fx-alignment: CENTER;
+}
+
+.table-view .placeholder .label {
+    -fx-text-fill: -gm-text-muted;
+}
+
+/* ---------- TEXT AREA ---------- */
+
+.text-area {
+    -fx-background-color: -gm-surface;
+    -fx-background-radius: 8;
+    -fx-border-color: -gm-border;
+    -fx-border-radius: 8;
+    -fx-text-fill: -gm-text;
+}
+
+.text-area .content {
+    -fx-background-color: -gm-surface;
+}
+
+.text-area:focused {
+    -fx-border-color: -gm-accent-soft;
+}
+
+/* ---------- SPLIT PANE ---------- */
+
+.split-pane {
+    -fx-background-color: transparent;
+    -fx-padding: 10;
+}
+
+.split-pane-divider {
+    -fx-background-color: -gm-border;
+    -fx-padding: 1;
+}
+
+.split-pane-divider:hover {
+    -fx-background-color: -gm-accent-soft;
+}
+
+/* ---------- SCROLL BAR ---------- */
+
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: -gm-thumb;
+    -fx-background-radius: 10;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: -gm-thumb-hover;
+}
+
+.scroll-bar .track {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-opacity: 0;
+    -fx-padding: 0;
+}
+
+.scroll-pane,
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* ---------- DIALOGS ---------- */
+
+.dialog-pane {
+    -fx-background-color: -gm-surface;
+}
+
+.dialog-pane .label,
+.dialog-pane .content .label,
+.dialog-pane .header-panel .label {
+    -fx-text-fill: -gm-text;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: -gm-surface-alt;
+}
+
+/* ---------- COMPONENT CLASSES USED BY mainmain.fxml ---------- */
+
+.card {
+    -fx-background-color: -gm-surface;
+    -fx-background-radius: 10;
+    -fx-border-color: -gm-border;
+    -fx-border-radius: 10;
+}
+
+/* replaces style="-fx-padding: 4 6 4 6;" on the four info VBoxes */
+.info-cell {
+    -fx-padding: 4 6 4 6;
+}
+
+/* replaces style="-fx-font-weight: bold;" on the Labels that carry it */
+.strong-label {
+    -fx-font-weight: bold;
+    -fx-text-fill: -gm-text-strong;
+}
+
+.muted-label {
+    -fx-text-fill: -gm-text-muted;
+}
+
+.page-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -gm-text-strong;
+}
+
+.users-title {
+    -fx-alignment: CENTER;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -gm-text-strong;
+}
+
+.section-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -gm-text-strong;
+}
+
+/* Caption above each one-row option table. Smaller than .section-title
+   so the option block costs less vertical space in the LMSR pane. */
+.option-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -gm-text-muted;
+}
+
+.balance-card {
+    -fx-background-color: -gm-surface-alt;
+    -fx-background-radius: 10;
+    -fx-border-color: -gm-border;
+    -fx-border-radius: 10;
+    -fx-padding: 10 14 10 14;
+}
+
+.balance-value {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -gm-accent-soft;
+}
+
+/* The two one-row LMSR option tables.
+   Vertical padding is cut so the row fits inside fixedCellSize=30,
+   horizontal padding is raised so wide values are not clipped sideways.
+   Declared after .card so it wins on the tables carrying both classes. */
+.option-table {
+    -fx-background-color: -gm-surface;
+}
+
+/* The two one-row option tables are read-only displays:
+   no hover, no selection, no focus ring, no sort affordance.
+   (mouseTransparent/focusTraversable in the FXML stop the interaction;
+   these rules make sure no state ever paints differently.) */
+.option-table .table-row-cell,
+.option-table .table-row-cell:odd,
+.option-table .table-row-cell:hover,
+.option-table .table-row-cell:selected,
+.option-table .table-row-cell:selected:hover,
+.option-table .table-row-cell:focused {
+    -fx-background-color: -gm-surface;
+    -fx-border-color: transparent;
+    -fx-cursor: default;
+}
+
+.option-table .table-row-cell .table-cell,
+.option-table .table-row-cell:hover .table-cell,
+.option-table .table-row-cell:selected .table-cell,
+.option-table .table-row-cell:selected:hover .table-cell {
+    -fx-text-fill: -gm-text;
+}
+
+.option-table {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.option-table .column-header-background,
+.option-table .column-header-background .filler,
+.option-table .column-header,
+.option-table .column-header:hover {
+    -fx-background-color: -gm-surface-alt;
+}
+
+.option-table .column-header .label {
+    -fx-text-fill: -gm-header-text;
+    -fx-font-weight: bold;
+    -fx-padding: 0 6 0 6;
+}
+
+/* hide the sort arrow slot entirely */
+.option-table .column-header .arrow,
+.option-table .column-header .sort-order-dot,
+.option-table .column-header .sort-order {
+    -fx-opacity: 0;
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+}
+
+/* Prevents visual selection on standard scrollable tables */
+.unselectable-table .table-row-cell:selected,
+.unselectable-table .table-row-cell:selected:hover {
+    -fx-background-color: -gm-editor;
+}
+
+.unselectable-table .table-row-cell:odd:selected,
+.unselectable-table .table-row-cell:odd:selected:hover {
+    -fx-background-color: -gm-row-odd;
+}
+
+.unselectable-table .table-row-cell:selected .table-cell,
+.unselectable-table .table-row-cell:selected:hover .table-cell {
+    -fx-text-fill: -gm-text;
+}
+
+/* ---------- REQUESTED BEHAVIOUR ---------- */
+
+/* 1a. option tables: no scrollbars at all (one fixed row, nothing to scroll) */
+.lmsr-option-table .scroll-bar:vertical,
+.lmsr-option-table .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+    -fx-max-width: 0;
+    -fx-max-height: 0;
+    -fx-padding: 0;
+}
+
+.lmsr-option-table > .virtual-flow > .corner {
+    -fx-opacity: 0;
+    -fx-background-color: transparent;
+}
+
+/* 1b. option table text centred, header captions centred to match */
+.option-table .table-cell {
+    -fx-alignment: CENTER;
+    -fx-padding: 3 10 3 10;
+}
+
+.option-table .column-header .label {
+    -fx-alignment: CENTER;
+}
+
+/* 3. the description keeps the plain .card wrapper; only the text inside is
+   lifted - slightly larger and using the strong text colour, so it reads as
+   emphasis rather than as a different kind of component. */
+.description-area {
+    -fx-font-size: 13.5px;
+    -fx-text-fill: -gm-text-strong;
+}
+
+/* flat read-only surface, never selectable */
+.description-area,
+.description-area .content,
+.description-area:focused,
+.description-area:focused .content {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-effect: null;
+    -fx-highlight-fill: transparent;
+    -fx-highlight-text-fill: -gm-text-strong;
+    -fx-text-fill: -gm-text-strong;
+    -fx-cursor: default;
+}
+
+.description-area .scroll-bar:vertical,
+.description-area .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+}
+
+/* ---------- BET CONTROLS ---------- */
+
+.text-field {
+    -fx-background-color: -gm-surface;
+    -fx-background-radius: 7;
+    -fx-border-color: -gm-border-strong;
+    -fx-border-radius: 7;
+    -fx-text-fill: -gm-text;
+    -fx-prompt-text-fill: -gm-text-muted;
+    -fx-padding: 4 8 4 8;
+}
+
+.text-field:focused {
+    -fx-border-color: -gm-accent-soft;
+}
+
+.bet-field {
+    -fx-alignment: CENTER;
+    -fx-pref-width: 90;
+}
+
+/* red edge while the typed totalSharesValue is not a usable positive number */
+.bet-field.invalid {
+    -fx-border-color: -gm-danger;
+}
+
+.bet-button {
+    -fx-font-size: 12px;
+    -fx-padding: 5 10 5 10;
+    -fx-background-radius: 7;
+    -fx-border-radius: 7;
+}
+
+/* ---------- CLOSE / DESTRUCTIVE ACTION ---------- */
+
+.danger-button {
+    -fx-background-color: -gm-cherry;
+    -fx-text-fill: -gm-on-accent;
+    -fx-font-weight: bold;
+}
+
+.danger-button:hover {
+    -fx-background-color: -gm-cherry-hover;
+}
+
+.danger-button:pressed {
+    -fx-background-color: -gm-cherry-press;
+}
+
+.danger-button:disabled {
+    -fx-background-color: -gm-disabled-bg;
+    -fx-text-fill: -gm-disabled-text;
+}
+
+/* ---------- ANIMATIONS CHECK BOX ---------- */
+
+.check-box {
+    -fx-text-fill: -gm-text;
+    -fx-cursor: hand;
+}
+
+.check-box > .box {
+    -fx-background-color: -gm-surface;
+    -fx-background-insets: 0;
+    -fx-background-radius: 5;
+    -fx-border-color: -gm-border-strong;
+    -fx-border-radius: 5;
+    -fx-border-width: 1.5;
+    -fx-padding: 3 3 3 3;
+    -fx-pref-width: 17;
+    -fx-pref-height: 17;
+}
+
+.check-box > .box > .mark {
+    -fx-background-color: transparent;
+    -fx-shape: "M 0 5 L 4 9 L 11 0 L 9 -1 L 4 6 L 1.5 3.5 Z";
+    -fx-min-width: 11;
+    -fx-min-height: 10;
+}
+
+.check-box:hover > .box {
+    -fx-border-color: -gm-accent-soft;
+}
+
+.check-box:selected > .box {
+    -fx-background-color: -gm-accent;
+    -fx-border-color: -gm-accent;
+}
+
+.check-box:selected > .box > .mark {
+    -fx-background-color: -gm-on-accent;
+}
+
+.check-box:selected:hover > .box {
+    -fx-background-color: -gm-accent-hover;
+    -fx-border-color: -gm-accent-hover;
+}
+
+.check-box:focused > .box {
+    -fx-border-color: -gm-accent-soft;
+}
+
+.check-box:disabled {
+    -fx-opacity: 1;
+    -fx-text-fill: -gm-disabled-text;
+}
+
+.check-box:disabled > .box {
+    -fx-background-color: -gm-disabled-bg;
+    -fx-border-color: -gm-disabled-bg;
+}
+
+/* the toggle in the top bar sits next to the theme picker */
+.animations-check {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 8 4 8;
+    -fx-background-radius: 8;
+}
+
+.animations-check:hover {
+    -fx-background-color: -gm-surface-alt;
+}
+
+/* ---------- ACTIVE USER ---------- */
+
+.active-user {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -gm-accent-soft;
+    -fx-padding: 4 10 4 10;
+    -fx-background-color: -gm-surface-alt;
+    -fx-background-radius: 8;
+    -fx-border-color: -gm-border;
+    -fx-border-radius: 8;
+}
+
+.active-user-none {
+    -fx-text-fill: -gm-text-muted;
+    -fx-font-weight: normal;
+}
+
+/* ---------- ACTIVATE (positive action) ---------- */
+
+/* the same button becomes green while it reads "Activate Event" and red
+   while it reads "Close Event"; EventRightController swaps the class. */
+.success-button {
+    -fx-background-color: -gm-success;
+    -fx-text-fill: -gm-on-accent;
+    -fx-font-weight: bold;
+}
+
+.success-button:hover {
+    -fx-background-color: -gm-success-hover;
+}
+
+.success-button:pressed {
+    -fx-background-color: -gm-success-press;
+}
+
+.success-button:disabled {
+    -fx-background-color: -gm-disabled-bg;
+    -fx-text-fill: -gm-disabled-text;
+}
+
+.status-open-button:disabled {
+    -fx-background-color: -gm-success;
+    -fx-text-fill: -gm-on-accent;
+    -fx-font-weight: bold;
+}
+
+.participation-summary {
+    -fx-padding: 10px 16px;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+
+    -fx-background-color: -fx-control-inner-background;
+    -fx-border-color: -fx-box-border;
+    -fx-border-width: 1px;
+}
+
+.participation-summary-main {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.participation-summary-secondary {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+/* ---------- ORDER BOOK: side picker ---------- */
+
+.side-box {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-pref-width: 105;
+}
+
+.side-box .list-cell {
+    -fx-alignment: CENTER;
+}
+
+/* ---------- SLIDING TAB SELECTION ---------- */
+
+/* The moving indicator now draws the selected background and line. */
+.sliding-tabs > .tab-header-area > .headers-region > .tab,
+.sliding-tabs > .tab-header-area > .headers-region > .tab:selected {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+
+    /* Reserve the same line space in both states. */
+    -fx-border-width: 2 0 0 0;
+}
+
+.sliding-tab-indicator {
+    -fx-background-color: -gm-surface;
+    -fx-background-radius: 8 8 0 0;
+
+    /* Matches the existing purple line at the top of your tabs. */
+    -fx-border-color: -gm-accent-soft transparent transparent transparent;
+    -fx-border-width: 2 0 0 0;
+    -fx-border-radius: 8 8 0 0;
+}
+
+
+/* ---------- KEYBOARD-KEY BUTTONS ---------- */
+
+.button.keycap {
+    -key-face: -gm-accent;
+
+    -fx-background-color:
+            linear-gradient(
+                    to bottom,
+                    derive(-key-face, 12%),
+                    -key-face
+            );
+
+    -fx-background-insets: 0;
+    -fx-background-radius: 7;
+
+    /* A light top edge and darker bottom edge give the face a bevel. */
+    -fx-border-color:
+            rgba(255, 255, 255, 0.28)
+            rgba(0, 0, 0, 0.12)
+            rgba(0, 0, 0, 0.25)
+            rgba(255, 255, 255, 0.10);
+
+    -fx-border-width: 1;
+    -fx-border-radius: 7;
+
+    -fx-cursor: hand;
+}
+
+.button.keycap:hover {
+    -key-face: -gm-accent-hover;
+
+    -fx-border-color:
+            rgba(255, 255, 255, 0.65)
+            rgba(255, 255, 255, 0.25)
+            rgba(0, 0, 0, 0.20)
+            rgba(255, 255, 255, 0.25);
+}
+
+.button.keycap:armed {
+    -key-face: -gm-accent-press;
+}
+
+
+/* Preserve the existing red action-button palette. */
+
+.button.keycap.danger-button {
+    -key-face: -gm-cherry;
+}
+
+.button.keycap.danger-button:hover {
+    -key-face: -gm-cherry-hover;
+}
+
+.button.keycap.danger-button:armed {
+    -key-face: -gm-cherry-press;
+}
+
+
+/* Preserve the existing green activation-button palette. */
+
+.button.keycap.success-button {
+    -key-face: -gm-success;
+}
+
+.button.keycap.success-button:hover {
+    -key-face: -gm-success-hover;
+}
+
+.button.keycap.success-button:armed {
+    -key-face: -gm-success-press;
+}
+
+
+/* Disabled buttons retain their shape without hover feedback. */
+
+.button.keycap:disabled,
+.button.keycap.danger-button:disabled,
+.button.keycap.success-button:disabled {
+    -key-face: -gm-disabled-bg;
+    -fx-text-fill: -gm-disabled-text;
+
+    -fx-border-color:
+            rgba(255, 255, 255, 0.10)
+            rgba(0, 0, 0, 0.10)
+            rgba(0, 0, 0, 0.15)
+            rgba(255, 255, 255, 0.05);
+}
+
+
+/* Keep your disabled "Event is open" status green. */
+
+.button.keycap.status-open-button:disabled {
+    -key-face: -gm-success;
+    -fx-text-fill: -gm-on-accent;
+
+    -fx-border-color:
+            rgba(255, 255, 255, 0.10)
+            rgba(0, 0, 0, 0.10)
+            rgba(0, 0, 0, 0.15)
+            rgba(255, 255, 255, 0.05);
+}
+/* ---------- SLIDING ROW SELECTION ---------- */
+
+/* Preserve normal row backgrounds underneath the moving band. */
+
+.sliding-row-selection .table-row-cell {
+    -slide-row-base: -gm-editor;
+}
+
+.sliding-row-selection .table-row-cell:odd {
+    -slide-row-base: -gm-row-odd;
+}
+
+.sliding-row-selection .table-row-cell:hover {
+    -slide-row-base: -gm-row-hover;
+}
+
+/* Replace the immediate selected background with the moving band. */
+
+.sliding-row-selection .table-row-cell,
+.sliding-row-selection .table-row-cell:selected,
+.sliding-row-selection .table-row-cell:selected:hover {
+    -fx-background-color: -slide-row-base;
+}
+
+/* Text follows the moving highlight rather than changing early. */
+
+.sliding-row-selection .table-row-cell:selected .table-cell {
+    -fx-text-fill: -gm-text;
+}
+
+.sliding-row-selection .table-row-cell:selected:hover .table-cell {
+    -fx-text-fill: -gm-text-strong;
+}
+
+.sliding-row-selection .table-row-cell:selection-band .table-cell,
+.sliding-row-selection .table-row-cell:selection-band:hover .table-cell {
+    -fx-text-fill: -gm-selection-text;
+}
+
+.sliding-row-selection .table-row-cell {
+    -slide-base-paint: -slide-row-base;
+    -slide-band-paint: -gm-selection;
+
+    /* Keep divider lines from slicing the moving highlight. */
+    -fx-border-color: transparent;
+}
+
+.sliding-row-selection .table-row-cell {
+    -slide-midpoint-paint: #78b7ff;
+}
+
+/* ---------- LOGIN / LANDING PAGE ---------- */
+
+.login-root {
+    -fx-background-color: -gm-bg;
+}
+
+/* The card is the only lit surface on the page, so it reads as the one thing
+   to interact with no matter how large the window gets. */
+.login-card {
+    -fx-background-color: -gm-surface;
+    -fx-background-radius: 14;
+    -fx-border-color: -gm-border;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+}
+
+/* Larger than the top bar's headline - here it is the page, not a strip. */
+.login-card .headline {
+    -fx-font-size: 32px;
+}
+
+.login-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: -gm-text-muted;
+}
+
+.login-field {
+    -fx-font-size: 14px;
+    -fx-padding: 8 12 8 12;
+    -fx-pref-height: 36;
+}
+
+.login-button {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-pref-height: 36;
+}
+
+.login-error {
+    -fx-font-size: 12px;
+    -fx-text-fill: -gm-danger;
+    -fx-background-color: -gm-surface-alt;
+    -fx-background-radius: 8;
+    -fx-border-color: -gm-danger;
+    -fx-border-radius: 8;
+    -fx-padding: 8 10 8 10;
+}
+
+.login-busy .percentage {
+    -fx-fill: transparent;
+}
+
+.login-busy {
+    -fx-progress-color: -gm-accent;
+}
+
+.login-footnote {
+    -fx-font-size: 11px;
+    -fx-text-fill: -gm-text-muted;
+}

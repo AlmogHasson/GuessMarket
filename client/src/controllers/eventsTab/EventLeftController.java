@@ -1,0 +1,289 @@
+package controllers.eventsTab;
+
+import controllers.MainController;
+import controllers.util.DialogHelper;
+import dto.*;
+import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.util.StringConverter;
+import util.HttpClientUtil;
+
+import java.util.List;
+
+/** Controller for eventLeft.fxml - the four filters and the events table. */
+public class EventLeftController {
+
+    /** Sentinel for "no commissionPaid filter"; -1 can never collide with a real totalSharesValue. */
+    private static final int ALL_COMMISSIONS = -1;
+
+    private MainController main;
+    private EventTabController tab;
+
+    @FXML private ComboBox<String>  methodFilter;
+    @FXML private ComboBox<String>  statusFilter;
+    @FXML private ComboBox<Integer> commissionFilter;
+    @FXML private ComboBox<String>  commissionTypeFilter;
+
+    @FXML private TableView<EventSummaryDTO> eventsTable;
+    @FXML private TableColumn<EventSummaryDTO, Integer> eventListIdCol;
+    @FXML private TableColumn<EventSummaryDTO, String>  eventListEventCol;
+    @FXML private TableColumn<EventSummaryDTO, String>  eventListMethodCol;
+    @FXML private TableColumn<EventSummaryDTO, String>  eventListStatusCol;
+    @FXML private TableColumn<EventSummaryDTO, String>  eventListCommissionCol;
+    @FXML private TableColumn<EventSummaryDTO, String>  eventListCommissionTypeCol;
+
+    private boolean restoringSelection;
+
+    /**
+     * Column factories and filter items are self-contained, so they belong here
+     * rather than being redone on every load the way the old loadEvents() did.
+     */
+
+    @FXML
+    public void initialize() {
+        initColumns();
+        initFilterItems();
+        initCommissionConverter();
+    }
+
+    public void init(MainController main, EventTabController tab) {
+        this.main = main;
+        this.tab = tab;
+
+        commissionFilter.disableProperty().bind(main.fileLoadedProperty().not());
+        methodFilter.disableProperty().bind(main.fileLoadedProperty().not());
+        statusFilter.disableProperty().bind(main.fileLoadedProperty().not());
+        commissionTypeFilter.disableProperty().bind(main.fileLoadedProperty().not());
+
+        eventsTable.getSelectionModel().selectedItemProperty()
+                .addListener((obs, oldSelection, newSelection) -> {
+                    if (!restoringSelection) {
+                        tab.onEventSelected(newSelection);
+                    }
+                });
+    }
+
+    // ---------------- public API used by MainController ----------------
+
+    /** Rebuilds the table from the engine. The setAll is queued, as before. */
+    public void loadEvents() {
+
+        Task<List<EventSummaryDTO>> task =
+                new Task<>() {
+                    @Override
+                    protected List<EventSummaryDTO> call() throws Exception {
+                        return HttpClientUtil.getEvents();
+                    }
+                };
+
+        task.setOnSucceeded(event -> {
+
+            List<EventSummaryDTO> result = task.getValue();
+
+            refreshCommissionFilterValues(result);
+
+            ObservableList<EventSummaryDTO> events = FXCollections.observableArrayList(result);
+
+            main.rows().update(
+                    eventsTable,
+                    "events",
+                    events,
+                    EventSummaryDTO::getId
+            );
+        });
+
+        task.setOnFailed(event -> {
+            Throwable error = task.getException();
+
+            DialogHelper.showErrorAlert(
+                    "Events",
+                    error == null
+                            ? "Could not load events."
+                            : error.getMessage()
+            );
+        });
+
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    /**
+     * Rebuild, then re-select the same event.
+     * The selection has to be queued too. runLater is FIFO, so this block is
+     * guaranteed to run after the setAll posted by reloadEvents() - reading the
+     * table any earlier would still see the pre-change rows.
+     * EventSummaryDTO is a record, so the refreshed DTO is not equal() to the old
+     * one once isOpen flips. Re-selecting therefore has to look the row up by id
+     * in the new list rather than re-using the previously selected object.
+     */
+    public void reloadEventsAndSelect(int eventId) {
+        loadEvents();
+
+        Platform.runLater(() -> {
+            EventSummaryDTO updated = eventsTable.getItems().stream()
+                    .filter(e -> e.getId() == eventId)
+                    .findFirst()
+                    .orElse(null);
+
+            if (updated != null) {
+                eventsTable.getSelectionModel().select(updated);
+                tab.onEventSelected(updated);
+            }
+        });
+    }
+
+    /** Repopulates the commissionPaid dropdown from the values present in the file. */
+    private void refreshCommissionFilterValues(List<EventSummaryDTO> events) {
+        List<Integer> values = events
+                .stream()
+                        .map(event -> event.getCommission().value())
+                        .distinct()
+                        .sorted()
+                        .toList();
+
+        commissionFilter.getItems().setAll(values);
+    }
+
+    public EventSummaryDTO getSelectedEvent() {
+        return eventsTable.getSelectionModel().getSelectedItem();
+    }
+
+    // ---------------- filter handlers ----------------
+
+    @FXML void onCommissionFilterChanged(ActionEvent event)     { filterEvents(); }
+    @FXML void onMethodFilterChanged(ActionEvent event)         { filterEvents(); }
+    @FXML void onStatusFilterChanged(ActionEvent event)         { filterEvents(); }
+    @FXML void onCommissionTypeFilterChanged(ActionEvent event) { filterEvents(); }
+
+    private void filterEvents() {
+        if (main == null) {
+            return;
+        }
+
+        Integer selectedCommission = commissionFilter.getValue();
+        String selectedMethod = methodFilter.getValue();
+        String selectedStatus = statusFilter.getValue();
+        String selectedCommissionType = commissionTypeFilter.getValue();
+
+        List<EventSummaryDTO> filtered = main.getEngine().getEvents().stream()
+                .filter(evnt -> selectedCommission == null
+                        || selectedCommission == ALL_COMMISSIONS
+                        || evnt.getCommission().value() == selectedCommission)
+
+                .filter(evnt -> selectedMethod == null
+                        || "All".equals(selectedMethod)
+                        || ("Lmsr".equals(selectedMethod) && evnt.getMethod() instanceof LMSRDTO)
+                        || ("Order Book".equals(selectedMethod) && !(evnt.getMethod() instanceof LMSRDTO)))
+
+                .filter(evnt -> selectedStatus == null
+                        || "All".equals(selectedStatus)
+                        || ("Open".equals(selectedStatus) && evnt.isOpen())
+                        || ("Closed".equals(selectedStatus) && evnt.status() == EventStatus.CLOSED)
+                        || ("Not Started".equals(selectedStatus) && evnt.status() == EventStatus.NOT_STARTED))
+
+                .filter(evnt -> selectedCommissionType == null
+                        || "All".equals(selectedCommissionType)
+                        || selectedCommissionType.equalsIgnoreCase(evnt.getCommission().commissionType()))
+                .toList();
+
+        Platform.runLater(() -> main.rows().update(eventsTable, "events", filtered, EventSummaryDTO::getId));
+    }
+
+    // ---------------- one-time setup ----------------
+
+    private void initColumns() {
+        eventListIdCol.setCellValueFactory(c ->
+                new ReadOnlyObjectWrapper<>(c.getValue().getId()));
+
+        eventListEventCol.setCellValueFactory(c ->
+                new ReadOnlyStringWrapper(c.getValue().getName()));
+
+        eventListMethodCol.setCellValueFactory(c ->
+                new ReadOnlyStringWrapper(
+                        c.getValue().getMethod() instanceof LMSRDTO ? "Lmsr" : "Order Book"));
+
+        eventListStatusCol.setCellValueFactory(c ->
+                new ReadOnlyStringWrapper(getStatusText(c.getValue())));
+
+        eventListCommissionCol.setCellValueFactory(c ->
+                new ReadOnlyStringWrapper(String.valueOf(c.getValue().getCommission().value())));
+
+        eventListCommissionTypeCol.setCellValueFactory(c ->
+                new ReadOnlyStringWrapper(c.getValue().commission().commissionType()));
+    }
+
+    private String getStatusText(EventSummaryDTO event) {
+        switch (event.getStatus()) {
+            case OPEN -> {
+                return "Open";
+            }
+            case CLOSED -> {
+                return "Closed";
+            }
+            default -> {
+                return "Not Started";
+            }
+        }
+    }
+
+    private void initFilterItems() {
+        methodFilter.getItems().setAll("All", "Lmsr", "Order Book");
+        statusFilter.getItems().setAll("All","Not Started" ,"Open", "Closed");
+        commissionTypeFilter.getItems().setAll("All", "On-Close", "On-Purchase");
+    }
+
+    private void initCommissionConverter() {
+        commissionFilter.setConverter(new StringConverter<Integer>() {
+            @Override
+            public String toString(Integer value) {
+                return (value == null || value == ALL_COMMISSIONS) ? "All" : value.toString();
+            }
+
+            @Override
+            public Integer fromString(String text) {
+                return (text == null || text.equals("All"))
+                        ? ALL_COMMISSIONS
+                        : Integer.parseInt(text);
+            }
+        });
+    }
+
+
+    public void reloadEventsWithoutAnimation(int eventId) {
+        var events = main.getEngine().getEvents();
+
+        Platform.runLater(() -> {
+            restoringSelection = true;
+
+            try {
+                main.rows().update(
+                        eventsTable,
+                        "events",
+                        events,
+                        EventSummaryDTO::getId,
+                        false
+                );
+
+                EventSummaryDTO updated = eventsTable.getItems().stream()
+                        .filter(e -> e.getId() == eventId)
+                        .findFirst()
+                        .orElse(null);
+
+                eventsTable.getSelectionModel().select(updated);
+                tab.onEventSelected(updated, false);
+            } finally {
+                restoringSelection = false;
+            }
+        });
+    }
+}

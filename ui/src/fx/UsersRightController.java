@@ -116,20 +116,20 @@ public class UsersRightController {
                         -> showUserParticipation(newRow));
 
         userEventCol.setCellValueFactory(cellData ->
-                        new ReadOnlyStringWrapper(cellData.getValue().eventName()));
+                new ReadOnlyStringWrapper(cellData.getValue().eventName()));
 
         userEventRoleCol.setCellValueFactory(cellData ->
-                        new ReadOnlyStringWrapper(
-                                //if the user eventIds contains the eventId,
-                                // then the user is a market maker, otherwise they are a player
-                                cellData.getValue().role())
-                        );
+                new ReadOnlyStringWrapper(
+                        //if the user eventIds contains the eventId,
+                        // then the user is a market maker, otherwise they are a player
+                        cellData.getValue().role())
+        );
 
         userEventStatusCol.setCellValueFactory(cellData ->
                 new ReadOnlyStringWrapper(formatStatus(cellData.getValue().eventStatus())));
 
         userEventSharesCol.setCellValueFactory(cellData ->
-                        new ReadOnlyStringWrapper(String.valueOf(cellData.getValue().totalShares())));
+                new ReadOnlyStringWrapper(String.valueOf(cellData.getValue().totalShares())));
     }
 
     /** No user selected - show the structure with placeholders, not a blank pane. */

@@ -20,7 +20,7 @@ public record UserDTO(
     //getters
     public double getAccountBalance() {
         return accountBalance;
-}
+    }
 
     public List<Integer> getEventsIDs() {
         return eventsIDs;

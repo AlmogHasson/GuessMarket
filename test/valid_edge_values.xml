@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Guess-Market xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="GM-EX3-Schema.xsd">
+	<GM-events>
+		<GM-event name="Zero commission">
+			<description>Commission at the lower boundary.</description>
+			<commission type="on-purchase">0</commission>
+			<GM-options>
+				<GM-option>Yes</GM-option>
+				<GM-option>No</GM-option>
+			</GM-options>
+			<GM-method>
+				<GM-LMSR>
+					<b>100</b>
+				</GM-LMSR>
+			</GM-method>
+		</GM-event>
+		<GM-event name="Max commission">
+			<description>Commission at the upper boundary (90).</description>
+			<commission type="on-close">90</commission>
+			<GM-options>
+				<GM-option>Yes</GM-option>
+				<GM-option>No</GM-option>
+			</GM-options>
+			<GM-method>
+				<GM-LMSR>
+					<b>100</b>
+				</GM-LMSR>
+			</GM-method>
+		</GM-event>
+		<GM-event name="Tiny b">
+			<description>LMSR liquidity b at the smallest sensible value.</description>
+			<commission type="on-close">10</commission>
+			<GM-options>
+				<GM-option>Yes</GM-option>
+				<GM-option>No</GM-option>
+			</GM-options>
+			<GM-method>
+				<GM-LMSR>
+					<b>1</b>
+				</GM-LMSR>
+			</GM-method>
+		</GM-event>
+		<GM-event name="Rock &amp; Roll &lt;Hall&gt;">
+			<description>Special characters escaped in the name and in the description: &amp; &lt; &gt; &quot;quoted&quot;.</description>
+			<commission type="on-close">10</commission>
+			<GM-options>
+				<GM-option>A &amp; B</GM-option>
+				<GM-option>C &lt; D</GM-option>
+			</GM-options>
+			<GM-method>
+				<GM-order-book allow-mint="false" initial="1" d="1"/>
+			</GM-method>
+		</GM-event>
+		<GM-event name="אירוויזיון - ישראל">
+			<description>תיאור באותיות עבריות: האם ישראל תעלה לגמר?</description>
+			<commission type="on-close">10</commission>
+			<GM-options>
+				<GM-option>כן</GM-option>
+				<GM-option>לא</GM-option>
+			</GM-options>
+			<GM-method>
+				<GM-LMSR>
+					<b>150</b>
+				</GM-LMSR>
+			</GM-method>
+		</GM-event>
+		<GM-event name="Very long description">
+			<description>This description is intentionally very long to test table wrapping and text areas. </description>
+			<commission type="on-purchase">10</commission>
+			<GM-options>
+				<GM-option>Yes</GM-option>
+				<GM-option>No</GM-option>
+			</GM-options>
+			<GM-method>
+				<GM-order-book allow-mint="true" initial="100000" d="50"/>
+			</GM-method>
+		</GM-event>
+	</GM-events>
+</Guess-Market>

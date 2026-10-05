@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane fx:id="rootPane" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.MainController">
+
+   <top>
+      <fx:include fx:id="topPane" source="top.fxml" />
+   </top>
+
+   <center>
+
+      <TabPane fx:id="mainTabs" tabClosingPolicy="UNAVAILABLE">
+
+         <tabs>
+
+            <Tab fx:id="eventsTab" onSelectionChanged="#refreshEventsTab" text="Events">
+               <content>
+                  <fx:include fx:id="eventPane" source="event.fxml" />
+               </content>
+            </Tab>
+
+            <Tab fx:id="usersTab" onSelectionChanged="#refreshUsersTab" text="Users">
+               <content>
+                  <BorderPane>
+                     <top>
+                        <fx:include fx:id="fileLoadPane" source="fileLoad.fxml" />
+                     </top>
+                     <center>
+                        <fx:include fx:id="usersPane" source="users.fxml" />
+                     </center>
+                  </BorderPane>
+               </content>
+            </Tab>
+
+         </tabs>
+
+      </TabPane>
+
+   </center>
+
+</BorderPane>

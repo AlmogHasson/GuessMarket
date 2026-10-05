@@ -4,7 +4,7 @@ import java.util.List;
 
 public class User {
     protected double accountBalance; // initialCash in the generated files
-    protected List<Integer> eventsIDs;
+    protected List<Integer> eventsIDs = new java.util.ArrayList<>(); // list of event IDs where the user is a market maker
     protected String name;
 
     public double getAccountBalance() {
@@ -21,6 +21,10 @@ public class User {
 
     public void setUserEvents(List<Integer> value) {
         this.eventsIDs = value;
+    }
+
+    public void addUserEvent(int eventID) {
+        this.eventsIDs.add(eventID);
     }
 
     public String getName() {

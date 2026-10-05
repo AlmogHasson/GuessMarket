@@ -3,16 +3,33 @@ package api;
 import dto.*;
 import dto.Side;
 import engine.*;
-
 import java.util.*;
-import java.io.IOException;
 import java.util.stream.Collectors;
 
 public class GMController {
     private Engine engine = new EngineImpl();
 
-    public void loadFile(String path) throws Exception {
-        engine.loadFile(path);
+    public synchronized void loadFile(String path, String uploaderName) throws Exception {
+        int oldCount = engine.getEvents().size();
+
+        try {
+            engine.loadFile(path);
+        } catch (Exception e) {
+            List<Event> all = engine.getEvents();
+            all.subList(oldCount, all.size()).clear();   // roll back the partial load
+            throw e;
+        }
+
+        User uploader = engine.getOrCreateUser(uploaderName);
+        List<Event> events = engine.getEvents();
+
+        for (int i = oldCount; i < events.size(); i++) {
+            uploader.addUserEvent(events.get(i).getId());
+        }
+    }
+
+    public UserDTO getOrCreateUser(String userName) {
+        return new UserDTO(engine.getOrCreateUser(userName));
     }
 
     public List<EventSummaryDTO> getEvents() {
@@ -29,16 +46,6 @@ public class GMController {
 
     public void closeEvent(int eventID,int winningOption) {
         engine.closeEvent(eventID, winningOption);
-    }
-
-
-    //bonus: save and load the state of the engine to a file
-    public void saveState(String path) throws IOException {
-        engine.saveState(path);
-    }
-
-    public void loadState(String path) throws IOException, ClassNotFoundException {
-        engine.loadState(path);
     }
 
     public Map<String, UserDTO> getUsers() {
@@ -69,8 +76,8 @@ public class GMController {
         engine.getEvents().stream()
                 .filter(event -> event.isParticipating(user.getName()))
                 .forEach(event -> {
-                userEvents.add(new UserEventDTO(user, event));
-            });
+                    userEvents.add(new UserEventDTO(user, event));
+                });
 
         // filter the events the user is participating as market maker
         engine.getEvents().stream().filter(event -> user.getEventsIDs().contains(event.getId()))
@@ -91,18 +98,18 @@ public class GMController {
     public List<ParticipantHoldingDTO> getEventParticipants(int eventId) {
         List<OptionDTO> options = getEventTradingStatus(eventId).optionTradingStatus();
         List<ParticipantHoldingDTO> rows = new ArrayList<>();
-            for (int i = 0; i < options.size(); i++)
-            {
-                for (String userName : engine.getEventParticipants(eventId)) {
-                    int optionNumber = i + 1;
-                    OptionDTO option = options.get(i);
-                    int shares = engine.getParticipantShares(eventId, userName, optionNumber);
-                    double value = shares * option.currentValue();
-                    Holding[] userHoldings = engine.getEvents().get(eventId - 1).getUserHoldings(userName);
-                    double totalPaid = (userHoldings == null) ? 0.0 : userHoldings[i].getTotalPaid();
-                    rows.add(new ParticipantHoldingDTO(userName, option.optionName(), shares, value, totalPaid));
-                }
+        for (int i = 0; i < options.size(); i++)
+        {
+            for (String userName : engine.getEventParticipants(eventId)) {
+                int optionNumber = i + 1;
+                OptionDTO option = options.get(i);
+                int shares = engine.getParticipantShares(eventId, userName, optionNumber);
+                double value = shares * option.currentValue();
+                Holding[] userHoldings = engine.getEvents().get(eventId - 1).getUserHoldings(userName);
+                double totalPaid = (userHoldings == null) ? 0.0 : userHoldings[i].getTotalPaid();
+                rows.add(new ParticipantHoldingDTO(userName, option.optionName(), shares, value, totalPaid));
             }
+        }
         return rows;
     }
 
