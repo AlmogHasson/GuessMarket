@@ -1,3 +1,4 @@
+
 package servlets;
 
 import api.GMController;
@@ -11,9 +12,7 @@ import jakarta.servlet.http.Part;
 import util.ServletUtils;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
+import java.io.InputStream;
 
 @WebServlet("/upload")
 @MultipartConfig
@@ -21,7 +20,8 @@ public class UploadServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        String userName = ServletUtils.getLoggedInUserName(request);
+
+        String userName = ServletUtils.validateUserSession(request);
 
         if (userName == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -31,37 +31,39 @@ public class UploadServlet extends HttpServlet {
 
         Part filePart = request.getPart("file");
 
-        if (filePart == null || filePart.getSize() == 0) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().print("No XML file was provided.");
+
+        if (filePart == null) {
+            response.setStatus(
+                    HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().print(
+                    "No XML file was provided.");
             return;
         }
 
-        Path tempFile = Files.createTempFile(
-                "guess-market-",
-                ".xml"
-        );
+        if (filePart.getSize() == 0) {
+            response.setStatus(
+                    HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().print(
+                    "The selected XML file is empty.");
+            return;
+        }
 
-        try {
-            filePart.write(tempFile.toString());
+
+        try (InputStream inputStream = filePart.getInputStream()) {
 
             GMController controller = ServletUtils.getController(getServletContext());
-            controller.loadFile(tempFile.toString(), userName);
+
+            controller.loadFile(inputStream, userName);
 
             response.setStatus(HttpServletResponse.SC_OK);
 
         } catch (Exception e) {
-
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 
-            response.getWriter().print(
-                    e.getMessage() == null
+            response.getWriter().print(e.getMessage() == null
                             ? "Could not load file."
                             : e.getMessage()
             );
-
-        } finally {
-            Files.deleteIfExists(tempFile);
         }
     }
 }

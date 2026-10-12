@@ -19,19 +19,20 @@ public class UsersTabController {
 
     public void init(MainController main) {
         this.main = main;
+
         usersLeftPaneController.init(main, this);
         usersRightPaneController.init(main, this);
+
+        main.activeUserProperty().addListener((obs, oldUser, newUser) -> {
+            usersRightPaneController.showUserDetails(newUser);
+        });
     }
 
     public void onFileLoaded() {
         usersLeftPaneController.loadUsers();
-        usersRightPaneController.clear();
+        usersRightPaneController.showUserDetails(main.getActiveUser());
     }
 
-    /** Left changed its selection. user is null when nothing is selected. */
-    public void onUserSelected(UserDTO user) {
-        usersRightPaneController.showUserDetails(user);
-    }
 
     public void refresh() {
         usersRightPaneController.refresh();

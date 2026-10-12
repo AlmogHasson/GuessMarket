@@ -1019,3 +1019,47 @@
     -fx-font-size: 11px;
     -fx-text-fill: -gm-text-muted;
 }
+/* ---------- CHAT WINDOW ---------- */
+.chat-window {
+    -fx-background-color: -gm-surface;
+    -fx-background-radius: 10 10 0 0;
+    -fx-border-color: -gm-border-strong;
+    -fx-border-radius: 10 10 0 0;
+    -fx-border-width: 1 1 0 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 14, 0.2, 0, -2);
+}
+
+.chat-header {
+    -fx-background-color: -gm-accent;
+    -fx-background-radius: 10 10 0 0;
+    -fx-padding: 8 12 8 12;
+    -fx-cursor: hand;
+}
+
+.chat-header:hover {
+    -fx-background-color: -gm-accent-hover;
+}
+
+.chat-title {
+    -fx-text-fill: -gm-on-accent;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.chat-chevron {
+    -fx-text-fill: -gm-on-accent;
+}
+
+.chat-badge {
+    -fx-background-color: -gm-cherry;
+    -fx-background-radius: 10;
+    -fx-text-fill: -gm-on-accent;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 1 7 1 7;
+}
+
+.chat-body {
+    -fx-padding: 8;
+    -fx-spacing: 8;
+}

@@ -20,20 +20,6 @@
              text="Single User Details"
              StackPane.alignment="CENTER" />
 
-      <VBox alignment="CENTER"
-            maxWidth="-Infinity"
-            styleClass="balance-card"
-            StackPane.alignment="CENTER_RIGHT">
-
-         <Label styleClass="muted-label"
-                text="Account Balance" />
-
-         <Label fx:id="balance"
-                styleClass="balance-value"
-                text="0.00" />
-
-      </VBox>
-
    </StackPane>
 
 
@@ -105,7 +91,10 @@
                alignment="CENTER"
                spacing="6"
                maxWidth="1.7976931348623157E308"
-               styleClass="participation-summary">
+               styleClass="participation-summary"
+               visible="false"
+               managed="false">
+
 
             <Label fx:id="commissionSummaryLabel"
                    alignment="CENTER"

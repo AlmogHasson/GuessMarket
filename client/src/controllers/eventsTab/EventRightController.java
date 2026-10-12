@@ -22,6 +22,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import util.HttpClientUtil;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -401,16 +402,18 @@ public class EventRightController {
 
         int eventId = currentEvent.get().getId();
 
-        List<String> optionNames = currentEvent.get().getOptions().stream()
+        List<String> optionNames = currentEvent.get().getOptions()
+                .stream()
                 .map(OptionDTO::optionName)
                 .toList();
 
-        ChoiceDialog<String> dialog = new ChoiceDialog<>(optionNames.getFirst(), optionNames);
-        dialog.setTitle("Close Event");
-        dialog.setHeaderText("Closing \"" + currentEvent.get().getName() + "\"");
-        dialog.setContentText("Winning option:");
+        Optional<String> chosen = DialogHelper.showChoiceDialog(
+                "Close Event",
+                "Closing \"" + currentEvent.get().getName() + "\"",
+                "Winning option:",
+                optionNames
+        );
 
-        Optional<String> chosen = dialog.showAndWait();
         if (chosen.isEmpty()) {
             return;
         }
@@ -418,22 +421,46 @@ public class EventRightController {
         int winningOption = optionNames.indexOf(chosen.get()) + 1;
 
         try {
-            main.getEngine().closeEvent( /* TODO: server */ eventId, winningOption);
-            // Main rebuilds the left table and re-selects, which calls showEvent()
-            // again with a DTO that actually has isOpen == false.
+            HttpClientUtil.closeEvent(eventId, winningOption);
             tab.onEventChanged(eventId);
-        } catch (IllegalArgumentException ex) {
-            DialogHelper.showErrorAlert("Could not close the event: ", ex.getMessage());
+
+        } catch (HttpClientUtil.ServerException ex) {
+            DialogHelper.showErrorAlert(
+                    "Could not close the event",
+                    ex.getMessage()
+            );
+
+        } catch (IOException ex) {
+            DialogHelper.showErrorAlert(
+                    "Could not close the event",
+                    "Could not communicate with the server."
+            );
         }
     }
 
     private void activateEvent() {
+        if (currentEvent.get() == null) {
+            return;
+        }
+
         int eventId = currentEvent.get().getId();
+
         try {
-            main.getEngine().activateEvent( /* TODO: server */ main.getActiveUser().getName(), eventId);
-            tab.onEventChanged(eventId); // re-fetches the DTO, status flips to ACTIVE, button relabels
-        } catch (IllegalArgumentException ex) {
-            DialogHelper.showErrorAlert("Could not activate the event: ", ex.getMessage());
+            HttpClientUtil.activateEvent(eventId);
+
+            tab.onEventChanged(eventId);
+
+        } catch (HttpClientUtil.ServerException ex) {
+            DialogHelper.showErrorAlert(
+                    "Could not activate the event",
+                    ex.getMessage()
+            );
+
+        } catch (IOException ex) {
+            DialogHelper.showErrorAlert(
+                    "Could not activate the event",
+                    "Could not communicate with the server."
+            );
         }
     }
 
@@ -496,36 +523,42 @@ public class EventRightController {
         }
 
         int shares;
+
         try {
             shares = Integer.parseInt(field.getText().trim());
         } catch (NumberFormatException ex) {
-            DialogHelper.showErrorAlert("Could not place the bet", "Enter the number of totalShares to buy.");
+            DialogHelper.showErrorAlert(
+                    "Could not place the bet",
+                    "Enter the number of shares to buy."
+            );
             return;
         }
 
         int eventId = currentEvent.get().getId();
 
         try {
-            PurchaseDTO purchase = main.getEngine().participateInEvent( /* TODO: server */ 
-                    main.getActiveUser().getName(),
+            HttpClientUtil.participateInEvent(
                     eventId,
                     optionNumber,
                     shares,
                     Side.BUY,
-                    null);
-
-            // the engine returns null when the event is already closed
-            if (purchase == null) {
-                DialogHelper.showErrorAlert("Could not place the bet",
-                        "This event is closed - no further bets can be placed.");
-                return;
-            }
+                    null
+            );
 
             field.clear();
             tab.onParticipationChanged(eventId);
 
-        } catch (IllegalArgumentException ex) {
-            DialogHelper.showErrorAlert("Could not place the bet", ex.getMessage());
+        } catch (HttpClientUtil.ServerException ex) {
+            DialogHelper.showErrorAlert(
+                    "Could not place the bet",
+                    ex.getMessage()
+            );
+
+        } catch (IOException ex) {
+            DialogHelper.showErrorAlert(
+                    "Could not place the bet",
+                    "Could not communicate with the server."
+            );
         }
     }
 
@@ -867,19 +900,27 @@ public class EventRightController {
         boolean isBid = BID.equals(sideBox.getValue());
 
         try {
-            main.getEngine().participateInEvent( /* TODO: server */
-                    main.getActiveUser().getName(),
+            HttpClientUtil.participateInEvent(
                     event.getId(),
                     optionNumber,
                     shares,
                     isBid ? Side.BUY : Side.SELL,
-                    price);
+                    price
+            );
 
             sharesField.clear();
             priceField.clear();
             tab.onParticipationChanged(event.getId());
-        } catch (IllegalArgumentException | IllegalStateException ex) {
-            DialogHelper.showErrorAlert("Could not place the order", ex.getMessage());
+        } catch (HttpClientUtil.ServerException ex) {
+            DialogHelper.showErrorAlert(
+                    "Could not place the order",
+                    ex.getMessage()
+            );
+        } catch (IOException ex) {
+            DialogHelper.showErrorAlert(
+                    "Could not place the order",
+                    "Could not communicate with the server."
+            );
         }
     }
 

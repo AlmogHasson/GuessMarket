@@ -18,7 +18,12 @@ public class LMSR implements Method,Serializable {
 
     @Override
     public double activate(User mm, Event event) {
-        return calculateBalance(0, 0); // subsidy = b*ln(2), current default option values already 0.5/0.5
+        return getActivationCost(); // subsidy = b*ln(2), current default option values already 0.5/0.5
+    }
+
+    @Override
+    public double getActivationCost() {
+        return calculateBalance(0, 0);
     }
 
     @Override
@@ -38,11 +43,14 @@ public class LMSR implements Method,Serializable {
         // Calculate the commission based on the event's commission type
         double commission = "on-purchase".equals(event.getCommission().getCommissionType())
                 ? sharesCost * event.getCommission().getValue() / 100 : 0.0;
+
         double totalCost = sharesCost + commission;
 
-        if (user.getAccountBalance() < totalCost)
-            throw new IllegalArgumentException("Insufficient funds");
-        user.setAccountBalance(user.getAccountBalance() - totalCost);
+        user.adjustBalance(
+                -totalCost,
+                event.getEventName(),
+                "Buy " + req.shares() + " " + opt.getOptionName()
+        );
 
         EventTradingStatus ets = event.getEventTradingStatus();
         ets.updateAccountBalance(ets.getAccountBalance() + totalCost);
@@ -74,7 +82,15 @@ public class LMSR implements Method,Serializable {
             double gross = holding.getShares(); // d=1 always for LMSR
             double commission = onClose ? gross * percentage : 0.0;
             double payout = gross - commission;
-            users.get(entry.getKey()).setAccountBalance(users.get(entry.getKey()).getAccountBalance() + payout);
+
+            User winner = users.get(entry.getKey());
+
+            winner.adjustBalance(
+                    payout,
+                    event.getEventName(),
+                    "Event payout"
+            );
+
             totalPaidOut += payout;
             totalCommission += commission;
         }
@@ -85,7 +101,13 @@ public class LMSR implements Method,Serializable {
                 .filter(user -> user.isMarketMaker(event.getId()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("No market maker found for event " + event.getId()));
-        MM.setAccountBalance(MM.getAccountBalance() + leftover + totalCommission);
+
+        MM.adjustBalance(
+                leftover + totalCommission,
+                event.getEventName(),
+                "Event commission payout"
+        );
+
         ets.updateAccountBalance(0);
         event.getOptions().get(winningOptionNumber - 1).setWinner();
         ets.close();

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox fx:id="chatRoot" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.ChatController"
+      styleClass="chat-window"
+      prefWidth="320" maxWidth="-Infinity" maxHeight="-Infinity"
+      StackPane.alignment="BOTTOM_LEFT">
+
+   <!-- keep in sync with HOME_MARGIN_LEFT in ChatController -->
+   <StackPane.margin>
+      <Insets left="16"/>
+   </StackPane.margin>
+
+   <!-- header: always visible. Click = expand/collapse, drag = move the window -->
+   <HBox styleClass="chat-header" alignment="CENTER_LEFT" spacing="8"
+         onMousePressed="#onHeaderPressed"
+         onMouseDragged="#onHeaderDragged"
+         onMouseClicked="#toggle">
+      <Label text="Chat" styleClass="chat-title" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS"/>
+      <Label fx:id="unreadBadge" styleClass="chat-badge" visible="false" managed="false"/>
+      <Label fx:id="chevron" text="▲" styleClass="chat-chevron"/>
+   </HBox>
+
+   <!-- body: hidden while collapsed -->
+   <VBox fx:id="chatBody" styleClass="chat-body" prefHeight="360" visible="false" managed="false">
+      <ListView fx:id="messagesList" VBox.vgrow="ALWAYS"/>
+      <HBox spacing="8">
+         <TextField fx:id="inputField" promptText="Type a message..." HBox.hgrow="ALWAYS" onAction="#send"/>
+         <Button fx:id="sendBtn" text="Send" onAction="#send"/>
+      </HBox>
+   </VBox>
+
+</VBox>

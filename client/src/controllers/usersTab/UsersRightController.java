@@ -10,6 +10,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
+import util.HttpClientUtil;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,7 +28,6 @@ public class UsersRightController {
     private MainController main;
     private UsersTabController tab;
 
-    @FXML private Label balance;
     @FXML private TableView<UserEventDTO> userEventsTable;
     @FXML private TableColumn<UserEventDTO, String> userEventCol;
     @FXML private TableColumn<UserEventDTO, String> userEventRoleCol;
@@ -64,6 +64,7 @@ public class UsersRightController {
         lmsrEventTable.setItems(FXCollections.observableArrayList());
         userEventsTable.setItems(FXCollections.observableArrayList());
         orderBookPositionTable.setItems(FXCollections.observableArrayList());
+        setSummary(null, null);
     }
 
     public void init(MainController main, UsersTabController tab) {
@@ -135,7 +136,6 @@ public class UsersRightController {
 
     /** No user selected - show the structure with placeholders, not a blank pane. */
     public void clear() {
-        balance.setText("0.00");
         lmsrEventTable.getItems().clear();
         userEventsTable.getItems().clear();
         userEventsTable.setPlaceholder(new Label("Select a user"));
@@ -146,39 +146,62 @@ public class UsersRightController {
     }
 
     public void showUserDetails(UserDTO user) {
+
         if (user == null) {
             clear();
+            return;
         }
-        else {
-            Platform.runLater(() -> {
-                balance.setText(String.format("%.2f", (double) user.getAccountBalance()));
-                var userEvents = FXCollections.observableArrayList(
-                        main.getEngine().getUserEvents(user.name())
-                );
-                UserEventDTO previous = userEventsTable.getSelectionModel().getSelectedItem();
-                if (userEvents.isEmpty()) {
-                    userEventsTable.getItems().clear();
-                    userEventsTable.setPlaceholder(new Label("No events"));
-                }
 
-                main.rows().update(userEventsTable, user.name(), userEvents, UserEventDTO::eventId);
+        try {
+            List<UserEventDTO> events = HttpClientUtil.getUserEvents();
 
-                if (previous != null) {
-                    userEvents.stream()
-//                            .filter(e -> e.eventName().equals(previous.eventName()))
-                            .filter(e -> e.eventId() == previous.eventId())
-                            .findFirst()
-                            .ifPresent(e ->
-                                    {
-                                        userEventsTable.getSelectionModel().select(e);
-                                        //refresh the table to show the new data for this event
-                                        showUserParticipation(e);
-                                    }
-                            );
+            var userEvents = FXCollections.observableArrayList(events);
 
-                }
-            });
+            UserEventDTO previous = userEventsTable.getSelectionModel().getSelectedItem();
 
+            if (userEvents.isEmpty()) {
+                userEventsTable.getItems().clear();
+                userEventsTable.setPlaceholder(new Label("No events"));
+                lmsrEventTable.getItems().clear();
+                orderBookPositionTable.getItems().clear();
+                setSummary(null, null);
+                return;
+            }
+
+            main.rows().update(
+                    userEventsTable,
+                    user.name(),
+                    userEvents,
+                    UserEventDTO::eventId
+            );
+
+            if (previous != null) {
+
+                userEvents.stream()
+                        .filter(e ->
+                                e.eventId() == previous.eventId()
+                        )
+                        .findFirst()
+                        .ifPresentOrElse(
+                                e -> userEventsTable
+                                        .getSelectionModel()
+                                        .select(e),
+                                () -> userEventsTable
+                                        .getSelectionModel()
+                                        .selectFirst()
+                        );
+
+            } else {
+                userEventsTable
+                        .getSelectionModel()
+                        .selectFirst();
+            }
+
+        } catch (Exception ex) {
+            controllers.util.DialogHelper.showErrorAlert(
+                    "Could not load user events",
+                    ex.getMessage()
+            );
         }
     }
 
@@ -207,33 +230,62 @@ public class UsersRightController {
     private void showLmsrHistory(UserEventDTO row, String userName) {
         showTable(true);
 
-        EventTradingStatusDTO status = main.getEngine().getEventTradingStatus(row.eventId());
+        try {
+            EventTradingStatusDTO status = HttpClientUtil.getEventTradingStatus(row.eventId());
 
-        var userTrades = status.tradingHistory().stream()
-                .filter(t -> t.userName().equals(userName))
-                .toList();
+            var userTrades = status.tradingHistory()
+                            .stream()
+                            .filter(t -> t.userName().equals(userName))
+                            .toList();
 
+            main.rows().update(
+                    lmsrEventTable,
+                    List.of(userName, row.eventId()),
+                    userTrades,
+                    TradeDTO::id
+            );
 
-        main.rows().update(lmsrEventTable, List.of(userName, row.eventId()), userTrades, TradeDTO::id);
+            setOrderBookParticipationTablePlaceHolder(
+                    userTrades,
+                    status
+            );
 
-        setOrderBookParticipationTablePlaceHolder(userTrades, status);
+            String closedText = null;
 
-        String closedText = null;
+            if (status.status() == EventStatus.CLOSED) {
 
-        if (status.status() == EventStatus.CLOSED) {
-            String perOption = status.optionTradingStatus().stream()
-                    .map(o -> o.optionName() + ": " + o.totalSharesBought())
-                    .collect(Collectors.joining(", "));
+                String perOption =
+                        status.optionTradingStatus()
+                                .stream()
+                                .map(o ->
+                                        o.optionName()
+                                                + ": "
+                                                + o.totalSharesBought()
+                                )
+                                .collect(Collectors.joining(", "));
 
-            String winner = status.optionTradingStatus()
-                    .stream()
-                    .filter(o -> o instanceof LMSROptionDTO l && l.isWinner())
-                    .map(OptionDTO::optionName)
-                    .findFirst().orElse(EMPTY);
+                String winner =
+                        status.optionTradingStatus()
+                                .stream()
+                                .filter(o ->
+                                        o instanceof LMSROptionDTO l
+                                                && l.isWinner()
+                                )
+                                .map(OptionDTO::optionName)
+                                .findFirst()
+                                .orElse(EMPTY);
 
-            closedText = "Total shares per option: " + perOption + "  —  Winning Option: " + winner;
+                closedText = "Total shares per option: " + perOption + "  —  Winning Option: " + winner;
+            }
+
+            setSummary(null, closedText);
+
+        } catch (Exception ex) {
+            controllers.util.DialogHelper.showErrorAlert(
+                    "Could not load participation",
+                    ex.getMessage()
+            );
         }
-        setSummary(null, closedText); // LMSR shows commission per-row, no need to repeat it
     }
 
     private void setOrderBookParticipationTablePlaceHolder(List<TradeDTO> userTrades, EventTradingStatusDTO status) {
@@ -257,52 +309,93 @@ public class UsersRightController {
         }
     }
 
-    private void showOrderBookPosition(UserEventDTO row, String userName) {
+    private void showOrderBookPosition(
+            UserEventDTO row,
+            String userName
+    ) {
+
         showTable(false);
 
-        UserOrderBookPositionDTO position = main.getEngine().getUserOrderBookPosition(userName, row.eventId());
+        try {
+            UserOrderBookPositionDTO position =
+                    HttpClientUtil.getUserOrderBookPosition(
+                            row.eventId()
+                    );
 
-        EventTradingStatusDTO status =
-                main.getEngine().getEventTradingStatus(row.eventId());
+            EventTradingStatusDTO status =
+                    HttpClientUtil.getEventTradingStatus(
+                            row.eventId()
+                    );
 
-        List<TradeDTO> history = status.tradingHistory().stream()
-                .filter(trade -> trade.userName().equals(userName))
-                .toList();
+            List<TradeDTO> history =
+                    status.tradingHistory()
+                            .stream()
+                            .filter(trade ->
+                                    trade.userName()
+                                            .equals(userName)
+                            )
+                            .toList();
 
-        main.rows().update(
-                orderBookPositionTable,
-                List.of(userName, row.eventId()),
-                history,
-                TradeDTO::id
-        );
+            main.rows().update(
+                    orderBookPositionTable,
+                    List.of(userName, row.eventId()),
+                    history,
+                    TradeDTO::id
+            );
 
-        orderBookPositionTable.setPlaceholder(
-                new Label("No transactions in this event")
-        );
+            orderBookPositionTable.setPlaceholder(
+                    new Label(
+                            "No transactions in this event"
+                    )
+            );
 
+            String commissionText =
+                    String.format(
+                            "Total commission Paid: %.2f",
+                            position.commissionPaid()
+                    );
 
+            String closedText = null;
 
-        String commissionText = String.format("Total commission Paid: %.2f", position.commissionPaid());
+            if (position.eventClosed()) {
 
-        String closedText = null;
+                String winner =
+                        status.optionTradingStatus()
+                                .stream()
+                                .filter(
+                                        OBOptionDTO.class::isInstance
+                                )
+                                .map(
+                                        OBOptionDTO.class::cast
+                                )
+                                .filter(
+                                        OBOptionDTO::isWinner
+                                )
+                                .map(
+                                        OptionDTO::optionName
+                                )
+                                .findFirst()
+                                .orElse(EMPTY);
 
-        if (position.eventClosed()) {
-            String winner = main.getEngine().getEventTradingStatus(row.eventId()).optionTradingStatus()
-                    .stream()
-                    .filter(OBOptionDTO.class::isInstance)
-                    .map(OBOptionDTO.class::cast)
-                    .filter(OBOptionDTO::isWinner)
-                    .map(OptionDTO::optionName)
-                    .findFirst()
-                    .orElse(EMPTY);
+                closedText =
+                        String.format(
+                                "Winning Option: %s   —   Profit / Loss: %.2f",
+                                winner,
+                                position.profitLoss()
+                        );
+            }
 
-            closedText = String.format(
-                    "Winning Option: %s   —   Profit / Loss: %.2f",
-                    winner,
-                    position.profitLoss()
+            setSummary(
+                    commissionText,
+                    closedText
+            );
+
+        } catch (Exception ex) {
+            controllers.util.DialogHelper.showErrorAlert(
+                    "Could not load order book position",
+                    ex.getMessage()
             );
         }
-        setSummary(commissionText, closedText);
     }
 
     /** Switches which of the two tables is visible/managed. Only one is ever shown. */
@@ -314,24 +407,21 @@ public class UsersRightController {
     }
 
     private void setSummary(String commissionText, String closedText) {
-        boolean hasCommission = commissionText != null;
-        boolean hasClosedText = closedText != null;
-        boolean hasAnything = hasCommission || hasClosedText;
 
-        participationSummary.setVisible(hasAnything);
-        participationSummary.setManaged(hasAnything);
+        boolean hasCommission = commissionText != null && !commissionText.isBlank();
+        boolean hasClosed     = closedText != null && !closedText.isBlank();
+        boolean hasSummary    = hasCommission || hasClosed;
 
-        commissionSummaryLabel.setText(
-                hasCommission ? commissionText : ""
-        );
+        participationSummary.setVisible(hasSummary);
+        participationSummary.setManaged(hasSummary);
+
+        commissionSummaryLabel.setText(hasCommission ? commissionText : "");
         commissionSummaryLabel.setVisible(hasCommission);
         commissionSummaryLabel.setManaged(hasCommission);
 
-        closedSummaryLabel.setText(
-                hasClosedText ? closedText : ""
-        );
-        closedSummaryLabel.setVisible(hasClosedText);
-        closedSummaryLabel.setManaged(hasClosedText);
+        closedSummaryLabel.setText(hasClosed ? closedText : "");
+        closedSummaryLabel.setVisible(hasClosed);
+        closedSummaryLabel.setManaged(hasClosed);
     }
 
     private String formatStatus(EventStatus status) {
@@ -343,15 +433,19 @@ public class UsersRightController {
     }
 
     public void refresh() {
-        UserDTO current = main.getActiveUser();
-        if (current == null)
-            return;
 
-        UserDTO fresh = main.getEngine().getUsers().get(current.name());
-        if (fresh == null)
-            return;
+        try {
+            UserDTO fresh = HttpClientUtil.getCurrentUser();
 
-        main.setActiveUser(fresh);
-        showUserDetails(fresh);
+            main.setActiveUser(fresh);
+
+            showUserDetails(fresh);
+
+        } catch (Exception ex) {
+            controllers.util.DialogHelper.showErrorAlert(
+                    "Could not refresh user data",
+                    ex.getMessage()
+            );
+        }
     }
 }

@@ -73,7 +73,7 @@ public class Event implements Serializable {
 
     public void activate(User mm) {
         double charged = method.activate(mm, this);
-        mm.setAccountBalance(mm.getAccountBalance() - charged);
+        mm.adjustBalance(-charged, eventName, "Event activation");
         EventTradingStatus ets = getEventTradingStatus();
         ets.updateAccountBalance(ets.getAccountBalance() + charged);
         ets.activate(); // NOT_STARTED -> ACTIVE

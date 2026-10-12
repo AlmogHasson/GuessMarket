@@ -8,6 +8,8 @@ public interface Method {
     /** MM funds the event. Returns the amount to debit from the MM's account. */
     double activate(User marketMaker, Event event);
 
+    double getActivationCost();
+
     /** Process one trade request (LMSR: always a "buy" against the curve; OB: a limit order). */
     TradeResult executeTrade(Event event, Map<String, User> users, TradeRequest request);
 

@@ -59,8 +59,7 @@ public class EventTabController {
             return;
         }
 
-        EventSummaryDTO selected =
-                eventLeftPaneController.getSelectedEvent();
+        EventSummaryDTO selected = eventLeftPaneController.getSelectedEvent();
 
         if (selected != null) {
             eventLeftPaneController.reloadEventsAndSelect(selected.getId());

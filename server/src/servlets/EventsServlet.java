@@ -17,6 +17,11 @@ public class EventsServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String userName = ServletUtils.validateUserSession(request);
+
+        if (userName == null) {
+            return;
+        }
 
         GMController controller = ServletUtils.getController(getServletContext());
 

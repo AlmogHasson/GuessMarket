@@ -7,7 +7,7 @@
     files, wired together by fx.UsersTabController.
 -->
 <SplitPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="controllers.usersTab.UsersTabController" dividerPositions="0.27">
+           fx:controller="controllers.usersTab.UsersTabController" dividerPositions="0.4">
 
    <items>
 

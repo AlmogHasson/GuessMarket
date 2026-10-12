@@ -11,7 +11,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import util.Constants;
-import util.FrameProbe;
 import util.HttpClientUtil;
 import util.ThemeManager;
 
@@ -68,9 +67,7 @@ public class LoginController {
         Task<Void> loginTask = new Task<>() {
             @Override
             protected Void call() throws Exception {
-                long t0 = System.nanoTime();                                          // TEMP timing
                 HttpClientUtil.login(userName);
-                System.out.println("[timing] login request: " + (System.nanoTime() - t0) / 1_000_000 + " ms");
                 return null;
             }
         };
@@ -102,10 +99,9 @@ public class LoginController {
     private void openMainScreen(String userName) {
 
         try {
-            long t0 = System.nanoTime();                                              // TEMP timing
+            long t0 = System.nanoTime();
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxmls/main.fxml"));
             Parent root = loader.load();
-            System.out.println("[timing] main.fxml load: " + (System.nanoTime() - t0) / 1_000_000 + " ms");
             MainController controller = loader.getController();
 
             controller.setUserName(userName);
@@ -115,19 +111,15 @@ public class LoginController {
             // Resize first, while the light login page is still the root, and swap
             // the root last: the big main tree is then styled and laid out once, at
             // its final size, instead of once at the login size and again after.
-            long t1 = System.nanoTime();                                              // TEMP timing
             stage.setTitle("Guess Market - " + userName);
+            controller.installCloseLogout(stage);      // X button logs out on the server too
             stage.setMinWidth(800);
             stage.setMinHeight(550);
             stage.setWidth(1200);
             stage.setHeight(700);
             stage.centerOnScreen();
-            System.out.println("[timing] stage resize: " + (System.nanoTime() - t1) / 1_000_000 + " ms");
 
-            long t2 = System.nanoTime();                                              // TEMP timing
             stage.getScene().setRoot(root);
-            System.out.println("[timing] setRoot: " + (System.nanoTime() - t2) / 1_000_000 + " ms");
-            FrameProbe.start("login", clickNanos);                                    // TEMP timing
 
         } catch (IOException e) {
 

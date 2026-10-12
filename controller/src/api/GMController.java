@@ -9,14 +9,15 @@ import java.util.stream.Collectors;
 public class GMController {
     private Engine engine = new EngineImpl();
 
-    public synchronized void loadFile(String path, String uploaderName) throws Exception {
+    public synchronized void loadFile(java.io.InputStream inputStream, String uploaderName) throws Exception {
+
         int oldCount = engine.getEvents().size();
 
         try {
-            engine.loadFile(path);
+            engine.loadFile(inputStream);
         } catch (Exception e) {
             List<Event> all = engine.getEvents();
-            all.subList(oldCount, all.size()).clear();   // roll back the partial load
+            all.subList(oldCount, all.size()).clear();
             throw e;
         }
 
@@ -28,27 +29,27 @@ public class GMController {
         }
     }
 
-    public UserDTO getOrCreateUser(String userName) {
+    public synchronized UserDTO getOrCreateUser(String userName) {
         return new UserDTO(engine.getOrCreateUser(userName));
     }
 
-    public List<EventSummaryDTO> getEvents() {
+    public synchronized List<EventSummaryDTO> getEvents() {
         return engine.getEvents().stream().map(EventSummaryDTO::new).toList();
     }
 
-    public EventTradingStatusDTO getEventTradingStatus(int eventId) throws IllegalArgumentException {
+    public synchronized EventTradingStatusDTO getEventTradingStatus(int eventId) throws IllegalArgumentException {
         return new EventTradingStatusDTO(engine.getEvents().stream().filter(e -> e.getId() == eventId).findFirst().orElseThrow(() -> new IllegalArgumentException("Event not found: " + eventId)));
     }
 
-    public PurchaseDTO participateInEvent(String userName, int eventId, int optionNumber, int shares, Side side, Double price) {
+    public synchronized PurchaseDTO participateInEvent(String userName, int eventId, int optionNumber, int shares, Side side, Double price) {
         return new PurchaseDTO(engine.participateInEvent(userName, eventId, optionNumber, shares, side.toEngine(), price));
     }
 
-    public void closeEvent(int eventID,int winningOption) {
-        engine.closeEvent(eventID, winningOption);
+    public synchronized void closeEvent(String userName, int eventId, int winningOption) {
+        engine.closeEvent(userName, eventId, winningOption);
     }
 
-    public Map<String, UserDTO> getUsers() {
+    public synchronized Map<String, UserDTO> getUsers() {
         Map<String, User> users = engine.getUsers();
 
         if (users == null) {
@@ -65,7 +66,7 @@ public class GMController {
                 ));
     }
 
-    public List<UserEventDTO> getUserEvents(String userName) {
+    public synchronized List<UserEventDTO> getUserEvents(String userName) {
         if (!engine.getUsers().containsKey(userName)) {
             throw new IllegalArgumentException("User not found: " + userName);
         }
@@ -91,29 +92,46 @@ public class GMController {
         return userEvents;
     }
 
-    public void activateEvent(String name, int eventId) {
+    public synchronized void activateEvent(String name, int eventId) {
         engine.activateEvent(name, eventId);
     }
 
-    public List<ParticipantHoldingDTO> getEventParticipants(int eventId) {
+    public synchronized List<ParticipantHoldingDTO> getEventParticipants(int eventId) {
+
+        Event event = engine.getEvents()
+                .stream()
+                .filter(e -> e.getId() == eventId)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Event not found: " + eventId));
+
         List<OptionDTO> options = getEventTradingStatus(eventId).optionTradingStatus();
+
         List<ParticipantHoldingDTO> rows = new ArrayList<>();
+
         for (int i = 0; i < options.size(); i++)
         {
             for (String userName : engine.getEventParticipants(eventId)) {
                 int optionNumber = i + 1;
+
                 OptionDTO option = options.get(i);
+
                 int shares = engine.getParticipantShares(eventId, userName, optionNumber);
+
                 double value = shares * option.currentValue();
-                Holding[] userHoldings = engine.getEvents().get(eventId - 1).getUserHoldings(userName);
-                double totalPaid = (userHoldings == null) ? 0.0 : userHoldings[i].getTotalPaid();
+
+                Holding[] userHoldings = event.getUserHoldings(userName);
+
+                double totalPaid = (userHoldings == null || userHoldings[i] == null)
+                        ? 0.0
+                        : userHoldings[i].getTotalPaid();
+
                 rows.add(new ParticipantHoldingDTO(userName, option.optionName(), shares, value, totalPaid));
             }
         }
         return rows;
     }
 
-    public UserOrderBookPositionDTO getUserOrderBookPosition(String userName, int eventId) {
+    public synchronized UserOrderBookPositionDTO getUserOrderBookPosition(String userName, int eventId) {
         Event event = engine.getEvents().stream()
                 .filter(e -> e.getId() == eventId)
                 .findFirst()
@@ -127,7 +145,8 @@ public class GMController {
     }
 
 
-    public List<OrderBookStatsDTO> getOrderBookStats(int eventId) {
+
+    public synchronized List<OrderBookStatsDTO> getOrderBookStats(int eventId) {
         Event event = engine.getEvents()
                 .stream()
                 .filter(e -> e.getId() == eventId)
@@ -140,6 +159,27 @@ public class GMController {
         return event.getEventTradingStatus().getOptions()
                 .stream()
                 .map(opt -> new OrderBookStatsDTO(ob, opt.getOptionNumber()))
+                .toList();
+    }
+
+    public synchronized UserDTO deposit(String userName, double amount) {
+        return new UserDTO(engine.deposit(userName, amount));
+    }
+
+    public synchronized List<AccountTransactionDTO> getAccountTransactions(
+            String userName
+    ) {
+        User user = engine.getUsers().get(userName);
+
+        if (user == null) {
+            throw new IllegalArgumentException(
+                    "User not found: " + userName
+            );
+        }
+
+        return user.getAccountTransactions()
+                .stream()
+                .map(AccountTransactionDTO::new)
                 .toList();
     }
 }

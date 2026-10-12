@@ -19,6 +19,10 @@ public class OrderBook implements Method{
         this.allowMint = ob.getAllowMint().equals("true");
     }
 
+    @Override
+    public double getActivationCost() {
+        return ((double) initial /d * (double)d);
+    }
 
     @Override
     public int getValue() {
@@ -28,9 +32,10 @@ public class OrderBook implements Method{
     @Override
     public double activate(User mm, Event event) {
         int pairShares = initial / d;
+        double cost = pairShares * (double) d;
         //add shares to the MM's holdings for both options, at a cost of initial/2 for each option
-        event.getOrCreateHolding(mm.getName(), 1).applyBuy(pairShares, initial / 2.0);
-        event.getOrCreateHolding(mm.getName(), 2).applyBuy(pairShares, initial / 2.0);
+        event.getOrCreateHolding(mm.getName(), 1).applyBuy(pairShares, cost / 2.0);
+        event.getOrCreateHolding(mm.getName(), 2).applyBuy(pairShares, cost / 2.0);
         //place orders for the MM to sell the initial shares at price d/2 for both options
         executeTrade(event, Map.of(mm.getName(), mm), new TradeRequest(mm.getName(), 1,  pairShares, Side.SELL,d / 2.0));
         executeTrade(event, Map.of(mm.getName(), mm), new TradeRequest(mm.getName(), 2,  pairShares, Side.SELL,d / 2.0));
@@ -40,17 +45,26 @@ public class OrderBook implements Method{
 
         //add trades to the event's trading history for the initial MM trades
         event.getEventTradingStatus().updateHistory(
-                new Trade(mm.getName(), event.getOptions().get(0).getOptionName(), pairShares, initial / 2.0, Side.SELL, 0));
+                new Trade(mm.getName(), event.getOptions().get(0).getOptionName(), pairShares, cost / 2.0, Side.SELL, 0));
         event.getEventTradingStatus().updateHistory(
-                new Trade(mm.getName(), event.getOptions().get(1).getOptionName(), pairShares, initial / 2.0, Side.SELL, 0));
+                new Trade(mm.getName(), event.getOptions().get(1).getOptionName(), pairShares, cost / 2.0, Side.SELL, 0));
 
-        return initial;
+        return cost;
     }
 
     @Override
     public TradeResult executeTrade(Event event, Map<String, User> users, TradeRequest req) {
-        if (req.price() == null || req.price() >= d )
-            throw new IllegalArgumentException("Invalid price for Order Book order: " + req.price() + " (must be < d = " + d + ")");
+
+        if (req.price() == null
+                || !Double.isFinite(req.price())
+                || req.price() < 0
+                || req.price() > d - 0.01) {
+
+            throw new IllegalArgumentException(
+                    "Invalid Order Book price: " + req.price()
+                            + ". Price must be between 0 and "
+                            + (d - 0.01));
+        }
 
         Order incoming =
                 new Order(++orderSeq, req.userName(), req.side(), req.shares(), req.price(), orderSeq);
@@ -88,7 +102,9 @@ public class OrderBook implements Method{
 
             double gross = holding.getShares() * d;
             double commission = onClose ? gross * percentage : 0.0;
+
             holding.addCommissionPaid(commission);
+
             event.getEventTradingStatus()
                     .updateTotalCommissionPaid(
                     event.getEventTradingStatus().getTotalCommissionPaid() + commission);
@@ -98,7 +114,11 @@ public class OrderBook implements Method{
             User user = users.get(entry.getKey());
 
             // pay winner
-            user.setAccountBalance(user.getAccountBalance() + net);
+            user.adjustBalance(
+                    net,
+                    event.getEventName(),
+                    "Event payout"
+            );
 
             // money leaves event contract
             event.getEventTradingStatus().updateAccountBalance(
@@ -107,10 +127,17 @@ public class OrderBook implements Method{
 
             // commission goes to MM
             if (commission > 0) {
-                User mm = users.values().stream().filter(u -> u.isMarketMaker(event.getId()))
+                User mm = users.values()
+                        .stream()
+                        .filter(u -> u.isMarketMaker(event.getId()))
                         .findFirst()
                         .orElseThrow(() -> new IllegalStateException("Market maker not found"));
-                mm.setAccountBalance(mm.getAccountBalance() + commission);
+
+                mm.adjustBalance(
+                        commission,
+                        event.getEventName(),
+                        "Event commission payout"
+                );
             }
         }
 
@@ -163,12 +190,24 @@ public class OrderBook implements Method{
                 ? gross * event.getCommission().getValue() / 100.0 : 0.0;
 
         User buyer = users.get(buyerName);
-        buyer.setAccountBalance(buyer.getAccountBalance() - (gross + commission));
+
+        buyer.adjustBalance(
+                -(gross + commission),
+                event.getEventName(),
+                "Buy " + qty + " " + optName
+        );
+
         event.getOrCreateHolding(buyerName, optNum).applyBuy(qty, gross + commission);
         event.getOrCreateHolding(buyerName, optNum).addCommissionPaid(commission);
 
         User seller = users.get(sellerName);
-        seller.setAccountBalance(seller.getAccountBalance() + gross);
+
+        seller.adjustBalance(
+                gross,
+                event.getEventName(),
+                "Sell " + qty + " " + optName
+        );
+
         event.getOrCreateHolding(sellerName, optNum).applySell(qty, gross);
 
         event.getOptions().get(optNum - 1).updateValue(price);
@@ -216,7 +255,13 @@ public class OrderBook implements Method{
                 ? gross * event.getCommission().getValue() / 100.0 : 0.0;
 
         User buyer = users.get(buyerName);
-        buyer.setAccountBalance(buyer.getAccountBalance() - (gross + commission));
+
+        buyer.adjustBalance(
+                -(gross + commission),
+                event.getEventName(),
+                "Buy " + qty + " " + optName
+        );
+
         Holding holding = event.getOrCreateHolding(buyerName, optNum);
         holding.applyBuy(qty, gross + commission);
         holding.addCommissionPaid(commission);

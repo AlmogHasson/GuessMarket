@@ -21,7 +21,9 @@ public class ChangeTrackingFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
 
-        if ("POST".equals(request.getMethod()) && response.getStatus() < 400) {
+        if ("POST".equals(request.getMethod())
+                && response.getStatus() < 400
+                && !"/chat".equals(request.getServletPath())) {
             ServletUtils.getDataVersion(req.getServletContext()).incrementAndGet();
         }
     }

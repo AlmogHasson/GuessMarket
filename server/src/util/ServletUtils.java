@@ -5,6 +5,7 @@ import jakarta.servlet.ServletContext;
 import manager.ActiveUsersManager;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import manager.ChatManager;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -20,7 +21,7 @@ public final class ServletUtils {
         return (ActiveUsersManager) context.getAttribute(ServerConstants.ACTIVE_USERS_ATTRIBUTE);
     }
 
-    public static String getLoggedInUserName(HttpServletRequest request) {
+    public static String validateUserSession(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
 
         if (session == null) {
@@ -30,8 +31,11 @@ public final class ServletUtils {
         return (String) session.getAttribute(ServerConstants.USERNAME_SESSION_ATTRIBUTE);
     }
 
-
     public static AtomicInteger getDataVersion(ServletContext context) {
         return (AtomicInteger) context.getAttribute(ServerConstants.DATA_VERSION_ATTRIBUTE);
+    }
+
+    public static ChatManager getChatManager(ServletContext context) {
+        return (ChatManager) context.getAttribute(ServerConstants.CHAT_ATTRIBUTE);
     }
 }

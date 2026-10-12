@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.util.DialogHelper;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -133,5 +134,10 @@ public class FileLoadController {
         );
 
         finishAnimation.play();
+        Platform.runLater(() ->
+                DialogHelper.showInfoAlert(
+                        "Load Successful", "Your file loaded successfully."
+                )
+        );
     }
 }

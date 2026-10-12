@@ -44,7 +44,7 @@ public class TopController {
 
     private void showActiveUser(String userName) {
         boolean none = userName == null || userName.isBlank();
-        activeUserLabel.setText(none ? "No active user" : "Acting as: " + userName);
+        activeUserLabel.setText(none ? "No active user" : "Acting as: " + userName.toUpperCase());
         activeUserLabel.getStyleClass().removeAll("active-user-none");
         if (none) {
             activeUserLabel.getStyleClass().add("active-user-none");

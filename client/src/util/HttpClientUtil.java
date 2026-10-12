@@ -1,6 +1,10 @@
 package util;
 
 import dto.*;
+import dto.request.ChatRequestDTO;
+import dto.request.CloseEventRequestDTO;
+import dto.request.DepositRequestDTO;
+import dto.request.ParticipationRequestDTO;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -27,6 +31,8 @@ public final class HttpClientUtil {
     private static final Gson GSON = util.GsonProvider.GSON;
 
     private static final SimpleCookieManager COOKIE_MANAGER = new SimpleCookieManager();
+
+    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     private static final OkHttpClient CLIENT =
             new OkHttpClient.Builder()
@@ -141,6 +147,149 @@ public final class HttpClientUtil {
 
         execute(request);
     }
+
+    public static void participateInEvent(
+            //username is not needed because the server gets it from the session
+            int eventId,
+            int optionNumber,
+            int shares,
+            Side side,
+            Double price) throws IOException {
+
+        ParticipationRequestDTO participation =
+                new ParticipationRequestDTO(
+                        eventId,
+                        optionNumber,
+                        shares,
+                        side,
+                        price
+                );
+
+        String json = GSON.toJson(participation);
+
+        RequestBody requestBody = RequestBody.create(json, JSON);
+
+        Request request = new Request.Builder()
+                        .url(Constants.EVENT_PARTICIPATE)
+                        .post(requestBody)
+                        .build();
+
+        String response = execute(request);
+
+        GSON.fromJson(response, PurchaseDTO.class);
+    }
+
+    public static void activateEvent(int eventId) throws IOException {
+
+        HttpUrl url = urlOf(Constants.EVENT_ACTIVATE)
+                .addQueryParameter("id", String.valueOf(eventId))
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .post(RequestBody.create(new byte[0]))
+                .build();
+
+        execute(request);
+    }
+
+    public static List<UserDTO> getUsers() throws IOException {
+
+        String json = get(Constants.USERS);
+
+        Type type = new TypeToken<List<UserDTO>>() {}.getType();
+
+        return GSON.fromJson(json, type);
+    }
+
+    public static List<UserEventDTO> getUserEvents()
+            throws IOException {
+
+        String json = get(Constants.USER_EVENTS);
+
+        Type type =
+                new TypeToken<List<UserEventDTO>>() {}.getType();
+
+        return GSON.fromJson(json, type);
+    }
+
+    public static UserOrderBookPositionDTO getUserOrderBookPosition(
+            int eventId
+    ) throws IOException {
+
+        String url =
+                urlOf(Constants.USER_ORDER_BOOK_POSITION)
+                        .addQueryParameter(
+                                "id",
+                                String.valueOf(eventId)
+                        )
+                        .build()
+                        .toString();
+
+        return GSON.fromJson(
+                get(url),
+                UserOrderBookPositionDTO.class
+        );
+    }
+
+    public static UserDTO deposit(double amount)
+            throws IOException {
+
+        DepositRequestDTO deposit =
+                new DepositRequestDTO(amount);
+
+        String json = GSON.toJson(deposit);
+
+        RequestBody requestBody =
+                RequestBody.create(json, JSON);
+
+        Request request =
+                new Request.Builder()
+                        .url(Constants.DEPOSIT)
+                        .post(requestBody)
+                        .build();
+
+        String response = execute(request);
+
+        return GSON.fromJson(
+                response,
+                UserDTO.class
+        );
+    }
+
+    public static List<AccountTransactionDTO> getAccountTransactions() throws IOException {
+
+        String json = get(Constants.ACCOUNT_TRANSACTIONS);
+
+        Type type =
+                new TypeToken<
+                        List<AccountTransactionDTO>
+                        >() {}.getType();
+
+        return GSON.fromJson(json, type);
+    }
+
+    public static void closeEvent(int eventId, int winningOption) throws IOException {
+
+        CloseEventRequestDTO closeRequest = new CloseEventRequestDTO(eventId, winningOption);
+
+        String json = GSON.toJson(closeRequest);
+
+        RequestBody requestBody =
+                RequestBody.create(
+                        json,
+                        JSON
+                );
+
+        Request request =
+                new Request.Builder()
+                        .url(Constants.EVENT_CLOSE)
+                        .post(requestBody)
+                        .build();
+
+        execute(request);
+    }
+
     /**
      * Sends one throwaway GET to the login URL on a background thread, so the
      * first real login does not pay for OkHttp's one-time class loading, the
@@ -148,6 +297,22 @@ public final class HttpClientUtil {
      * with 405 (login is POST-only) and creates no session or user. Best
      * effort: a failure - including a server that is not up yet - is ignored.
      */
+
+    public static List<ChatMessageDTO> getChatMessages(int since) throws IOException {
+        String url = Objects.requireNonNull(HttpUrl.parse(Constants.CHAT)).newBuilder()
+                .addQueryParameter("since", String.valueOf(since))
+                .build().toString();
+
+        Type type = new TypeToken<List<ChatMessageDTO>>() {}.getType();
+        return GSON.fromJson(get(url), type);
+    }
+
+    public static void sendChatMessage(String text) throws IOException {
+        RequestBody body = RequestBody.create(GSON.toJson(new ChatRequestDTO(text)), JSON);
+        execute(new Request.Builder().url(Constants.CHAT).post(body).build());
+    }
+
+
     public static void warmUp() {
         Thread thread = new Thread(() -> {
             try {

@@ -1,5 +1,6 @@
 package servlets;
 
+import api.GMController;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +25,14 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        userName = userName.trim();
+        GMController controller = ServletUtils.getController(getServletContext());
+
+        String typedName = userName.trim();
+
+        userName = controller.getUsers().keySet().stream()
+                .filter(existing -> existing.equalsIgnoreCase(typedName))
+                .findFirst()
+                .orElse(typedName);
 
         ActiveUsersManager activeUserManager = ServletUtils.getActiveUsersManager(getServletContext());
 
@@ -38,7 +46,7 @@ public class LoginServlet extends HttpServlet {
 
         try
         {
-            ServletUtils.getController(getServletContext()).getOrCreateUser(userName);
+            controller.getOrCreateUser(userName);
 
             HttpSession session = request.getSession(true);
 

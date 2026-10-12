@@ -12,7 +12,7 @@ public record UserDTO(
     public UserDTO(User user){
         this(
                 user.getAccountBalance(),
-                user.getUserEvents(),
+                List.copyOf(user.getUserEvents()),
                 user.getName()
         );
     }
@@ -34,7 +34,4 @@ public record UserDTO(
         return eventsIDs.contains(eventID);
     }
 
-    public boolean isBlocked() {
-        return accountBalance < 0;
-    }
 }

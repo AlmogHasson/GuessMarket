@@ -15,7 +15,7 @@ public class EventStatusServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        if (ServletUtils.getLoggedInUserName(request) == null) {
+        if (ServletUtils.validateUserSession(request) == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }

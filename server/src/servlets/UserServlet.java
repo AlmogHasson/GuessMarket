@@ -15,7 +15,7 @@ public class UserServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String userName = ServletUtils.getLoggedInUserName(request);
+        String userName = ServletUtils.validateUserSession(request);
 
         if (userName == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

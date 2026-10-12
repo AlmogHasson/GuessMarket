@@ -1,6 +1,7 @@
 package controllers;
 
-import api.GMController;
+import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import controllers.eventsTab.EventTabController;
 import controllers.usersTab.UsersTabController;
 import controllers.util.DialogHelper;
@@ -34,16 +35,14 @@ import java.util.Objects;
 
 /**
  * Root coordinator for the composition tree.
- * It owns the things every pane must agree on - the engine controller, whether a
- * file has been loaded, who the active user is, and whether animations are
- * enabled - and forwards events down to the two tab controllers. Anything that
- * stays inside a single tab (a row selection, a bet, closing an event) is handled
- * by that tab's own controller and never reaches this class.
+ * It owns the things every pane must agree on - whether a file has been loaded,
+ * who the active user is, and whether animations are enabled - and forwards
+ * events down to the tab controllers. Anything that stays inside a single tab
+ * (a row selection, a bet, closing an event) is handled by that tab's own
+ * controller and never reaches this class.
  */
 public class MainController {
 
-    /** The single engine instance for the whole application. */
-    private final GMController controller = new GMController();
     private int lastVersion = -1;
     private ScheduledService<Integer> poller;
 
@@ -69,6 +68,7 @@ public class MainController {
     @FXML private EventTabController eventPaneController;
     @FXML private UsersTabController usersPaneController;
     @FXML private FileLoadController fileLoadPaneController;
+    @FXML private ChatController     chatPaneController;
 
     @FXML private Tab eventsTab;
     @FXML private Tab usersTab;
@@ -83,6 +83,7 @@ public class MainController {
         fileLoadPaneController.init(this);
         eventPaneController.init(this);
         usersPaneController.init(this);
+        chatPaneController.init(this);
 
         slidingTabs = new SlidingTabs(
                 mainTabs,
@@ -145,10 +146,6 @@ public class MainController {
     }
 
     // ---------------- shared state, read by the panes ----------------
-
-    public GMController getEngine() {
-        return controller;
-    }
 
     public BooleanProperty fileLoadedProperty() {
         return fileLoadedProperty;
@@ -228,6 +225,7 @@ public class MainController {
             setActiveUser(new UserDTO(0, List.of(), userName));
             syncWithServer();
             startPolling();
+            chatPaneController.start();
         } else {
             clearActiveUser();
         }
@@ -235,15 +233,52 @@ public class MainController {
 
 
     /**
+     * Pressing the window's X must log the user out on the server too, otherwise
+     * the session stays alive. Installed by LoginController once the main screen
+     * is shown; removed again in showLoginScreen().
+     */
+    public void installCloseLogout(Stage stage) {
+        stage.setOnCloseRequest(event -> {
+            event.consume();                       // we close the window ourselves, after logout
+            if (poller != null) {
+                poller.cancel();
+            }
+            chatPaneController.stop();
+
+            // never let an unreachable server keep the window open
+            PauseTransition fallback = new PauseTransition(Duration.seconds(3));
+            fallback.setOnFinished(e -> stage.close());
+            fallback.play();
+
+            Thread thread = new Thread(() -> {
+                try {
+                    HttpClientUtil.logout();
+                } catch (Exception ignored) {
+                    // closing anyway
+                }
+                Platform.runLater(stage::close);   // close() does not re-fire onCloseRequest
+            });
+            thread.setDaemon(true);
+            thread.start();
+        });
+    }
+
+    /**
      * Swaps the scene's root back to the login page. The scene (and so the
      * current theme) is kept; this MainController is simply dropped, which is
      * what resets all per-session state.
      */
     public void showLoginScreen() {
+        chatPaneController.stop();
+        if (poller != null) {
+            poller.cancel();
+        }
+
         try {
             Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/fxmls/login.fxml")));
             Stage stage = (Stage) rootPane.getScene().getWindow();
 
+            stage.setOnCloseRequest(null);     // no session to log out of on the login page
             stage.getScene().setRoot(root);
             stage.setTitle("Guess Market - Login");
             stage.setMinWidth(460);
