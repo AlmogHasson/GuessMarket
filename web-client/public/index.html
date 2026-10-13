@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Guess Market - Login</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23a252c8'/%3E%3Cpath d='M8 22l5-6 4 3 7-9' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<!-- ================= LOGIN (login.fxml) ================= -->
+<section id="login-view" class="login-root" hidden>
+    <form id="login-form" class="login-card" autocomplete="off" novalidate>
+        <h1 class="headline">Guess Market</h1>
+        <p class="login-subtitle">Enter your name to join the market</p>
+
+        <label class="field-group">
+            <span class="muted-label">User name</span>
+            <input id="login-name" class="text-field login-field" type="text" maxlength="30"
+                   placeholder="letters and digits only" spellcheck="false">
+        </label>
+
+        <div id="login-error" class="login-error" role="alert" hidden></div>
+
+        <button id="login-button" class="button keycap login-button" type="submit" disabled>Log in</button>
+
+        <label class="theme-row">
+            <span class="muted-label">Theme</span>
+            <select id="login-theme" class="combo-box theme-select"></select>
+        </label>
+
+        <p id="server-label" class="login-footnote"></p>
+    </form>
+</section>
+
+<!-- ================= MAIN (main.fxml) ================= -->
+<section id="main-view" class="main-root" hidden>
+
+    <!-- top.fxml -->
+    <header class="top-bar">
+        <div class="top-side top-left">
+            <span id="active-user" class="active-user active-user-none">No active user</span>
+            <button id="logout-button" class="button keycap load-file-button" type="button">Log out</button>
+        </div>
+        <h1 class="headline">Guess Market</h1>
+        <div class="top-side top-right">
+            <label class="check-box animations-check">
+                <input id="animations-check" type="checkbox">
+                <span class="box" aria-hidden="true"></span>
+                <span>Animations</span>
+            </label>
+            <select id="main-theme" class="combo-box theme-select" aria-label="Theme"></select>
+        </div>
+    </header>
+
+    <main class="main-center">
+        <div class="tab-pane">
+            <nav class="tab-header-area" role="tablist">
+                <span id="tab-indicator" class="sliding-tab-indicator" aria-hidden="true"></span>
+                <button class="tab selected" role="tab" data-tab="events" aria-selected="true">Events</button>
+                <button class="tab" role="tab" data-tab="users" aria-selected="false">Users</button>
+            </nav>
+
+            <div class="tab-content-area">
+
+                <!-- ============ EVENTS TAB (event.fxml) ============ -->
+                <div id="events-tab" class="tab-content split-pane" data-split="0.48">
+
+                    <!-- eventLeft.fxml -->
+                    <div class="split-item card events-left">
+                        <div class="filters">
+                            <select id="filter-method" class="combo-box" aria-label="Method"></select>
+                            <select id="filter-status" class="combo-box" aria-label="Status"></select>
+                            <select id="filter-commission" class="combo-box" aria-label="Commission"></select>
+                            <select id="filter-commission-type" class="combo-box" aria-label="Commission Type"></select>
+                        </div>
+                        <div id="events-table" class="table-view grow"></div>
+                    </div>
+
+                    <div class="split-divider" role="separator" aria-orientation="vertical"></div>
+
+                    <!-- eventRight.fxml -->
+                    <div class="split-item events-right">
+                        <div class="details-header">
+                            <span class="header-spacer"></span>
+                            <h2 id="event-details-title" class="page-title">Event details and trade</h2>
+                            <button id="event-status-button" class="button keycap danger-button status-button" type="button" disabled>Close Event</button>
+                        </div>
+
+                        <div id="event-details-content" class="event-details-content">
+
+                            <!-- LMSR view -->
+                            <div id="lmsr-pane" class="lmsr-pane">
+                                <div class="card info-grid">
+                                    <div class="info-cell">
+                                        <span class="strong-label">Event Name</span>
+                                        <span id="lmsr-name">—</span>
+                                    </div>
+                                    <div class="info-cell">
+                                        <span class="strong-label">Status</span>
+                                        <span id="lmsr-status">—</span>
+                                    </div>
+                                    <div class="info-cell description-cell">
+                                        <span class="strong-label">Description</span>
+                                        <div id="lmsr-description" class="description-area"></div>
+                                    </div>
+                                    <div class="info-cell">
+                                        <span class="strong-label">Account Balance</span>
+                                        <span id="lmsr-balance">0.00</span>
+                                    </div>
+                                    <div class="info-cell">
+                                        <span class="strong-label">Total Commission Paid</span>
+                                        <span id="lmsr-commission">0.00</span>
+                                    </div>
+                                </div>
+
+                                <div class="lmsr-options">
+                                    <div class="lmsr-option" data-option="1">
+                                        <div class="option-title">Option 1</div>
+                                        <div class="table-view option-table" data-role="option-table"></div>
+                                        <div class="bet-row">
+                                            <input class="text-field bet-field" data-role="bet-field" placeholder="Shares" inputmode="numeric" disabled>
+                                            <button class="button keycap bet-button" data-role="bet-button" type="button" disabled>Place the bet</button>
+                                        </div>
+                                    </div>
+                                    <div class="lmsr-option" data-option="2">
+                                        <div class="option-title">Option 2</div>
+                                        <div class="table-view option-table" data-role="option-table"></div>
+                                        <div class="bet-row">
+                                            <input class="text-field bet-field" data-role="bet-field" placeholder="Shares" inputmode="numeric" disabled>
+                                            <button class="button keycap bet-button" data-role="bet-button" type="button" disabled>Place the bet</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card participations grow">
+                                    <h3 class="section-title">Participations information</h3>
+                                    <div id="lmsr-participations" class="table-view grow"></div>
+                                </div>
+                            </div>
+
+                            <!-- Order Book view -->
+                            <div id="ob-pane" class="ob-pane scroll-pane" hidden>
+                                <div class="ob-grid">
+                                    <div class="ob-option" data-option="1"></div>
+                                    <div class="ob-option" data-option="2"></div>
+
+                                    <div class="card ob-participations">
+                                        <div class="ob-participations-header">
+                                            <h3 class="section-title">Participations information</h3>
+                                            <span class="grow"></span>
+                                            <span class="muted-label">Event Balance:</span>
+                                            <span id="ob-event-balance" class="strong-label">0.00</span>
+                                            <span class="muted-label">Commission Paid:</span>
+                                            <span id="ob-commission" class="strong-label">0.00</span>
+                                        </div>
+                                        <div id="ob-participations" class="table-view fixed-230"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ USERS TAB (users.fxml) ============ -->
+                <div id="users-tab" class="tab-content split-pane" data-split="0.4" hidden>
+
+                    <!-- usersLeft.fxml -->
+                    <div class="split-item card users-left">
+                        <h2 class="users-title">Users</h2>
+                        <div id="users-table" class="table-view grow"></div>
+
+                        <div class="card account-card grow">
+                            <h3 class="section-title centered">Account Details</h3>
+                            <div id="account-table" class="table-view grow"></div>
+                            <div class="balance-card">
+                                <div>
+                                    <div class="muted-label">Account Balance</div>
+                                    <div id="account-balance" class="balance-value">0.00</div>
+                                </div>
+                                <span class="grow"></span>
+                                <button id="deposit-button" class="button keycap" type="button">Deposit</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="split-divider" role="separator" aria-orientation="vertical"></div>
+
+                    <!-- usersRight.fxml -->
+                    <div class="split-item users-right">
+                        <h2 class="page-title centered">Single User Details</h2>
+
+                        <div class="card grow">
+                            <h3 class="section-title centered">Events Participation / Owner</h3>
+                            <div id="user-events-table" class="table-view grow"></div>
+                        </div>
+
+                        <div class="card grow">
+                            <h3 class="section-title centered">Single event details and trade</h3>
+                            <div id="user-lmsr-table" class="table-view grow"></div>
+                            <div id="user-ob-table" class="table-view grow" hidden></div>
+                            <div id="participation-summary" class="participation-summary" hidden>
+                                <div id="commission-summary" class="participation-summary-main"></div>
+                                <div id="closed-summary" class="participation-summary-secondary"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- chat.fxml -->
+        <aside id="chat" class="chat-window">
+            <div id="chat-header" class="chat-header">
+                <span class="chat-title">Chat</span>
+                <span id="chat-badge" class="chat-badge" hidden></span>
+                <span id="chat-chevron" class="chat-chevron">▲</span>
+            </div>
+            <div id="chat-body" class="chat-body" hidden>
+                <ul id="chat-messages" class="chat-list"></ul>
+                <form id="chat-form" class="chat-input-row" autocomplete="off">
+                    <input id="chat-input" class="text-field" maxlength="500" placeholder="Type a message...">
+                    <button id="chat-send" class="button keycap" type="submit">Send</button>
+                </form>
+            </div>
+        </aside>
+    </main>
+</section>
+
+<!-- dialogs are created here by ui.js -->
+<div id="dialog-layer"></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
