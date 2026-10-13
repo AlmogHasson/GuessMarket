@@ -12,7 +12,6 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
-import org.glassfish.jaxb.core.v2.TODO;
 
 
 /**
@@ -64,8 +63,6 @@ public class GuessMarket {
      *     {@link GMEvents }
      *     
      */
-
-    // TODO: check if this is necessary and how to fit it in
     public void setGMEvents(GMEvents value) {
         this.gmEvents = value;
     }

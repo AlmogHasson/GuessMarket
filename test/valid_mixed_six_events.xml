@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Guess-Market xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="GM-EX3-Schema.xsd">
+	<GM-events>
+		<GM-event name="Mixed: Rain on Friday">
+			<description>Will it rain on Friday in Tel Aviv?</description>
+			<commission type="on-close">10</commission>
+			<GM-options>
+				<GM-option>Yes</GM-option>
+				<GM-option>No</GM-option>
+			</GM-options>
+			<GM-method>
+				<GM-LMSR>
+					<b>200</b>
+				</GM-LMSR>
+			</GM-method>
+		</GM-event>
+		<GM-event name="Mixed: Football Final">
+			<description>Who wins the cup final?</description>
+			<commission type="on-purchase">15</commission>
+			<GM-options>
+				<GM-option>Home</GM-option>
+				<GM-option>Away</GM-option>
+			</GM-options>
+			<GM-method>
+				<GM-order-book allow-mint="true" initial="400" d="2"/>
+			</GM-method>
+		</GM-event>
+		<GM-event name="Mixed: Startup IPO">
+			<description>Will the startup IPO before 2027?</description>
+			<commission type="on-purchase">25</commission>
+			<GM-options>
+				<GM-option>Yes</GM-option>
+				<GM-option>No</GM-option>
+			</GM-options>
+			<GM-method>
+				<GM-LMSR>
+					<b>250</b>
+				</GM-LMSR>
+			</GM-method>
+		</GM-event>
+		<GM-event name="Mixed: Tennis Open">
+			<description>Who wins the open?</description>
+			<commission type="on-close">5</commission>
+			<GM-options>
+				<GM-option>Player 1</GM-option>
+				<GM-option>Player 2</GM-option>
+			</GM-options>
+			<GM-method>
+				<GM-order-book allow-mint="false" initial="600" d="1"/>
+			</GM-method>
+		</GM-event>
+		<GM-event name="Mixed: Eurovision">
+			<description>Will Israel reach the final?</description>
+			<commission type="on-close">40</commission>
+			<GM-options>
+				<GM-option>Yes</GM-option>
+				<GM-option>No</GM-option>
+			</GM-options>
+			<GM-method>
+				<GM-LMSR>
+					<b>120</b>
+				</GM-LMSR>
+			</GM-method>
+		</GM-event>
+		<GM-event name="Mixed: Housing prices">
+			<description>Will average rent rise next year?</description>
+			<commission type="on-purchase">18</commission>
+			<GM-options>
+				<GM-option>Rise</GM-option>
+				<GM-option>Fall</GM-option>
+			</GM-options>
+			<GM-method>
+				<GM-order-book allow-mint="true" initial="700" d="2"/>
+			</GM-method>
+		</GM-event>
+	</GM-events>
+</Guess-Market>

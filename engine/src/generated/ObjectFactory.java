@@ -30,7 +30,6 @@ import jakarta.xml.bind.annotation.XmlRegistry;
 @XmlRegistry
 public class ObjectFactory {
 
-    private static final QName _Id_QNAME = new QName("", "id");
     private static final QName _Description_QNAME = new QName("", "description");
     private static final QName _B_QNAME = new QName("", "b");
     private static final QName _GMOption_QNAME = new QName("", "GM-option");
@@ -43,13 +42,13 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Comision }
+     * Create an instance of {@link Commission }
      * 
      * @return
-     *     the new instance of {@link Comision }
+     *     the new instance of {@link Commission }
      */
-    public Comision createComision() {
-        return new Comision();
+    public Commission createCommission() {
+        return new Commission();
     }
 
     /**
@@ -113,16 +112,13 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     * Create an instance of {@link GMOrderBook }
      * 
-     * @param value
-     *     Java instance representing xml element's value.
      * @return
-     *     the new instance of {@link JAXBElement }{@code <}{@link Integer }{@code >}
+     *     the new instance of {@link GMOrderBook }
      */
-    @XmlElementDecl(namespace = "", name = "id")
-    public JAXBElement<Integer> createId(Integer value) {
-        return new JAXBElement<>(_Id_QNAME, Integer.class, null, value);
+    public GMOrderBook createGMOrderBook() {
+        return new GMOrderBook();
     }
 
     /**
@@ -163,7 +159,5 @@ public class ObjectFactory {
     public JAXBElement<String> createGMOption(String value) {
         return new JAXBElement<>(_GMOption_QNAME, String.class, null, value);
     }
-
-    // TODO: see how to use this factory
 
 }

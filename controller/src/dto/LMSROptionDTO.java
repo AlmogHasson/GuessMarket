@@ -1,0 +1,19 @@
+package dto;
+
+import engine.Option;
+
+public record LMSROptionDTO (
+        String optionName,
+        double currentValue,
+        int totalSharesBought,
+        boolean isWinner
+    ) implements OptionDTO {
+
+    public LMSROptionDTO(Option option) {
+        this(option.getOptionName(),
+                option.getCurrentValue(),
+                option.getTotalSharesBought(),
+                option.getIsWinner());
+    }
+
+}

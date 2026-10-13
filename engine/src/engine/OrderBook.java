@@ -1,0 +1,309 @@
+package engine;
+
+import generated.GMOrderBook;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+public class OrderBook implements Method{
+    private final int d;
+    protected int initial; //money the MM puts in the event - splits evenly between the two options
+    protected boolean allowMint;
+    private final OptionBook[] books = { new OptionBook(), new OptionBook() };
+    private long orderSeq = 0;
+
+    public OrderBook(GMOrderBook ob) {
+        this.d = ob.getD();
+        this.initial = ob.getInitial();
+        this.allowMint = ob.getAllowMint().equals("true");
+    }
+
+    @Override
+    public double getActivationCost() {
+        return ((double) initial /d * (double)d);
+    }
+
+    @Override
+    public int getValue() {
+        return d;
+    }
+
+    @Override
+    public double activate(User mm, Event event) {
+        int pairShares = initial / d;
+        double cost = pairShares * (double) d;
+        //add shares to the MM's holdings for both options, at a cost of initial/2 for each option
+        event.getOrCreateHolding(mm.getName(), 1).applyBuy(pairShares, cost / 2.0);
+        event.getOrCreateHolding(mm.getName(), 2).applyBuy(pairShares, cost / 2.0);
+        //place orders for the MM to sell the initial shares at price d/2 for both options
+        executeTrade(event, Map.of(mm.getName(), mm), new TradeRequest(mm.getName(), 1,  pairShares, Side.SELL,d / 2.0));
+        executeTrade(event, Map.of(mm.getName(), mm), new TradeRequest(mm.getName(), 2,  pairShares, Side.SELL,d / 2.0));
+        //update shares bought in the options to reflect the initial shares bought by the MM
+        event.getOptions().get(0).buyShares(pairShares);
+        event.getOptions().get(1).buyShares(pairShares); // total *outstanding* shares — only touched on activate/mint, never on ordinary fills
+
+        //add trades to the event's trading history for the initial MM trades
+        event.getEventTradingStatus().updateHistory(
+                new Trade(mm.getName(), event.getOptions().get(0).getOptionName(), pairShares, cost / 2.0, Side.SELL, 0));
+        event.getEventTradingStatus().updateHistory(
+                new Trade(mm.getName(), event.getOptions().get(1).getOptionName(), pairShares, cost / 2.0, Side.SELL, 0));
+
+        return cost;
+    }
+
+    @Override
+    public TradeResult executeTrade(Event event, Map<String, User> users, TradeRequest req) {
+
+        if (req.price() == null
+                || !Double.isFinite(req.price())
+                || req.price() < 0
+                || req.price() > d - 0.01) {
+
+            throw new IllegalArgumentException(
+                    "Invalid Order Book price: " + req.price()
+                            + ". Price must be between 0 and "
+                            + (d - 0.01));
+        }
+
+        Order incoming =
+                new Order(++orderSeq, req.userName(), req.side(), req.shares(), req.price(), orderSeq);
+
+        List<Trade> trades = new ArrayList<>();
+        matchSameOption(event, users, incoming, req.optionNumber(), trades);
+
+        if (allowMint && incoming.getQuantity() > 0 && req.side() == Side.BUY)
+            matchMint(event, users, incoming, req.optionNumber(), trades);
+
+        if (incoming.getQuantity() > 0)
+            books[req.optionNumber() - 1].rest(incoming);
+
+        double net = trades.stream().filter(t -> t.userName().equals(req.userName()))
+                .mapToDouble(t -> t.side() == Side.BUY ? t.pricePaid() : -t.pricePaid()).sum();
+
+        double commission = trades.stream().filter(t -> t.userName().equals(req.userName()))
+                .mapToDouble(Trade::commissionPaid).sum();
+
+        return new TradeResult(net, commission, trades, incoming.getQuantity());
+    }
+
+
+    @Override
+    public void close( Event event, Map<String, User> users, int winningOptionNumber) {
+        boolean onClose = "on-close".equals(event.getCommission().getCommissionType());
+        double percentage = event.getCommission().getValue() / 100.0;
+
+        for (var entry : event.getUsersHoldings().entrySet()) {
+            Holding holding = entry.getValue()[winningOptionNumber - 1];
+
+            if (holding.getShares() <= 0) {
+                continue;
+            }
+
+            double gross = holding.getShares() * d;
+            double commission = onClose ? gross * percentage : 0.0;
+
+            holding.addCommissionPaid(commission);
+
+            event.getEventTradingStatus()
+                    .updateTotalCommissionPaid(
+                    event.getEventTradingStatus().getTotalCommissionPaid() + commission);
+
+            double net = gross - commission;
+
+            User user = users.get(entry.getKey());
+
+            // pay winner
+            user.adjustBalance(
+                    net,
+                    event.getEventName(),
+                    "Event payout"
+            );
+
+            // money leaves event contract
+            event.getEventTradingStatus().updateAccountBalance(
+                    event.getEventTradingStatus().getAccountBalance() - gross
+            );
+
+            // commission goes to MM
+            if (commission > 0) {
+                User mm = users.values()
+                        .stream()
+                        .filter(u -> u.isMarketMaker(event.getId()))
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalStateException("Market maker not found"));
+
+                mm.adjustBalance(
+                        commission,
+                        event.getEventName(),
+                        "Event commission payout"
+                );
+            }
+        }
+
+        event.getOptions().get(winningOptionNumber - 1).setWinner();
+        event.getEventTradingStatus().close();
+    }
+
+
+    public int getInitial() {
+        return initial;
+    }
+
+    public boolean getAllowMint() {
+        return allowMint;
+    }
+
+    private void matchSameOption(Event event, Map<String,User> users, Order incoming, int optNum, List<Trade> trades) {
+        OptionBook book = books[optNum - 1];
+//        String optName = event.getOptions().get(optNum - 1).getOptionName();
+        while (incoming.getQuantity() > 0) {
+            Order resting = book.bestOpposing(incoming.getSide(), incoming.getUserName()); // best ask if incoming is BUY, best bid if SELL
+            if (resting == null)
+                break;
+            boolean crosses = incoming.getSide() == Side.BUY
+                    ? incoming.getPrice() >= resting.getPrice()
+                    : incoming.getPrice() <= resting.getPrice();
+            if (!crosses)
+                break;
+
+            int qty = Math.min(incoming.getQuantity(), resting.getQuantity());
+            double price = resting.getPrice(); // resting order sets the execution price
+
+            String buyerName  = incoming.getSide() == Side.BUY ? incoming.getUserName() : resting.getUserName();
+            String sellerName = incoming.getSide() == Side.BUY ? resting.getUserName() : incoming.getUserName();
+
+            fill(event, users, buyerName, sellerName, optNum, qty, price, trades);
+            incoming.reduce(qty);
+            resting.reduce(qty);
+            book.updateLast(price);
+            if (resting.getQuantity() == 0) book.removeResting(resting);
+        }
+    }
+
+    private void fill(Event event, Map<String, User> users, String buyerName, String sellerName,
+                      int optNum, int qty, double price, List<Trade> trades)
+    {
+        String optName = event.getOptions().get(optNum - 1).getOptionName();
+        double gross = qty * price;
+        double commission = "on-purchase".equals(event.getCommission().getCommissionType())
+                ? gross * event.getCommission().getValue() / 100.0 : 0.0;
+
+        User buyer = users.get(buyerName);
+
+        buyer.adjustBalance(
+                -(gross + commission),
+                event.getEventName(),
+                "Buy " + qty + " " + optName
+        );
+
+        event.getOrCreateHolding(buyerName, optNum).applyBuy(qty, gross + commission);
+        event.getOrCreateHolding(buyerName, optNum).addCommissionPaid(commission);
+
+        User seller = users.get(sellerName);
+
+        seller.adjustBalance(
+                gross,
+                event.getEventName(),
+                "Sell " + qty + " " + optName
+        );
+
+        event.getOrCreateHolding(sellerName, optNum).applySell(qty, gross);
+
+        event.getOptions().get(optNum - 1).updateValue(price);
+
+        EventTradingStatus ets = event.getEventTradingStatus();
+        ets.updateTotalCommissionPaid(ets.getTotalCommissionPaid() + commission);
+
+        Trade buyerTrade = new Trade(buyerName, optName, qty, gross + commission, Side.BUY, commission);
+        Trade sellerTrade = new Trade(sellerName, optName, qty, gross, Side.SELL, 0);
+        trades.add(buyerTrade);
+        trades.add(sellerTrade);
+        ets.updateHistory(buyerTrade);
+        ets.updateHistory(sellerTrade);
+    }
+
+    private void matchMint(Event event, Map<String,User> users, Order incoming, int optNum, List<Trade> trades) {
+        int otherOptNum = 3 - optNum;
+        OptionBook otherBook = books[otherOptNum - 1];
+        while (incoming.getQuantity() > 0) {
+            Order restingBid = otherBook.bestBidOrder();
+            if (restingBid == null || incoming.getPrice() + restingBid.getPrice() < d)
+                break;
+
+            int qty = Math.min(incoming.getQuantity(), restingBid.getQuantity());
+            double restingPay = restingBid.getPrice();
+            double incomingPay = d - restingPay;
+
+            mintFill(event, users, restingBid.getUserName(), otherOptNum, qty, restingPay, trades);
+            mintFill(event, users, incoming.getUserName(), optNum, qty, incomingPay, trades);
+            event.getOptions().get(optNum - 1).buyShares(qty);
+            event.getOptions().get(otherOptNum - 1).buyShares(qty);
+            event.getEventTradingStatus().updateAccountBalance(event.getEventTradingStatus().getAccountBalance() + d * qty);
+
+            incoming.reduce(qty);
+            restingBid.reduce(qty);
+            if (restingBid.getQuantity() == 0) otherBook.removeResting(restingBid);
+        }
+    }
+
+    private void mintFill(Event event, Map<String, User> users, String buyerName,
+                          int optNum, int qty, double price, List<Trade> trades) {
+        String optName = event.getOptions().get(optNum - 1).getOptionName();
+        double gross = qty * price;
+        double commission = "on-purchase".equals(event.getCommission().getCommissionType())
+                ? gross * event.getCommission().getValue() / 100.0 : 0.0;
+
+        User buyer = users.get(buyerName);
+
+        buyer.adjustBalance(
+                -(gross + commission),
+                event.getEventName(),
+                "Buy " + qty + " " + optName
+        );
+
+        Holding holding = event.getOrCreateHolding(buyerName, optNum);
+        holding.applyBuy(qty, gross + commission);
+        holding.addCommissionPaid(commission);
+
+        event.getOptions().get(optNum - 1).updateValue(price);
+
+        EventTradingStatus ets = event.getEventTradingStatus();
+        ets.updateTotalCommissionPaid(ets.getTotalCommissionPaid() + commission);
+
+        Trade trade = new Trade(buyerName, optName, qty, gross + commission, Side.BUY, commission);
+        trades.add(trade);
+        ets.updateHistory(trade);
+    }
+
+
+    public List<Order> getRestingOrders(int optionNumber) {
+        return books[optionNumber - 1].getRestingOrders();
+    }
+
+    public int getReservedSellShares(String userName, int optionNumber) {
+        return books[optionNumber - 1]
+                .getRestingOrders()
+                .stream()
+                .filter(order -> order.getSide() == Side.SELL)
+                .filter(order -> order.getUserName().equals(userName))
+                .mapToInt(Order::getQuantity)
+                .sum();
+    }
+
+    public Double getLast(int optionNumber)    {
+        return books[optionNumber - 1].last();
+    }
+    public Double getBestBid(int optionNumber) {
+        return books[optionNumber - 1].bestBid();
+    }
+    public Double getBestAsk(int optionNumber) {
+        return books[optionNumber - 1].bestAsk();
+    }
+    public Double getMid(int optionNumber)     {
+        return books[optionNumber - 1].mid();
+    }
+    public Double getSpread(int optionNumber)  {
+        return books[optionNumber - 1].spread();
+    }
+}

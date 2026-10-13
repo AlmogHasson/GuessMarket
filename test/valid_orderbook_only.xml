@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Guess-Market xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="GM-EX3-Schema.xsd">
+	<GM-events>
+		<GM-event name="Champions League Winner">
+			<description>Which club will win the next Champions League?</description>
+			<commission type="on-purchase">20</commission>
+			<GM-options>
+				<GM-option>Real Madrid</GM-option>
+				<GM-option>Man City</GM-option>
+			</GM-options>
+			<GM-method>
+				<GM-order-book allow-mint="true" initial="500" d="2"/>
+			</GM-method>
+		</GM-event>
+		<GM-event name="Oscar Best Picture">
+			<description>Will the winner be a drama?</description>
+			<commission type="on-close">10</commission>
+			<GM-options>
+				<GM-option>Drama</GM-option>
+				<GM-option>Other</GM-option>
+			</GM-options>
+			<GM-method>
+				<GM-order-book allow-mint="false" initial="800" d="1"/>
+			</GM-method>
+		</GM-event>
+		<GM-event name="Next Prime Minister">
+			<description>Who will be the next prime minister?</description>
+			<commission type="on-purchase">30</commission>
+			<GM-options>
+				<GM-option>Candidate A</GM-option>
+				<GM-option>Candidate B</GM-option>
+			</GM-options>
+			<GM-method>
+				<GM-order-book allow-mint="true" initial="1000" d="3"/>
+			</GM-method>
+		</GM-event>
+	</GM-events>
+</Guess-Market>
